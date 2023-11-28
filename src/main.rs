@@ -1,0 +1,55 @@
+mod cli;
+mod constants;
+mod operations;
+mod utils;
+use anyhow::{anyhow, Result};
+use cli::get_matches;
+use constants::REPO_NAME;
+use std::path::PathBuf;
+use utils::replace_tilde_slash_with_home;
+
+fn main() -> Result<()> {
+    let matches = get_matches();
+    let data_path_result: Result<PathBuf> =
+        if let Some(data_dir_path) = matches.get_one::<String>("data-dir") {
+            replace_tilde_slash_with_home(data_dir_path)
+        } else {
+            Ok(dirs::data_dir()
+                .ok_or_else(|| anyhow!("Error getting data directory"))?
+                .join(format!("tinted-theming/{}", REPO_NAME)))
+        };
+    let data_path = data_path_result?;
+    let schemes_path_result: Result<PathBuf> =
+        if let Some(schemes_dir) = matches.get_one::<String>("schemes-dir") {
+            let schemes_path = PathBuf::from(schemes_dir);
+            if !schemes_path.exists() {
+                anyhow::bail!("The provided schemes path does not exist: {}", schemes_dir);
+            }
+
+            replace_tilde_slash_with_home(schemes_dir)
+        } else {
+            Ok(data_path.join("schemes"))
+        };
+    let schemes_path = schemes_path_result?;
+
+    match matches.subcommand() {
+        Some(("build", sub_matches)) => {
+            if let Some(template_dir) = sub_matches.get_one::<String>("template-dir") {
+                let template_path = PathBuf::from(template_dir);
+
+                operations::build::build(&template_path, &schemes_path)?;
+            } else {
+                return Err(anyhow!("scheme_name is required for apply command"));
+            }
+        }
+        Some(("sync", _)) => {
+            operations::sync::sync(&schemes_path)?;
+        }
+        _ => {
+            println!("Basic usage: {} apply <SCHEME_NAME>", REPO_NAME);
+            println!("For more information try --help");
+        }
+    };
+
+    Ok(())
+}
