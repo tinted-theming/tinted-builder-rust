@@ -1,8 +1,10 @@
 mod cli;
+mod commands;
 mod config;
 
-use crate::cli::build_cli;
-use anyhow::Result;
+use crate::commands::load_schemes;
+use crate::{cli::build_cli, commands::validate_scheme_from_path};
+use anyhow::{Context, Result};
 
 fn main() -> Result<()> {
     let cmd = build_cli();
@@ -16,9 +18,14 @@ fn main() -> Result<()> {
         .map(|s| s.clone())
         .expect("Default value should be available")
         .clone();
+    let schemes_collection = load_schemes(schemes_dir).context("Failed to load schemes")?;
 
-    println!("{}", schemes_dir);
-    println!("{}", template_dir);
+    for scheme in schemes_collection {
+        validate_scheme_from_path(scheme.clone())?;
+        println!("Scheme directory: {}", scheme.display());
+    }
+
+    println!("Templates directory: {}", template_dir);
 
     Ok(())
 }
