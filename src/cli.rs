@@ -1,25 +1,61 @@
-use crate::config::{DEFAULT_SCHEMES_VALUE, DEFAULT_TEMPLATE_VALUE};
-use clap::{Arg, ArgAction, Command};
+use crate::constants::REPO_NAME;
+use clap::{builder::styling, Arg, ArgAction, ArgMatches, Command};
 
-pub fn build_cli() -> Command {
-    Command::new("base16-builder-rust")
-        .version("1.0.0")
-        .author("Tinted Theming")
-        .about("A base16 builder tool to generate template colorschemes")
+/// Builds the command-line interface for the application.
+fn build_cli() -> Command {
+    Command::new(REPO_NAME)
+        .version(env!("CARGO_PKG_VERSION"))
+        .author(env!("CARGO_PKG_AUTHORS"))
+        .about(env!("CARGO_PKG_DESCRIPTION"))
+        .arg(
+            Arg::new("data-dir")
+                .short('d')
+                .help(format!("Optional path to the {} data directory", REPO_NAME))
+                .value_name("DIRECTORY")
+                .long("data-dir")
+                .global(true)
+                .action(ArgAction::Set),
+        )
         .arg(
             Arg::new("schemes-dir")
-                .long("schemes-dir")
                 .action(ArgAction::Set)
-                .value_name("FILE")
-                .help("Path to base16-schemes directory")
-                .default_value(DEFAULT_SCHEMES_VALUE),
+                .global(true)
+                .help("Path to the schemes directory")
+                .long("schemes-dir")
+                .short('s')
+                .value_name("DIRECTORY"),
         )
         .arg(
             Arg::new("template-dir")
-                .long("template-dir")
                 .action(ArgAction::Set)
-                .value_name("FILE")
-                .help("Path to the base16 template directory")
-                .default_value(DEFAULT_TEMPLATE_VALUE),
+                .global(true)
+                .help("Path to the theme template directory")
+                .long("template-dir")
+                .short('t')
+                .value_name("DIRECTORY"),
         )
+        .subcommand(
+            Command::new("build")
+                .about("Builds the target theme template")
+                .arg(
+                    Arg::new("template_dir")
+                        .help("Local path to the theme template you want to build")
+                        .required(false),
+                ),
+        )
+        .subcommand(
+            Command::new("sync")
+                .about("Clones {} and if it exists it does a git pull on the local clone"),
+        )
+}
+
+// Parse the command line arguments with styling
+pub fn get_matches() -> ArgMatches {
+    let styles = styling::Styles::styled()
+        .header(styling::AnsiColor::Green.on_default() | styling::Effects::BOLD)
+        .usage(styling::AnsiColor::Green.on_default() | styling::Effects::BOLD)
+        .literal(styling::AnsiColor::Blue.on_default() | styling::Effects::BOLD)
+        .placeholder(styling::AnsiColor::Cyan.on_default());
+
+    build_cli().styles(styles).get_matches()
 }
