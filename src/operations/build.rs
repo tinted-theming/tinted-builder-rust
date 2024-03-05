@@ -1,11 +1,12 @@
 use anyhow::{anyhow, Result};
-use base16_color_scheme::{Scheme, Template};
+use builder_rust::Scheme;
+use builder_rust::Template;
 use serde::Deserialize;
 use std::collections::HashMap;
 use std::fs::{self, create_dir_all, read_to_string};
 use std::path::{Path, PathBuf};
 
-use crate::constants::REPO_NAME;
+const REPO_NAME: &str = env!("CARGO_PKG_NAME");
 
 fn is_scheme_file_extension(extension: &str) -> bool {
     extension == "yaml" || extension == "yml"
@@ -104,7 +105,7 @@ pub fn build(template_path: &Path, user_schemes_path: &Path) -> Result<()> {
                 .unwrap_or_default();
         let template = Template::new(template_content)?;
         let output_str = &value.output;
-        let output_path = PathBuf::from(output_str);
+        let output_path = template_path.join(output_str);
 
         if output_str.starts_with('/') {
             return Err(anyhow!(

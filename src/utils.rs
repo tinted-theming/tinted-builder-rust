@@ -1,19 +1,18 @@
-use std::path::PathBuf;
+use anyhow::{Context, Result};
+use std::fs::{remove_file, File};
+use std::io::Write;
+use std::path::Path;
 
-use anyhow::{anyhow, Result};
-
-pub fn replace_tilde_slash_with_home(path_str: &str) -> Result<PathBuf> {
-    let trimmed_path_str = path_str.trim();
-    if trimmed_path_str.starts_with("~/") {
-        match dirs::home_dir() {
-                Some(home_dir) => Ok(PathBuf::from(trimmed_path_str.replacen(
-                        "~/",
-                        format!("{}/", home_dir.display()).as_str(),
-                        1,
-                    ))),
-                None => Err(anyhow!("Unable to determine a home directory for \"{}\", please use an absolute path instead", trimmed_path_str))
-            }
-    } else {
-        Ok(PathBuf::from(trimmed_path_str))
+#[allow(dead_code)]
+pub fn write_to_file(path: &Path, contents: &str) -> Result<()> {
+    if path.exists() {
+        remove_file(path).with_context(|| format!("Unable to remove file: {}", path.display()))?;
     }
+
+    let mut file =
+        File::create(path).with_context(|| format!("Unable to create file: {}", path.display()))?;
+
+    file.write_all(contents.as_bytes())?;
+
+    Ok(())
 }

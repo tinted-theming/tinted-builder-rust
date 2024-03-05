@@ -1,8 +1,7 @@
-use crate::constants::REPO_NAME;
 use clap::{builder::styling, Arg, ArgAction, ArgMatches, Command};
 
 fn build_cli() -> Command {
-    Command::new(REPO_NAME)
+    Command::new(env!("CARGO_PKG_NAME"))
         .version(env!("CARGO_PKG_VERSION"))
         .author(env!("CARGO_PKG_AUTHORS"))
         .about(env!("CARGO_PKG_DESCRIPTION"))

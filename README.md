@@ -1,8 +1,9 @@
 # builder-rust
 
-A simple builder for base16 templates and schemes.
+**UNDER CONSTRUCTION**: There are still a bunch of issues I'm working
+on, use [builder-go] instead.
 
-**NOTE**: This currently implements version 0.9.1 of the [base16 spec](https://github.com/tinted-theming/home/blog/main/builder.md), which is very outdated. We are currently working on the builder and it will soon implement the latest version of the spec. If you want to use a builder, use [builder-go] our most up to date builder.
+A simple builder for base16 and base24 templates and schemes.
 
 ## Basic Usage
 

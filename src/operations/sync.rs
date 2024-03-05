@@ -1,9 +1,10 @@
-use crate::constants::{REPO_NAME, SCHEMES_REPO_NAME};
 use anyhow::{anyhow, Context, Result};
 use std::path::Path;
 use std::process::{Command, Stdio};
 use std::str;
 
+const REPO_NAME: &str = env!("CARGO_PKG_NAME");
+const SCHEMES_REPO_NAME: &str = "schemes";
 const SCHEMES_URL: &str = "https://github.com/tinted-theming/schemes";
 
 pub fn git_clone(repo_url: &str, target_dir: &Path) -> Result<()> {

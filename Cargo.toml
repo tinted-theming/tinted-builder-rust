@@ -13,8 +13,14 @@ categories = ["command-line-utilities"]
 
 [dependencies]
 anyhow = "1.0.75"
-base16_color_scheme = "0.3.1"
 clap = "4.4.10"
 dirs = "5.0.1"
+ramhorns = "0.14.0"
 serde = { version = "1.0.193", features = ["derive"] }
 serde_yaml = "0.9.27"
+strip-ansi-escapes = "0.2.0"
+unicode-normalization = "0.1.23"
+
+[[bin]]
+name = "builder-rust"
+path = "src/main.rs"
