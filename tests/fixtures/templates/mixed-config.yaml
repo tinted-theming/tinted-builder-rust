@@ -1,0 +1,5 @@
+mixed: 
+  extension: .md
+  output: output-themes
+  supported-systems: [base16, base24]
+

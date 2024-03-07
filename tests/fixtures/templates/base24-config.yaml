@@ -1,0 +1,4 @@
+base24-template: 
+  extension: .md
+  output: output-themes
+  supported-systems: [base24]
