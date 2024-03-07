@@ -19,7 +19,7 @@ fn test_operation_build() -> Result<()> {
     let schemes_path = template_theme_path.join("schemes");
     let scheme_file_path = schemes_path.join("some-theme.yaml");
     let themes_path = template_theme_path.join("output-themes");
-    let rendered_theme_path = themes_path.join("some-theme.md");
+    let rendered_theme_path = themes_path.join("base16-some-theme.md");
 
     if template_theme_path.is_dir() {
         fs::remove_dir_all(&template_theme_path)?;
@@ -41,15 +41,7 @@ fn test_operation_build() -> Result<()> {
         format!("--schemes-dir={}", schemes_path.display()),
     ])
     .unwrap();
-    println!(
-        "out:{}\nerr:{}, path:{}",
-        stdout,
-        stderr,
-        rendered_theme_path.display()
-    );
-
     let rendered_content = fs::read_to_string(rendered_theme_path)?;
-    println!("{}", rendered_content);
 
     // ------
     // Assert
@@ -58,6 +50,16 @@ fn test_operation_build() -> Result<()> {
     assert!(
         stderr.is_empty(),
         "stderr does not contain the expected output"
+    );
+    assert!(
+        stdout.contains(
+            format!(
+                "base16 themes generated for \"default\" at \"{}/base16-*.md\"",
+                themes_path.display()
+            )
+            .as_str()
+        ),
+        "stdout does not contain the exptected output"
     );
 
     Ok(())

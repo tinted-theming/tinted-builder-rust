@@ -12,13 +12,10 @@ use anyhow::{Context, Result};
 pub const COMMAND_NAME: &str = "./target/release/builder-rust";
 
 pub fn run_command(command_vec: Vec<String>) -> Result<(String, String), Box<dyn Error>> {
-    println!("{:?}", command_vec);
     let output = Command::new(&command_vec[0])
         .args(&command_vec[1..])
         .output()
         .expect("Failed to execute command");
-
-    println!("1");
 
     if !output.stderr.is_empty() {
         println!(
@@ -26,7 +23,6 @@ pub fn run_command(command_vec: Vec<String>) -> Result<(String, String), Box<dyn
             String::from_utf8_lossy(&output.stderr)
         );
     }
-    println!("2");
 
     let stdout = strip_ansi_escapes::strip(String::from_utf8(output.stdout)?);
     let stderr = strip_ansi_escapes::strip(String::from_utf8(output.stderr)?);
