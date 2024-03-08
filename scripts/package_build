@@ -1,0 +1,28 @@
+#!/usr/bin/env bash
+
+package_build() {
+  local files="$1"
+  local target="$2"
+  local workspace="$3"
+  local version="$4"
+  local release_dir="$workspace/target/$target/release"
+  local build_dir="$workspace/build"
+  local files_to_include=""
+
+  for file in $files; do
+    if [ ! -e "$file" ]; then
+      continue
+    fi
+
+    cp "$file" "$release_dir/$file"
+    files_to_include+="$file "
+  done
+
+  mkdir "$build_dir"
+  tar -cv -C "$release_dir" builder-rust $files_to_include | gzip --best > \
+    "$build_dir/builder-rust-$version-$target.tar.gz"
+  shasum -a 256 "$build_dir/builder-rust-$version-$target.tar.gz" > \
+    "$build_dir/builder-rust-$version-$target.sha256"
+}
+
+package_build "$@"
