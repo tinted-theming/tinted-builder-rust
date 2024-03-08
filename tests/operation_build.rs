@@ -30,7 +30,7 @@ fn setup(system: &str, scheme_name: &str) -> Result<(String, String, String, Str
     ))
 }
 
-// Tests schemes/*.yaml generation with base16 system
+/// Tests schemes/*.yaml generation with base16 system
 #[test]
 fn test_operation_build_base16() -> Result<()> {
     // -------
@@ -105,7 +105,7 @@ fn test_operation_build_base16() -> Result<()> {
     Ok(())
 }
 
-// Tests schemes/*.yaml generation with base24 system
+/// Tests schemes/*.yaml generation with base24 system
 #[test]
 fn test_operation_build_base24() -> Result<()> {
     // -------
@@ -180,7 +180,7 @@ fn test_operation_build_base24() -> Result<()> {
     Ok(())
 }
 
-// Tests schemes/base16/*.yaml and schemes/base24/*.yaml generation
+/// Tests schemes/base16/*.yaml and schemes/base24/*.yaml generation
 #[test]
 fn test_operation_build_mixed() -> Result<()> {
     // -------
