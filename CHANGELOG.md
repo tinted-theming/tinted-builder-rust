@@ -3,10 +3,18 @@
 ## Unreleased
 
 ### Added
+
 - Github tests workflow for PRs and merges to main branch
+- Homebrew installation instructions
+- Release binary installation instructions
 
 ### Fixed
+
 - README.md links
+
+### Updated
+
+- `make install` now only installs if deps are missing
 
 ## [0.1.0] - 2024-03-08
 

@@ -33,6 +33,21 @@ install:
 	@echo "---------------"
 	@echo "Installing deps"
 	@echo "---------------"
-	curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
-	cargo install --locked cargo-about
-	cargo install --locked cargo-deny
+	@if [ -z "$$(command -v cargo)" ]; then \
+		echo "Installing rustup"; \
+		curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y; \
+	else \
+		echo "rustup already installed"; \
+	fi
+	@if [ ! "$$(cargo about --version &>/dev/null)" ]; then \
+		echo "Installing cargo about"; \
+		cargo install --locked cargo-about; \
+	else \
+		echo "cargo-about already installed"; \
+	fi
+	@if [ ! "$$(cargo deny --version &>/dev/null)" ]; then \
+		echo "Installing cargo deny"; \
+		cargo install --locked cargo-deny; \
+	else \
+		echo "cargo-deny already installed"; \
+	fi

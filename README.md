@@ -25,9 +25,23 @@ build templates within your own Rust application.
 
 ### Installation
 
+
+**Cargo**
+
 ```shell
 cargo install builder-rust
 ```
+
+**Homebrew**
+
+```shell
+brew tap tinted-theming/tinted
+brew install builder-rust
+```
+
+**Binaries**
+
+Download the relevant binary from the [repository releases] page.
 
 ### Basic Usage
 
@@ -140,6 +154,7 @@ used crates within the project.
 [base24]: https://github.com/tinted-theming/base24/blob/master/styling.md
 [ramhorns]: https://docs.rs/ramhorns/latest/ramhorns/index.html
 [builder specification]: https://github.com/tinted-theming/home/blob/main/builder.md
-[LICENSE]: [LICENSE]
-[license.html]: [license.html]
-[CONTRIBUTING.md]: [CONTRIBUTING.md]
+[LICENSE]: LICENSE
+[license.html]: license.html
+[CONTRIBUTING.md]: CONTRIBUTING.md
+[repository releases]: https://github.com/tinted-theming/tinty/releases/latest
