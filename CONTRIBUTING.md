@@ -11,7 +11,7 @@ make install # installs rust/cargo and cargo crate deps
 
 ## Building
 
-To generate a release binary to `./target/release/builder-rust`, run:
+To generate a release binary to `./target/release/tinted-builder-rust`, run:
 
 ```shell
 make build

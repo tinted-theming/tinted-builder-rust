@@ -1,4 +1,4 @@
-// builder-rust is a Tinted Theming template builder which uses color
+// tinted-builder-rust is a Tinted Theming template builder which uses color
 // schemes to generate theme files.
 // Copyright (C) 2024  Tinted Theming
 

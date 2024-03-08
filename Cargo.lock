@@ -94,20 +94,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "ed570934406eb16438a4e976b1b4500774099c13b8cb96eec99f620f05090ddf"
 
 [[package]]
-name = "builder-rust"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "clap",
- "dirs",
- "ramhorns",
- "serde",
- "serde_yaml",
- "strip-ansi-escapes",
- "unicode-normalization",
-]
-
-[[package]]
 name = "cfg-if"
 version = "1.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -473,6 +459,20 @@ dependencies = [
  "proc-macro2",
  "quote",
  "syn 2.0.52",
+]
+
+[[package]]
+name = "tinted-builder-rust"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "clap",
+ "dirs",
+ "ramhorns",
+ "serde",
+ "serde_yaml",
+ "strip-ansi-escapes",
+ "unicode-normalization",
 ]
 
 [[package]]

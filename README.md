@@ -1,4 +1,4 @@
-# builder-rust
+# tinted-builder-rust
 
 A builder for [base16] and [base24] templates using the `0.11.0` [builder
 specification].
@@ -29,14 +29,14 @@ build templates within your own Rust application.
 **Cargo**
 
 ```shell
-cargo install builder-rust
+cargo install tinted-builder-rust
 ```
 
 **Homebrew**
 
 ```shell
 brew tap tinted-theming/tinted
-brew install builder-rust
+brew install tinted-builder-rust
 ```
 
 **Binaries**
@@ -46,31 +46,31 @@ Download the relevant binary from the [repository releases] page.
 ### Basic Usage
 
 ```shell
-builder-rust sync # To sync with latest schemes
-builder-rust build path/to/base16-template
+tinted-builder-rust sync # To sync with latest schemes
+tinted-builder-rust build path/to/base16-template
 ```
 
 ## Commands
 
-The following is a table of the available subcommands for the CLI tool (builder-rust), including the descriptions and any notable arguments.
+The following is a table of the available subcommands for the CLI tool (tinted-builder-rust), including the descriptions and any notable arguments.
 
 | Subcommand | Description                          | Arguments            | Example Usage                              |
 |------------|--------------------------------------|----------------------|--------------------------------------------|
-| `sync`  | Installs and or updates latest schemes. | - | `builder-rust sync` |
-| `build` | Builds the themes of a template. | `template_path`: Path to template directory. | `builder-rust build ./path/to/base16-template` |
+| `sync`  | Installs and or updates latest schemes. | - | `tinted-builder-rust sync` |
+| `build` | Builds the themes of a template. | `template_path`: Path to template directory. | `tinted-builder-rust build ./path/to/base16-template` |
 
 ## Flags
 
 | Flag/Option       | Description                             | Applicable Subcommands | Default Value | Example Usage                             |
 |-------------------|-----------------------------------------|------------------------|---------------|-------------------------------------------|
-| `--schemes-dir` `-s`   | Path to a custom local schemes directory to use when building. Only necessary if the [latest schemes repository] is not desired. | `build` | `builder-rust build . --schemes-dir=/path/to/schemes/dir` |
-| `--data-dir` `-d`   | Specifies a custom path for the data directory. | All | Linux: `$XDG_DATA_HOME/tinted-theming/builder-rust` or `~/.local/share`. MacOS: `~/Library/Application\ Support/tinted-theming/builder-rust` | `builder-rust sync --data-dir /path/to/custom/data-dir` |
-| `--help` `-h`     | Displays help information for the subcommand. | All | - | `builder-rust --help`, `builder-rust build --help`, etc |
-| `--version` `-V`  | Shows the version of builder-rust. | All | - | `builder-rust --version` |
+| `--schemes-dir` `-s`   | Path to a custom local schemes directory to use when building. Only necessary if the [latest schemes repository] is not desired. | `build` | `tinted-builder-rust build . --schemes-dir=/path/to/schemes/dir` |
+| `--data-dir` `-d`   | Specifies a custom path for the data directory. | All | Linux: `$XDG_DATA_HOME/tinted-theming/tinted-builder-rust` or `~/.local/share`. MacOS: `~/Library/Application\ Support/tinted-theming/tinted-builder-rust` | `tinted-builder-rust sync --data-dir /path/to/custom/data-dir` |
+| `--help` `-h`     | Displays help information for the subcommand. | All | - | `tinted-builder-rust --help`, `tinted-builder-rust build --help`, etc |
+| `--version` `-V`  | Shows the version of tinted-builder-rust. | All | - | `tinted-builder-rust --version` |
 
 ## Builder specification
 
-builder-rust implements the `0.11.0` [builder specification]. This
+tinted-builder-rust implements the `0.11.0` [builder specification]. This
 specification details the scheme yaml format or schema as well as the
 variables the builder should provide when rendering template mustache
 file. Have a look at the [builder specification] document for more
@@ -82,18 +82,18 @@ This library exposes a `Scheme` and `Template` struct which you can
 use to generate your own themes using [base16] and [base24] templates and
 `0.11.0` compliant base16 and base24 scheme files.
 
-Internally builder-rust uses [ramhorns] to render the templates.
+Internally tinted-builder-rust uses [ramhorns] to render the templates.
 
 ### Library installation
 
 ```shell
-cargo add builder-rust
+cargo add tinted-builder-rust
 ```
 
 ### Library Usage
 
 ```rust
-use builder_rust::{Scheme, Template};
+use tinted_builder_rust::{Scheme, Template};
 use std::fs::read_to_string;
 
 let template_str = read_to_string("path/to/template.mustache").unwrap();

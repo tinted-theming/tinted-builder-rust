@@ -1,13 +1,13 @@
 [package]
-name = "builder-rust"
+name = "tinted-builder-rust"
 description = "A Tinted Theming template builder which uses yaml color schemes to generate theme files."
 version = "0.1.0"
 edition = "2021"
 license = "GPL-3.0"
 readme = "README.md"
 authors = ["Jamy Golden <code@jamygolden.com>", "Tinted Theming <tintedtheming@proton.me>"]
-homepage = "https://github.com/tinted-theming/builder-rust"
-repository = "https://github.com/tinted-theming/builder-rust"
+homepage = "https://github.com/tinted-theming/tinted-builder-rust"
+repository = "https://github.com/tinted-theming/tinted-builder-rust"
 keywords = ["cli", "base16", "base24", "tinted-theming"]
 categories = ["command-line-utilities", "library", "serialization"]
 
@@ -24,5 +24,5 @@ unicode-normalization = "0.1.23"
 strip-ansi-escapes = "0.2.0"
 
 [[bin]]
-name = "builder-rust"
+name = "tinted-builder-rust"
 path = "src/main.rs"

@@ -1,4 +1,4 @@
-// builder-rust is a Tinted Theming template builder which uses color
+// tinted-builder-rust is a Tinted Theming template builder which uses color
 // schemes to generate theme files.
 // Copyright (C) 2024  Tinted Theming
 
@@ -16,8 +16,8 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 use anyhow::{anyhow, Result};
-use builder_rust::Scheme;
-use builder_rust::Template;
+use tinted_builder_rust::Scheme;
+use tinted_builder_rust::Template;
 use serde::Deserialize;
 use std::collections::HashMap;
 use std::fs::{self, create_dir_all, read_to_string};

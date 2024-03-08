@@ -19,10 +19,10 @@ package_build() {
   done
 
   mkdir "$build_dir"
-  tar -cv -C "$release_dir" builder-rust $files_to_include | gzip --best > \
-    "$build_dir/builder-rust-$version-$target.tar.gz"
-  shasum -a 256 "$build_dir/builder-rust-$version-$target.tar.gz" > \
-    "$build_dir/builder-rust-$version-$target.sha256"
+  tar -cv -C "$release_dir" tinted-builder-rust $files_to_include | gzip --best > \
+    "$build_dir/tinted-builder-rust-$version-$target.tar.gz"
+  shasum -a 256 "$build_dir/tinted-builder-rust-$version-$target.tar.gz" > \
+    "$build_dir/tinted-builder-rust-$version-$target.sha256"
 }
 
 package_build "$@"
