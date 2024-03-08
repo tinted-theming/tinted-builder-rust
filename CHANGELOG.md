@@ -5,6 +5,9 @@
 ### Added
 - Github tests workflow for PRs and merges to main branch
 
+### Fixed
+- README.md links
+
 ## [0.1.0] - 2024-03-08
 
 ### Added
