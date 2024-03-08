@@ -1,5 +1,10 @@
 # Changelog
 
+## Unreleased
+
+### Added
+- Github tests workflow for PRs and merges to main branch
+
 ## [0.1.0] - 2024-03-08
 
 ### Added
