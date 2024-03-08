@@ -12,14 +12,16 @@ keywords = ["cli", "base16", "base24", "tinted-theming"]
 categories = ["command-line-utilities", "library", "serialization"]
 
 [dependencies]
-anyhow = "1.0.75"
-clap = "4.4.10"
+anyhow = "1.0.80"
+clap = "4.5.2"
 dirs = "5.0.1"
 ramhorns = "0.14.0"
-serde = { version = "1.0.193", features = ["derive"] }
-serde_yaml = "0.9.27"
-strip-ansi-escapes = "0.2.0"
+serde = { version = "1.0.197", features = ["derive"] }
+serde_yaml = "0.9.32"
 unicode-normalization = "0.1.23"
+
+[dev-dependencies]
+strip-ansi-escapes = "0.2.0"
 
 [[bin]]
 name = "builder-rust"
