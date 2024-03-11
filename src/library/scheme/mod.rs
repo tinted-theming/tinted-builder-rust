@@ -28,6 +28,7 @@ use crate::library::scheme::color::Color;
 pub struct SchemeWrapper {
     pub system: String,
     pub name: String,
+    pub slug: Option<String>,
     pub author: String,
     pub description: Option<String>,
     pub variant: Option<String>,
@@ -63,7 +64,7 @@ impl<'de> Deserialize<'de> for Scheme {
         D: Deserializer<'de>,
     {
         let wrapper = SchemeWrapper::deserialize(deserializer)?;
-        let slug = slugify(&wrapper.name);
+        let slug = wrapper.slug.map_or(slugify(&wrapper.name), |slug| slugify(&slug));
         let variant = wrapper.variant.unwrap_or(String::from("dark"));
 
         match wrapper.system.as_str() {
