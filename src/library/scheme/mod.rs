@@ -20,6 +20,7 @@ pub mod color;
 use serde::{Deserialize, Deserializer};
 use std::collections::HashMap;
 use unicode_normalization::UnicodeNormalization;
+use unidecode::unidecode;
 
 use crate::library::constants::{REQUIRED_BASE16_PALETTE_KEYS, REQUIRED_BASE24_PALETTE_KEYS};
 use crate::library::scheme::color::Color;
@@ -46,10 +47,10 @@ pub struct Scheme {
     pub palette: HashMap<String, Color>,
 }
 
-fn slugify(input: &str) -> String {
-    input
+pub fn slugify(input: &str) -> String {
+    unidecode(&input) // Convert to ASCII approximations
         .nfd() // Normalize the string to NFD form
-        .filter(char::is_ascii) // Only keep ASCII characters
+        .filter(|c| c.is_ascii_alphanumeric() || c.is_ascii_whitespace() || *c == '-') // Keep ASCII alphanumerics, whitespace, and hyphens
         .collect::<String>()
         .to_lowercase()
         .replace(' ', "-")

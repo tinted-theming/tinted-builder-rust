@@ -17,6 +17,8 @@
 - README.md links
 - Builder now reads scheme slug instead of always inferring based on
   scheme name
+- Fix template slugify function to ensure it approximates unicode to
+  ascii
 
 ### Updated
 

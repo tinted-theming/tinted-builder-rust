@@ -20,7 +20,7 @@ test: build
 	@echo "------------"
 	@echo "Running test"
 	@echo "------------"
-	cargo test --release
+	cargo test --release $(TINTED_BUILDER_RUST_TEST)
 
 build:
 	@echo "-------------"
