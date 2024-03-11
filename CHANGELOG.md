@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.2.1] - 2024-03-11
+
+### Fixed
+
+- Generated files should not end with a new line
+
 ## [0.2.0] - 2024-03-11
 
 ### Added
@@ -34,4 +40,6 @@
 - `sync` subcommand support to sync with latest Tinted Theming schemes
 - `build` subcommand to trigger theme template build
 
+[0.2.1]: https://github.com/tinted-theming/tinted-builder-rust/compare/v0.2.0...v0.2.1
+[0.2.0]: https://github.com/tinted-theming/tinted-builder-rust/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/tinted-theming/tinted-builder-rust/releases/tag/v0.1.0

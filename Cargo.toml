@@ -1,7 +1,7 @@
 [package]
 name = "tinted-builder-rust"
 description = "A Tinted Theming template builder which uses yaml color schemes to generate theme files."
-version = "0.2.0"
+version = "0.2.1"
 edition = "2021"
 license = "GPL-3.0"
 readme = "README.md"
