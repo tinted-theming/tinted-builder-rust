@@ -8,6 +8,7 @@
 - Homebrew installation instructions
 - Release binary installation instructions
 - Ensure rendered output contains a new line at end of file
+- Add error when a template config mustache file is not found
 
 ### Fixed
 

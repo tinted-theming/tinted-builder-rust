@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-use anyhow::{anyhow, Result};
+use anyhow::{anyhow, Context, Result};
 use serde::Deserialize;
 use std::collections::HashMap;
 use std::fs::{self, create_dir_all, read_to_string};
@@ -47,12 +47,12 @@ fn is_output_dir_as_expected(path: &Path, extension: &str) -> Result<bool> {
 }
 
 // Allow for the use of `.yaml` and `.yml` extensions
-fn get_theme_template_path(template_path: &Path) -> Result<PathBuf> {
-    if template_path.join("templates/config.yml").is_file() {
-        return Ok(template_path.join("templates/config.yml"));
+fn get_theme_template_path(theme_template_path: &Path) -> Result<PathBuf> {
+    if theme_template_path.join("templates/config.yml").is_file() {
+        return Ok(theme_template_path.join("templates/config.yml"));
     }
 
-    Ok(template_path.join("templates/config.yaml"))
+    Ok(theme_template_path.join("templates/config.yaml"))
 }
 
 fn generate_theme(
@@ -100,7 +100,7 @@ struct TemplateConfig {
 }
 
 /// Build theme template using provided schemes
-pub fn build(template_path: &Path, user_schemes_path: &Path) -> Result<()> {
+pub fn build(theme_template_path: &Path, user_schemes_path: &Path) -> Result<()> {
     if !user_schemes_path.exists() {
         return Err(anyhow!(
             "Schemes don't exist locally. First run `{} sync` and try again",
@@ -108,7 +108,7 @@ pub fn build(template_path: &Path, user_schemes_path: &Path) -> Result<()> {
         ));
     }
 
-    let template_config_path = get_theme_template_path(template_path)?;
+    let template_config_path = get_theme_template_path(theme_template_path)?;
     if !template_config_path.exists() || !template_config_path.is_file() {
         return Err(anyhow!(
             "The theme template config file is missing or not a valid yaml file: {}",
@@ -126,16 +126,16 @@ pub fn build(template_path: &Path, user_schemes_path: &Path) -> Result<()> {
             .as_str()
             .strip_prefix('.')
             .unwrap_or(value.extension.as_str());
+        let template_path = theme_template_path.join(format!("templates/{}.mustache", key));
         let template_content =
-            read_to_string(template_path.join(format!("templates/{}.mustache", key)))
-                .unwrap_or_default();
+            read_to_string(&template_path).context(format!("Mustache template missing: {}", template_path.display()))?;
         let supported_systems = &value
             .supported_systems
             .clone()
             .unwrap_or(vec![DEFAULT_SYSTEM.to_string()]);
         let template = Template::new(template_content)?;
         let output_str = &value.output;
-        let output_path = template_path.join(output_str);
+        let output_path = theme_template_path.join(output_str);
 
         if output_str.starts_with('/') {
             return Err(anyhow!(
@@ -170,8 +170,8 @@ pub fn build(template_path: &Path, user_schemes_path: &Path) -> Result<()> {
             }
         }
 
-        for (system, scheme_path) in scheme_path_vec {
-            for item_result in fs::read_dir(scheme_path)? {
+        for (system, schemes_path) in scheme_path_vec {
+            for item_result in fs::read_dir(schemes_path)? {
                 let scheme_direntry = item_result?;
                 let scheme_file_path = scheme_direntry.path();
 
