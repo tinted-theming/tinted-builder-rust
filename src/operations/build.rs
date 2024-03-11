@@ -16,12 +16,12 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 use anyhow::{anyhow, Result};
-use tinted_builder_rust::Scheme;
-use tinted_builder_rust::Template;
 use serde::Deserialize;
 use std::collections::HashMap;
 use std::fs::{self, create_dir_all, read_to_string};
 use std::path::{Path, PathBuf};
+use tinted_builder_rust::Scheme;
+use tinted_builder_rust::Template;
 
 const REPO_NAME: &str = env!("CARGO_PKG_NAME");
 const DEFAULT_SYSTEM: &str = "base16";
@@ -38,7 +38,7 @@ fn is_output_dir_as_expected(path: &Path, extension: &str) -> Result<bool> {
             return Ok(false);
         }
 
-        if entry.path().extension().unwrap_or_default() != extension {
+        if entry.path().ends_with(extension) {
             return Ok(false);
         }
     }

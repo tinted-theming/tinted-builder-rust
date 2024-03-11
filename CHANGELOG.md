@@ -10,6 +10,8 @@
 
 ### Fixed
 
+- Fix bug where `template/config.yaml` extension value isn't checked
+  properly when the extension has a dot: eg `extension = .theme.json`
 - README.md links
 
 ### Updated
