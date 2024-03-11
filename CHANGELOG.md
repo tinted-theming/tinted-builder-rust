@@ -7,6 +7,7 @@
 - Github tests workflow for PRs and merges to main branch
 - Homebrew installation instructions
 - Release binary installation instructions
+- Ensure rendered output contains a new line at end of file
 
 ### Fixed
 

@@ -83,6 +83,12 @@ impl Template {
         let tpl = RamhornsTemplate::new(self.content.clone()).unwrap();
         let context = Self::to_template_context(scheme);
         let rendered = tpl.render(&context);
+        // End with empty line
+        let rendered = if rendered.ends_with('\n') {
+            rendered
+        } else {
+            format!("{}\n", rendered)
+        };
 
         write_to_file(output_path, &rendered)?;
 

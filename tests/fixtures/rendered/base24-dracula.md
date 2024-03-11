@@ -39,4 +39,3 @@ base10: 29 base11: 27 base12: 110 base13: 255 base14: 255 base15: 255 base16: 17
 ## rgb-b
 base00: 44 base01: 54 base02: 78 base03: 104 base04: 131 base05: 244 base06: 242 base07: 255 base08: 85 base09: 140 base0A: 135 base0B: 123 base0C: 253 base0D: 249 base0E: 198 base0F: 105
 base10: 38 base11: 35 base12: 110 base13: 165 base14: 148 base15: 255 base16: 255 base17: 223
-

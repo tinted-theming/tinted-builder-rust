@@ -42,7 +42,7 @@ fn test_operation_build_base16() -> Result<()> {
     let template_theme_path = PathBuf::from(format!("./template-{}", name));
     let template_templates_path = template_theme_path.join("templates");
     let template_config_path = template_templates_path.join("config.yaml");
-    let template_mustache_path = template_templates_path.join("default.mustache");
+    let template_mustache_path = template_templates_path.join("base16-template.mustache");
     let schemes_path = template_theme_path.join("schemes");
     let scheme_file_path = schemes_path.join(format!("{}.yaml", &scheme_name));
     let themes_path = template_theme_path.join("output-themes");
@@ -77,16 +77,15 @@ fn test_operation_build_base16() -> Result<()> {
         format!("--schemes-dir={}", schemes_path.display()),
     ])
     .unwrap();
-    let rendered_content = fs::read_to_string(rendered_theme_path)?;
+    let rendered_content = fs::read_to_string(&rendered_theme_path)?;
 
     // ------
     // Assert
     // ------
-    assert!(
-        base16_template_rendered_content.contains(rendered_content.as_str()),
-        "rendered output does not match expected output"
+    assert_eq!(
+        rendered_content, 
+        base16_template_rendered_content,
     );
-
     assert!(
         stderr.is_empty(),
         "stderr does not contain the expected output"
@@ -117,7 +116,7 @@ fn test_operation_build_base24() -> Result<()> {
     let template_theme_path = PathBuf::from(format!("./template-{}", name));
     let template_templates_path = template_theme_path.join("templates");
     let template_config_path = template_templates_path.join("config.yaml");
-    let template_mustache_path = template_templates_path.join("default.mustache");
+    let template_mustache_path = template_templates_path.join("base24-template.mustache");
     let schemes_path = template_theme_path.join("schemes");
     let scheme_file_path = schemes_path.join(format!("{}.yaml", &scheme_name));
     let themes_path = template_theme_path.join("output-themes");
@@ -157,11 +156,10 @@ fn test_operation_build_base24() -> Result<()> {
     // ------
     // Assert
     // ------
-    assert!(
-        base24_template_rendered_content.contains(rendered_content.as_str()),
-        "rendered output does not match expected output"
+    assert_eq!(
+        rendered_content, 
+        base24_template_rendered_content,
     );
-
     assert!(
         stderr.is_empty(),
         "stderr does not contain the expected output"
@@ -192,7 +190,7 @@ fn test_operation_build_mixed() -> Result<()> {
     let template_theme_path = PathBuf::from(format!("./template-{}", name));
     let template_templates_path = template_theme_path.join("templates");
     let template_config_path = template_templates_path.join("config.yaml");
-    let base24_template_mustache_path = template_templates_path.join("default.mustache");
+    let base24_template_mustache_path = template_templates_path.join("mixed-template.mustache");
     let schemes_path = template_theme_path.join("schemes");
     let base16_schemes_path = schemes_path.join("base16");
     let base24_schemes_path = schemes_path.join("base24");
@@ -251,13 +249,13 @@ fn test_operation_build_mixed() -> Result<()> {
     // ------
     // Assert
     // ------
-    assert!(
-        base16_template_rendered_content.contains(base16_rendered_content.as_str()),
-        "rendered output does not match expected output"
+    assert_eq!(
+        base16_rendered_content,
+        base16_template_rendered_content,
     );
-    assert!(
-        base24_template_rendered_content.contains(base24_rendered_content.as_str()),
-        "rendered output does not match expected output"
+    assert_eq!(
+        base24_rendered_content,
+        base24_template_rendered_content,
     );
     assert!(
         stderr.is_empty(),
@@ -266,7 +264,7 @@ fn test_operation_build_mixed() -> Result<()> {
     assert!(
         stdout.contains(
             format!(
-                "base16 themes generated for \"mixed\" at \"{}/base16-*.md\"",
+                "base16 themes generated for \"mixed-template\" at \"{}/base16-*.md\"",
                 themes_path.display()
             )
             .as_str()
@@ -276,7 +274,7 @@ fn test_operation_build_mixed() -> Result<()> {
     assert!(
         stdout.contains(
             format!(
-                "base24 themes generated for \"mixed\" at \"{}/base24-*.md\"",
+                "base24 themes generated for \"mixed-template\" at \"{}/base24-*.md\"",
                 themes_path.display()
             )
             .as_str()

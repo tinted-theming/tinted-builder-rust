@@ -35,12 +35,12 @@ fn operation_sync_first_time() -> Result<()> {
 
     // ------
     // Assert
+    // ------
     assert!(
         stdout.contains(expected_output),
         "stdout does not contain the expected output"
     );
     assert!(
-        // stderr.is_empty(),
         stderr.contains(&expected_git_clone_str),
         "stderr does not contain the expected output"
     );
