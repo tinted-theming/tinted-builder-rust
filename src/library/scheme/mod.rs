@@ -48,7 +48,7 @@ pub struct Scheme {
 }
 
 pub fn slugify(input: &str) -> String {
-    unidecode(&input) // Convert to ASCII approximations
+    unidecode(input) // Convert to ASCII approximations
         .nfd() // Normalize the string to NFD form
         .filter(|c| c.is_ascii_alphanumeric() || c.is_ascii_whitespace() || *c == '-') // Keep ASCII alphanumerics, whitespace, and hyphens
         .collect::<String>()
