@@ -127,8 +127,10 @@ pub fn build(theme_template_path: &Path, user_schemes_path: &Path) -> Result<()>
             .strip_prefix('.')
             .unwrap_or(value.extension.as_str());
         let template_path = theme_template_path.join(format!("templates/{}.mustache", key));
-        let template_content =
-            read_to_string(&template_path).context(format!("Mustache template missing: {}", template_path.display()))?;
+        let template_content = read_to_string(&template_path).context(format!(
+            "Mustache template missing: {}",
+            template_path.display()
+        ))?;
         let supported_systems = &value
             .supported_systems
             .clone()

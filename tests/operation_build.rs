@@ -82,10 +82,7 @@ fn test_operation_build_base16() -> Result<()> {
     // ------
     // Assert
     // ------
-    assert_eq!(
-        rendered_content, 
-        base16_template_rendered_content,
-    );
+    assert_eq!(rendered_content, base16_template_rendered_content,);
     assert!(
         stderr.is_empty(),
         "stderr does not contain the expected output"
@@ -156,10 +153,7 @@ fn test_operation_build_base24() -> Result<()> {
     // ------
     // Assert
     // ------
-    assert_eq!(
-        rendered_content, 
-        base24_template_rendered_content,
-    );
+    assert_eq!(rendered_content, base24_template_rendered_content,);
     assert!(
         stderr.is_empty(),
         "stderr does not contain the expected output"
@@ -249,14 +243,8 @@ fn test_operation_build_mixed() -> Result<()> {
     // ------
     // Assert
     // ------
-    assert_eq!(
-        base16_rendered_content,
-        base16_template_rendered_content,
-    );
-    assert_eq!(
-        base24_rendered_content,
-        base24_template_rendered_content,
-    );
+    assert_eq!(base16_rendered_content, base16_template_rendered_content,);
+    assert_eq!(base24_rendered_content, base24_template_rendered_content,);
     assert!(
         stderr.is_empty(),
         "stderr does not contain the expected output"

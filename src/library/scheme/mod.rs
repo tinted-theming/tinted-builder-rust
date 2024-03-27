@@ -65,7 +65,9 @@ impl<'de> Deserialize<'de> for Scheme {
         D: Deserializer<'de>,
     {
         let wrapper = SchemeWrapper::deserialize(deserializer)?;
-        let slug = wrapper.slug.map_or(slugify(&wrapper.name), |slug| slugify(&slug));
+        let slug = wrapper
+            .slug
+            .map_or(slugify(&wrapper.name), |slug| slugify(&slug));
         let variant = wrapper.variant.unwrap_or(String::from("dark"));
 
         match wrapper.system.as_str() {
