@@ -155,6 +155,6 @@ used crates within the project.
 [ramhorns]: https://docs.rs/ramhorns/latest/ramhorns/index.html
 [builder specification]: https://github.com/tinted-theming/home/blob/main/builder.md
 [LICENSE]: LICENSE
-[license.html]: license.html
+[THIRD_PARTY_LICENSES.md]: THIRD_PARTY_LICENSES.md
 [CONTRIBUTING.md]: CONTRIBUTING.md
 [repository releases]: https://github.com/tinted-theming/tinty/releases/latest
