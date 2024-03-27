@@ -10,8 +10,8 @@ publish_dry: test
 	@echo "-------------------"
 	@echo "Generating license file"
 	cargo about generate about.hbs > license.html
-	@if [ -n "$(git status --porcelain)" ]; then \
-		echo "There are changes." && exit 1; \
+	@if [ -n "$$(git status --porcelain)" ]; then \
+		echo "There are uncommitted changes." && exit 1; \
 	fi
 	@echo "Publish dry run"
 	cargo publish --dry-run
