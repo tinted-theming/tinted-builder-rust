@@ -141,11 +141,9 @@ information.
 
 ## License
 
-This project uses Ramhorns, which is under the GPL-3 license. While most
-Tinted Theming projects are under the MIT license, this project is under
-the GPL-3 license since it consumes Ramhorns. See the [LICENSE] file for
-more details and the [license.html] for containing the licenses of the
-used crates within the project.
+Ribboncurls is dual-licensed under the [Apache 2.0] and [MIT] licenses.
+For more information about the licenses of the projects used by
+Ribboncurls, have a look at [THIRD_PARTY_LICENSES.md].
 
 [latest schemes repository]: https://github.com/tinted-theming/schemes
 [home repository]: https://github.com/tinted-theming/home

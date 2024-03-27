@@ -16,17 +16,14 @@ feature-depth = 1
 confidence-threshold = 0.93
 allow = [
     "Apache-2.0",
-    "GPL-3.0",
     "MIT",
+    "MPL-2.0",
     "BSD-3-Clause",
 ]
 exceptions = [
     { allow = [
         "Unicode-DFS-2016",
     ], name = "unicode-ident" },
-    { allow = [
-        "MPL-2.0",
-    ], name = "option-ext" },
 ]
 
 [bans]
@@ -43,7 +40,8 @@ deny = [
 ]
 
 skip = [
-    { name = "syn", version = "1.0.109" } # Ramhorns needs to update
+    { name = "syn", version = "1.0.109" }, # Ramhorns needs to update
+    { name = "heck", version = "0.3.3" }, # Ramhorns -> Bae needs to update
 ]
 
 [sources]
