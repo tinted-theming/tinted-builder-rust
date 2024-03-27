@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.2.2] - 2024-03-27
+
+### Fixed
+
+- Fixed bug where required `build` arg was not required to be there
+
 ## [0.2.1] - 2024-03-11
 
 ### Fixed

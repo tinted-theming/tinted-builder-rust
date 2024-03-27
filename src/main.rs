@@ -72,8 +72,6 @@ fn main() -> Result<()> {
                 let template_path = PathBuf::from(template_dir);
 
                 operations::build::build(&template_path, &schemes_path)?;
-            } else {
-                return Err(anyhow!("scheme_name is required for apply command"));
             }
         }
         Some(("sync", _)) => {

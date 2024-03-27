@@ -46,7 +46,7 @@ fn build_cli() -> Command {
                 .arg(
                     Arg::new("template-dir")
                         .help("Local path to the theme template you want to build")
-                        .required(false),
+                        .required(true),
                 ),
         )
         .subcommand(
