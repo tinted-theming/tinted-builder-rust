@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.3.0] - 2024-04-01
+
+### Changed
+
+- Changed from GPL-3 to MIT or Apache-2.0 license
+
 ## [0.2.2] - 2024-03-27
 
 ### Fixed
