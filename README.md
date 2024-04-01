@@ -1,5 +1,9 @@
 # tinted-builder-rust
 
+[![Matrix Chat](https://img.shields.io/matrix/tinted-theming:matrix.org)](https://matrix.to/#/#tinted-theming:matrix.org)
+[![Crates.io](https://img.shields.io/crates/v/tinted-builder-rust.svg)](https://crates.io/crates/tinted-builder-rust)
+[![Tests](https://github.com/tinted-theming/tinted-builder-rust/actions/workflows/tests.yml/badge.svg)](https://github.com/tinted-theming/tinty/actions/workflows/tests.yml)
+
 A builder for [base16] and [base24] templates using the `0.11.0` [builder
 specification].
 
