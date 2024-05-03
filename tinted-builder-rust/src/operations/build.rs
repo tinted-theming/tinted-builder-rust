@@ -6,6 +6,8 @@ use std::path::{Path, PathBuf};
 use tinted_builder::Scheme;
 use tinted_builder::Template;
 
+use crate::utils::write_to_file;
+
 const REPO_NAME: &str = env!("CARGO_PKG_NAME");
 const DEFAULT_SYSTEM: &str = "base16";
 
@@ -68,7 +70,8 @@ fn generate_theme(
             fs::create_dir_all(output_dir)?;
         }
 
-        template.render_to_file(&output_path, &scheme)?;
+        let output = template.render(&scheme)?;
+        write_to_file(&output_path, &output)?;
     }
 
     Ok(())

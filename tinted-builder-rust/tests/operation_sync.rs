@@ -44,10 +44,7 @@ fn operation_sync_first_time() -> Result<()> {
         stderr.contains(&expected_git_clone_str),
         "stderr does not contain the expected output"
     );
-    assert_eq!(
-        expected_schemes_path.exists() && !is_schemes_dir_empty,
-        true
-    );
+    assert!(expected_schemes_path.exists() && !is_schemes_dir_empty,);
 
     Ok(())
 }
@@ -85,10 +82,7 @@ fn operation_sync_update() -> Result<()> {
         stderr.is_empty(),
         "stderr does not contain the expected output"
     );
-    assert_eq!(
-        expected_schemes_path.exists() && !is_schemes_dir_empty,
-        true
-    );
+    assert!(expected_schemes_path.exists() && !is_schemes_dir_empty,);
 
     Ok(())
 }

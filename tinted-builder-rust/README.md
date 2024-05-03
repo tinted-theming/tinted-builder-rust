@@ -13,22 +13,15 @@ build templates within your own Rust application.
 
 ## Table of Contents
 
-- [CLI](#cli)
-  - [Installation](#installation)
-  - [Basic usage](#basic-usage)
-  - [Commands](#commands)
-  - [Flags](#flags)
+- [Installation](#installation)
+- [Basic usage](#basic-usage)
+- [Commands](#commands)
+- [Flags](#flags)
 - [Builder specification](#builder-specification)
-- [Library](#library)
-  - [Library installation](#library-installation)
-  - [Library usage](#library-usage)
 - [Contributing](#contributing)
 - [License](#license)
 
-## CLI
-
-### Installation
-
+## Installation
 
 **Cargo**
 
@@ -47,7 +40,7 @@ brew install tinted-builder-rust
 
 Download the relevant binary from the [repository releases] page.
 
-### Basic Usage
+## Basic Usage
 
 ```shell
 tinted-builder-rust sync # To sync with latest schemes
@@ -80,64 +73,6 @@ variables the builder should provide when rendering template mustache
 file. Have a look at the [builder specification] document for more
 details.
 
-## Library
-
-This library exposes a `Scheme` and `Template` struct which you can
-use to generate your own themes using [base16] and [base24] templates and
-`0.11.0` compliant base16 and base24 scheme files.
-
-Internally tinted-builder-rust uses [ramhorns] to render the templates.
-
-### Library installation
-
-```shell
-cargo add tinted-builder-rust
-```
-
-### Library Usage
-
-```rust
-use tinted_builder_rust::{Scheme, Template};
-use std::fs::read_to_string;
-
-let template_str = read_to_string("path/to/template.mustache").unwrap();
-let scheme_str = read_to_string("path/to/scheme.yml").unwrap();
-
-let template = Template::new(template_str).unwrap();
-let scheme: Scheme = serde_yaml::from_str(&scheme_str).unwrap();
-
-template
-    .render_to_file("path/to/rendered/template", &scheme)
-    .unwrap();
-```
-
-The Scheme struct is as follows:
-
-```rust
-pub struct Scheme {
-    pub system: String,
-    pub name: String,
-    pub slug: String,
-    pub author: String,
-    pub description: Option<String>,
-    pub variant: String,
-    pub palette: HashMap<String, Color>,
-}
-
-pub struct Color {
-    pub hex: (String, String, String),
-    pub rgb: (u8, u8, u8),
-    pub dec: (f32, f32, f32),
-}
-```
-
-`Template::new`
-The `Template` struct simply sets the content provided to it via
-`Template::new`.
-
-`template.render_to_file(&scheme)` takes the scheme and generates the
-variables defined in the `0.11.0` [builder specification].
-
 ## Contributing
 
 Contributions are welcome! Have a look at [CONTRIBUTING.md] for more
@@ -160,5 +95,3 @@ Ribboncurls, have a look at [THIRD_PARTY_LICENSES.md].
 [THIRD_PARTY_LICENSES.md]: THIRD_PARTY_LICENSES.md
 [CONTRIBUTING.md]: CONTRIBUTING.md
 [repository releases]: https://github.com/tinted-theming/tinty/releases/latest
-
-

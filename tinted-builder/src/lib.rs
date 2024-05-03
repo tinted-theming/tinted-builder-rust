@@ -1,5 +1,7 @@
-mod library;
-mod utils;
+#[doc = include_str!("../README.md")]
+mod constants;
+mod scheme;
+mod template;
 
-pub use library::scheme::Scheme;
-pub use library::template::Template;
+pub use scheme::Scheme;
+pub use template::Template;

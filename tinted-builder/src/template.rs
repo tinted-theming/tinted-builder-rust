@@ -1,13 +1,28 @@
-use anyhow::Result;
+use anyhow::{Context, Result};
 use ramhorns::Template as RamhornsTemplate;
 use std::collections::HashMap;
+use std::fs::{remove_file, File};
+use std::io::Write;
 use std::path::Path;
 
-use crate::utils::write_to_file;
 use crate::Scheme;
 
 pub struct Template {
     content: String,
+}
+
+#[allow(dead_code)]
+pub fn write_to_file(path: &Path, contents: &str) -> Result<()> {
+    if path.exists() {
+        remove_file(path).with_context(|| format!("Unable to remove file: {}", path.display()))?;
+    }
+
+    let mut file =
+        File::create(path).with_context(|| format!("Unable to create file: {}", path.display()))?;
+
+    file.write_all(contents.as_bytes())?;
+
+    Ok(())
 }
 
 impl Template {
@@ -70,6 +85,10 @@ impl Template {
         Ok(rendered)
     }
 
+    #[deprecated(
+        since = "0.4.0",
+        note = "Please use the `render` method instead and write the output to a file yourself."
+    )]
     pub fn render_to_file(&self, output_path: &Path, scheme: &Scheme) -> Result<&Self> {
         let tpl = RamhornsTemplate::new(self.content.clone()).unwrap();
         let context = Self::to_template_context(scheme);

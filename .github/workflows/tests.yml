@@ -13,10 +13,6 @@ jobs:
       - name: Fetch the repository code
         uses: actions/checkout@v4
 
-      - name: Install deps
-        run: |
-          make install
-
       - name: Cache Cargo registry
         uses: actions/cache@v4
         with:
@@ -35,5 +31,4 @@ jobs:
 
       - name: Tests and linting
         run: |
-          make test
-
+          make cli_test && make lib_test

@@ -29,6 +29,7 @@ pub fn run_command(command_vec: Vec<String>) -> Result<(String, String), Box<dyn
     Ok((String::from_utf8(stdout)?, String::from_utf8(stderr)?))
 }
 
+#[allow(dead_code)]
 pub fn write_to_file(path: &Path, contents: &str) -> Result<()> {
     if path.exists() {
         remove_file(path).with_context(|| format!("Unable to remove file: {}", path.display()))?;
