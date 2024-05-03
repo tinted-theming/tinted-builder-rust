@@ -21,12 +21,14 @@ lib_test: lib_build
 	@echo "Running test"
 	@echo "------------"
 	cargo test --package tinted-builder --release $(TINTED_BUILDER_RUST_TEST)
+	cargo fmt --package tinted-builder --check
 
 cli_test: cli_build
 	@echo "------------"
 	@echo "Running test"
 	@echo "------------"
 	cargo test --package tinted-builder-rust --release $(TINTED_BUILDER_RUST_TEST)
+	cargo fmt --package tinted-builder-rust --check
 
 lib_build:
 	@echo "-------------"

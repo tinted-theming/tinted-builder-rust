@@ -5,8 +5,8 @@ use std::collections::HashMap;
 use unicode_normalization::UnicodeNormalization;
 use unidecode::unidecode;
 
-use crate::library::constants::{REQUIRED_BASE16_PALETTE_KEYS, REQUIRED_BASE24_PALETTE_KEYS};
-use crate::library::scheme::color::Color;
+use crate::constants::{REQUIRED_BASE16_PALETTE_KEYS, REQUIRED_BASE24_PALETTE_KEYS};
+use crate::scheme::color::Color;
 
 #[derive(Deserialize)]
 pub struct SchemeWrapper {

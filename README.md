@@ -7,9 +7,10 @@
 A builder for [base16] and [base24] templates using the `0.11.0` [builder
 specification].
 
-This crate contains a command-line tool to build base16 and base24
-templates. It is also a library crate which you can use to directly
-build templates within your own Rust application.
+This repo contains a command-line tool, [tinted-builder-rust], to build
+base16 and base24 templates. It is also contains a library crate,
+[tinted-builder], which you can use to directly build templates within
+your own Rust application.
 
 ## Table of Contents
 
@@ -114,6 +115,8 @@ template
 The Scheme struct is as follows:
 
 ```rust
+use std::collections::HashMap;
+
 pub struct Scheme {
     pub system: String,
     pub name: String,
@@ -149,6 +152,8 @@ Ribboncurls is dual-licensed under the [Apache 2.0] and [MIT] licenses.
 For more information about the licenses of the projects used by
 Ribboncurls, have a look at [THIRD_PARTY_LICENSES.md].
 
+[tinted-builder-rust]: tinted-builder-rust/README.md
+[tinted-builder]: tinted-builder/README.md
 [latest schemes repository]: https://github.com/tinted-theming/schemes
 [home repository]: https://github.com/tinted-theming/home
 [builder specification]: https://github.com/tinted-theming/home/blob/main/builder.md

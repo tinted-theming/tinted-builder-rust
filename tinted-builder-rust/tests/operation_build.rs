@@ -77,7 +77,7 @@ fn test_operation_build_base16() -> Result<()> {
         format!("--schemes-dir={}", schemes_path.display()),
     ])
     .unwrap();
-    let rendered_content = fs::read_to_string(&rendered_theme_path)?;
+    let rendered_content = fs::read_to_string(rendered_theme_path)?;
 
     // ------
     // Assert

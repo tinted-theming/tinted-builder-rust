@@ -22,44 +22,50 @@ cargo add tinted-builder
 ## Usage
 
 ```rust
-use tinted_builder_rust::{Scheme, Template};
+use tinted_builder::{Scheme, Template};
 
 fn main() {
-  let template_str = ".someCssSelector { background: #{{base00-hex}} }";
+  let template = String::from(r#"/* Some CSS file with {{scheme-name}} theme */
+.someCssSelector { background-color: #{{base00-hex}} }
+.someOtherCssSelector { background-color: #{{base0F-hex}} }"#);
   let scheme_str = r#"system: "base16"
-  name: "UwUnicorn"
-  author: "Fernando Marques (https://github.com/RakkiUwU) and Gabriel Fontes (https://github.com/Misterio77)"
-  variant: "dark"
-  palette:
-    base00: "241b26"
-    base01: "2f2a3f"
-    base02: "46354a"
-    base03: "6c3cb2"
-    base04: "7e5f83"
-    base05: "eed5d9"
-    base06: "d9c2c6"
-    base07: "e4ccd0"
-    base08: "877bb6"
-    base09: "de5b44"
-    base0A: "a84a73"
-    base0B: "c965bf"
-    base0C: "9c5fce"
-    base0D: "6a9eb5"
-    base0E: "78a38f"
-    base0F: "a3a079""#;
-  let template = Template::new(template_str).unwrap();
+name: "UwUnicorn"
+author: "Fernando Marques (https://github.com/RakkiUwU) and Gabriel Fontes (https://github.com/Misterio77)"
+variant: "dark"
+palette:
+  base00: "241b26"
+  base01: "2f2a3f"
+  base02: "46354a"
+  base03: "6c3cb2"
+  base04: "7e5f83"
+  base05: "eed5d9"
+  base06: "d9c2c6"
+  base07: "e4ccd0"
+  base08: "877bb6"
+  base09: "de5b44"
+  base0A: "a84a73"
+  base0B: "c965bf"
+  base0C: "9c5fce"
+  base0D: "6a9eb5"
+  base0E: "78a38f"
+  base0F: "a3a079""#;
+  let template = Template::new(template).unwrap();
   let scheme: Scheme = serde_yaml::from_str(&scheme_str).unwrap();
   let output = template
     .render(&scheme)
     .unwrap();
 
-    assert_eq!(output, r#".someCssSelector { background-color: #241b26 i}"#);
+    assert_eq!(output, r#"/* Some CSS file with UwUnicorn theme */
+.someCssSelector { background-color: #241b26 }
+.someOtherCssSelector { background-color: #a3a079 }"#);
 }
 ```
 
 The Scheme struct is as follows:
 
 ```rust
+use std::collections::HashMap;
+
 pub struct Scheme {
     pub system: String,
     pub name: String,
@@ -81,8 +87,9 @@ pub struct Color {
 The `Template` struct simply sets the content provided to it via
 `Template::new`.
 
-`template.render_to_file(&scheme)` takes the scheme and generates the
-variables defined in the `0.11.0` [builder specification].
+`template.render(&scheme)` takes the scheme, generates the variables
+defined in the `0.11.0` [builder specification] and returns a new
+string.
 
 ## Contributing
 
