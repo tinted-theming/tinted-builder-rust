@@ -1,26 +1,51 @@
-publish: publish_dry
+lib_publish: lib_publish_dry
 	@echo "---------------"
 	@echo "Running publish"
 	@echo "---------------"
-	cargo publish
+	cargo publish --package tinted-builder
 
-publish_dry: test
-	@echo "-------------------"
-	@echo "Running publish_dry"
-	@echo "-------------------"
-	cargo publish --dry-run
+cli_publish: cli_publish_dry
+	@echo "---------------"
+	@echo "Running publish"
+	@echo "---------------"
+	cargo publish --package tinted-builder-rust
 
-test: build
-	@echo "------------"
-	@echo "Running test"
-	@echo "------------"
-	cargo test --release $(TINTED_BUILDER_RUST_TEST)
+lib_publish_dry: lib_test
+	@echo "----------------------"
+	@echo "Running lib publish_dry"
+	@echo "----------------------"
+	cargo publish --dry-run --package tinted-builder
 
-build:
-	@echo "-------------"
-	@echo "Running build"
-	@echo "-------------"
-	cargo build --release
+cli_publish_dry: cli_test
+	@echo "----------------------"
+	@echo "Running cli publish_dry"
+	@echo "----------------------"
+	cargo publish --dry-run --package tinted-builder-rust
+
+lib_test: lib_build
+	@echo "-----------------"
+	@echo "Running lib tests"
+	@echo "-----------------"
+	cargo test --package tinted-builder --release $(TINTED_BUILDER_RUST_TEST)
+
+cli_test: cli_build
+	@echo "-----------------"
+	@echo "Running cli tests"
+	@echo "-----------------"
+	cargo test --package tinted-builder-rust --release $(TINTED_BUILDER_RUST_TEST)
+
+lib_build:
+	@echo "-----------------"
+	@echo "Running lib build"
+	@echo "-----------------"
+	cargo build --release --package tinted-builder
+	cargo deny check
+
+cli_build:
+	@echo "-----------------"
+	@echo "Running cli build"
+	@echo "-----------------"
+	cargo build --release --package tinted-builder-rust
 	cargo deny check
 
 install: 
