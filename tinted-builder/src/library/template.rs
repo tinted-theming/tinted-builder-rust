@@ -62,6 +62,14 @@ impl Template {
         context
     }
 
+    pub fn render(&self, scheme: &Scheme) -> Result<String> {
+        let tpl = RamhornsTemplate::new(self.content.clone()).unwrap();
+        let context = Self::to_template_context(scheme);
+        let rendered = tpl.render(&context);
+
+        Ok(rendered)
+    }
+
     pub fn render_to_file(&self, output_path: &Path, scheme: &Scheme) -> Result<&Self> {
         let tpl = RamhornsTemplate::new(self.content.clone()).unwrap();
         let context = Self::to_template_context(scheme);

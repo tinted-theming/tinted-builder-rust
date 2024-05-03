@@ -3,8 +3,8 @@ use serde::Deserialize;
 use std::collections::HashMap;
 use std::fs::{self, create_dir_all, read_to_string};
 use std::path::{Path, PathBuf};
-use tinted_builder_rust::Scheme;
-use tinted_builder_rust::Template;
+use tinted_builder::Scheme;
+use tinted_builder::Template;
 
 const REPO_NAME: &str = env!("CARGO_PKG_NAME");
 const DEFAULT_SYSTEM: &str = "base16";

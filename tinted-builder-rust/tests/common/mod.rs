@@ -8,7 +8,7 @@ use std::{
 
 use anyhow::{Context, Result};
 
-pub const COMMAND_NAME: &str = "./target/release/tinted-builder-rust";
+pub const COMMAND_NAME: &str = "../target/release/tinted-builder-rust";
 
 pub fn run_command(command_vec: Vec<String>) -> Result<(String, String), Box<dyn Error>> {
     let output = Command::new(&command_vec[0])

@@ -1,5 +1,12 @@
 # Changelog
 
+## [Unreleased]
+
+### Changed
+
+- Split the tinted-builder-rust cli and library into two different
+  packages.
+
 ## [0.3.0] - 2024-04-01
 
 ### Changed
@@ -52,6 +59,8 @@
 - `sync` subcommand support to sync with latest Tinted Theming schemes
 - `build` subcommand to trigger theme template build
 
+[0.4.0]: https://github.com/tinted-theming/tinted-builder-rust/compare/v0.3.0...v0.4.0
+[0.3.0]: https://github.com/tinted-theming/tinted-builder-rust/compare/v0.2.1...v0.3.0
 [0.2.1]: https://github.com/tinted-theming/tinted-builder-rust/compare/v0.2.0...v0.2.1
 [0.2.0]: https://github.com/tinted-theming/tinted-builder-rust/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/tinted-theming/tinted-builder-rust/releases/tag/v0.1.0

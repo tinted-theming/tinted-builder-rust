@@ -65,7 +65,7 @@ jobs:
       - name: Get Cargo version
         id: cargo_version
         run: |
-          VERSION=$(cargo read-manifest | jq -r ".version")
+          VERSION=$(cargo read-manifest --manifest-path ./tinted-builder-rust/Cargo.toml | jq -r ".version")
           echo "value=$VERSION" >> $GITHUB_ENV
           echo "::set-output name=value::$VERSION"
 
@@ -147,7 +147,7 @@ jobs:
         uses: actions-rs/cargo@v1
         with:
           use-cross: ${{ matrix.cross }}
-          command: build
+          command: build --package tinted-builder-rust
           args: --release --locked --target=${{ matrix.target }} --color=always --verbose
 
       - name: Install cargo-deb

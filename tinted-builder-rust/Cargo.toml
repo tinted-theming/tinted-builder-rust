@@ -1,0 +1,31 @@
+[package]
+name = "tinted-builder-rust"
+version = "0.3.0"
+edition = "2021"
+authors = ["Jamy Golden <code@jamygolden.com>", "Tinted Theming <tintedtheming@proton.me>"]
+license = "MIT OR Apache-2.0"
+description = "Simple rendering of mustache templates"
+keywords = ["mustache", "template"]
+categories = ["template-engine"]
+homepage = "https://github.com/tinted-theming/tinted-builder-rust"
+repository = "https://github.com/tinted-theming/tinted-builder-rust"
+documentation = "https://github.com/tinted-theming/tinted-builder-rust"
+readme = "README.md"
+
+[dependencies]
+anyhow = "1.0.80"
+clap = "4.5.2"
+dirs = "5.0.1"
+serde = { version = "1.0.197", features = ["derive"] }
+serde_yaml = "0.9.32"
+
+[dev-dependencies]
+strip-ansi-escapes = "0.2.0"
+
+[dependencies.tinted-builder]
+path = "../tinted-builder"
+version = "0.1.0"
+
+[[bin]]
+name = "tinted-builder-rust"
+path = "src/main.rs"
