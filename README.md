@@ -33,13 +33,13 @@ your own Rust application.
 
 **Cargo**
 
-```shell
+```sh
 cargo install tinted-builder-rust
 ```
 
 **Homebrew**
 
-```shell
+```sh
 brew tap tinted-theming/tinted
 brew install tinted-builder-rust
 ```
@@ -50,7 +50,7 @@ Download the relevant binary from the [repository releases] page.
 
 ### Basic Usage
 
-```shell
+```sh
 tinted-builder-rust sync # To sync with latest schemes
 tinted-builder-rust build path/to/base16-template
 ```
@@ -91,7 +91,7 @@ Internally tinted-builder-rust uses [ramhorns] to render the templates.
 
 ### Library installation
 
-```shell
+```sh
 cargo add tinted-builder-rust
 ```
 

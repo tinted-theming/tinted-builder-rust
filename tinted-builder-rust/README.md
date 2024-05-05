@@ -25,13 +25,13 @@ build templates within your own Rust application.
 
 **Cargo**
 
-```shell
+```sh
 cargo install tinted-builder-rust
 ```
 
 **Homebrew**
 
-```shell
+```sh
 brew tap tinted-theming/tinted
 brew install tinted-builder-rust
 ```
