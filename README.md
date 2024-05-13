@@ -87,7 +87,7 @@ This library exposes a `Scheme` and `Template` struct which you can
 use to generate your own themes using [base16] and [base24] templates and
 `0.11.0` compliant base16 and base24 scheme files.
 
-Internally tinted-builder-rust uses [ramhorns] to render the templates.
+Internally tinted-builder-rust uses [ribboncurls] to render the templates.
 
 ### Library installation
 
@@ -159,7 +159,7 @@ Ribboncurls, have a look at [THIRD_PARTY_LICENSES.md].
 [builder specification]: https://github.com/tinted-theming/home/blob/main/builder.md
 [base16]: https://github.com/tinted-theming/home/blob/main/styling.md
 [base24]: https://github.com/tinted-theming/base24/blob/master/styling.md
-[ramhorns]: https://docs.rs/ramhorns/latest/ramhorns/index.html
+[ribboncurls]: https://github.com/tinted-theming/ribboncurls
 [builder specification]: https://github.com/tinted-theming/home/blob/main/builder.md
 [LICENSE]: LICENSE
 [THIRD_PARTY_LICENSES.md]: THIRD_PARTY_LICENSES.md

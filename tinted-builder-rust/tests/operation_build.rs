@@ -17,7 +17,7 @@ fn setup(system: &str, scheme_name: &str) -> Result<(String, String, String, Str
         "./tests/fixtures/templates/{}-template.mustache",
         system
     ));
-    let template_rendered_path: PathBuf = PathBuf::from(format!(
+    let template_rendered_path_fixture: PathBuf = PathBuf::from(format!(
         "./tests/fixtures/rendered/{}-{}.md",
         system, scheme_name
     ));
@@ -26,7 +26,7 @@ fn setup(system: &str, scheme_name: &str) -> Result<(String, String, String, Str
         fs::read_to_string(config_file_path)?,
         fs::read_to_string(scheme_file_path)?,
         fs::read_to_string(template_file_path)?,
-        fs::read_to_string(template_rendered_path)?,
+        fs::read_to_string(template_rendered_path_fixture)?,
     ))
 }
 
@@ -51,7 +51,7 @@ fn test_operation_build_base16() -> Result<()> {
         base16_config_file_content,
         base16_scheme_file_content,
         base16_template_file_content,
-        base16_template_rendered_content,
+        base16_template_rendered_content_fixture,
     ) = setup(system, scheme_name)?;
 
     if themes_path.is_dir() {
@@ -82,7 +82,7 @@ fn test_operation_build_base16() -> Result<()> {
     // ------
     // Assert
     // ------
-    assert_eq!(rendered_content, base16_template_rendered_content,);
+    assert_eq!(rendered_content, base16_template_rendered_content_fixture);
     assert!(
         stderr.is_empty(),
         "stderr does not contain the expected output"
@@ -122,7 +122,7 @@ fn test_operation_build_base24() -> Result<()> {
         base24_config_file_content,
         base24_scheme_file_content,
         base24_template_file_content,
-        base24_template_rendered_content,
+        base24_template_rendered_content_fixture,
     ) = setup(system, scheme_name)?;
 
     if themes_path.is_dir() {
@@ -153,7 +153,7 @@ fn test_operation_build_base24() -> Result<()> {
     // ------
     // Assert
     // ------
-    assert_eq!(rendered_content, base24_template_rendered_content,);
+    assert_eq!(rendered_content, base24_template_rendered_content_fixture);
     assert!(
         stderr.is_empty(),
         "stderr does not contain the expected output"
@@ -193,7 +193,7 @@ fn test_operation_build_mixed() -> Result<()> {
     let themes_path = template_theme_path.join("output-themes");
     let base16_rendered_theme_path = themes_path.join(format!("base16-{}.md", &base16_scheme_name));
     let base24_rendered_theme_path = themes_path.join(format!("base24-{}.md", &base24_scheme_name));
-    let base16_template_rendered_content = fs::read_to_string(format!(
+    let base16_template_rendered_content_fixture = fs::read_to_string(format!(
         "./tests/fixtures/rendered/base16-mixed-{}.md",
         base16_scheme_name
     ))?;
@@ -202,7 +202,7 @@ fn test_operation_build_mixed() -> Result<()> {
         _,
         base24_scheme_file_content,
         base24_template_file_content,
-        base24_template_rendered_content,
+        base24_template_rendered_content_fixture,
     ) = setup("base24", base24_scheme_name)?;
 
     if themes_path.is_dir() {
@@ -243,8 +243,14 @@ fn test_operation_build_mixed() -> Result<()> {
     // ------
     // Assert
     // ------
-    assert_eq!(base16_rendered_content, base16_template_rendered_content,);
-    assert_eq!(base24_rendered_content, base24_template_rendered_content,);
+    assert_eq!(
+        base16_rendered_content,
+        base16_template_rendered_content_fixture
+    );
+    assert_eq!(
+        base24_rendered_content,
+        base24_template_rendered_content_fixture
+    );
     assert!(
         stderr.is_empty(),
         "stderr does not contain the expected output"

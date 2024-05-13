@@ -89,7 +89,6 @@ Ribboncurls, have a look at [THIRD_PARTY_LICENSES.md].
 [builder specification]: https://github.com/tinted-theming/home/blob/main/builder.md
 [base16]: https://github.com/tinted-theming/home/blob/main/styling.md
 [base24]: https://github.com/tinted-theming/base24/blob/master/styling.md
-[ramhorns]: https://docs.rs/ramhorns/latest/ramhorns/index.html
 [builder specification]: https://github.com/tinted-theming/home/blob/main/builder.md
 [LICENSE]: LICENSE
 [THIRD_PARTY_LICENSES.md]: THIRD_PARTY_LICENSES.md

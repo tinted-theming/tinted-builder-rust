@@ -39,11 +39,6 @@ deny = [
     { name = "windows" },
 ]
 
-skip = [
-    { name = "syn", version = "1.0.109" }, # Ramhorns needs to update
-    { name = "heck", version = "0.3.3" }, # Ramhorns -> Bae needs to update
-]
-
 [sources]
 unknown-registry = "deny"
 unknown-git = "deny"
