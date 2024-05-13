@@ -16,7 +16,7 @@ rust-version = "1.74.0"
 anyhow = "1.0.80"
 clap = "4.5.2"
 dirs = "5.0.1"
-ramhorns = "1.0.0"
+ribboncurls = "0.1.0"
 serde = { version = "1.0.197", features = ["derive"] }
 serde_yaml = "0.9.32"
 unicode-normalization = "0.1.23"

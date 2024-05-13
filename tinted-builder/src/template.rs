@@ -1,5 +1,4 @@
 use anyhow::{Context, Result};
-use ramhorns::Template as RamhornsTemplate;
 use std::collections::HashMap;
 use std::fs::{remove_file, File};
 use std::io::Write;
@@ -78,9 +77,8 @@ impl Template {
     }
 
     pub fn render(&self, scheme: &Scheme) -> Result<String> {
-        let tpl = RamhornsTemplate::new(self.content.clone()).unwrap();
-        let context = Self::to_template_context(scheme);
-        let rendered = tpl.render(&context);
+        let context = serde_yaml::to_string(&Self::to_template_context(scheme))?;
+        let rendered = ribboncurls::render(&self.content, &context, None)?;
 
         Ok(rendered)
     }
@@ -90,9 +88,8 @@ impl Template {
         note = "Please use the `render` method instead and write the output to a file yourself."
     )]
     pub fn render_to_file(&self, output_path: &Path, scheme: &Scheme) -> Result<&Self> {
-        let tpl = RamhornsTemplate::new(self.content.clone()).unwrap();
-        let context = Self::to_template_context(scheme);
-        let rendered = tpl.render(&context);
+        let context = serde_yaml::to_string(&Self::to_template_context(scheme))?;
+        let rendered = ribboncurls::render(&self.content, &context, None)?;
 
         write_to_file(output_path, &rendered)?;
 

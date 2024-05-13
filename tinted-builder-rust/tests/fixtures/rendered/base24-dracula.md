@@ -5,6 +5,7 @@ slug: dracula
 slug_underscored: dracula
 description: 
 author: FredHappyface (https://github.com/fredHappyface)
+author-escaped: FredHappyface (https:&#x2F;&#x2F;github.com&#x2F;fredHappyface)
 is light: false
 is dark: true
 
