@@ -3,9 +3,6 @@
 // compatibility for a time. Everyone should move to using
 // tinted-builder as the rust library.
 
-mod operations;
-mod utils;
-
 /// # Add tinted-builder library test since tinted-builder-rust is
 /// exporting the structs
 ///

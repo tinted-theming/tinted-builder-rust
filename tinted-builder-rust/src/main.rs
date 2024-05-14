@@ -1,5 +1,8 @@
 mod cli;
-mod operations;
+mod operations {
+    pub mod build;
+    pub mod sync;
+}
 mod utils;
 
 use anyhow::{anyhow, Result};

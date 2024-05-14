@@ -1,10 +1,10 @@
-mod common;
+mod utils;
 
 use anyhow::Result;
 use std::fs;
 use std::path::PathBuf;
 
-use crate::common::{write_to_file, COMMAND_NAME};
+use crate::utils::{write_to_file, COMMAND_NAME};
 
 fn setup(system: &str, scheme_name: &str) -> Result<(String, String, String, String)> {
     let config_file_path: PathBuf =
@@ -70,7 +70,7 @@ fn test_operation_build_base16() -> Result<()> {
     // ---
     // Act
     // ---
-    let (stdout, stderr) = common::run_command(vec![
+    let (stdout, stderr) = utils::run_command(vec![
         COMMAND_NAME.to_string(),
         "build".to_string(),
         template_theme_path.display().to_string(),
@@ -141,7 +141,7 @@ fn test_operation_build_base24() -> Result<()> {
     // ---
     // Act
     // ---
-    let (stdout, stderr) = common::run_command(vec![
+    let (stdout, stderr) = utils::run_command(vec![
         COMMAND_NAME.to_string(),
         "build".to_string(),
         template_theme_path.display().to_string(),
@@ -230,7 +230,7 @@ fn test_operation_build_mixed() -> Result<()> {
     // ---
     // Act
     // ---
-    let (stdout, stderr) = common::run_command(vec![
+    let (stdout, stderr) = utils::run_command(vec![
         COMMAND_NAME.to_string(),
         "build".to_string(),
         template_theme_path.display().to_string(),
