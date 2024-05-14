@@ -1,10 +1,8 @@
-mod common;
+mod utils;
 
-use std::{fs, path::PathBuf};
-
+use crate::utils::COMMAND_NAME;
 use anyhow::Result;
-
-use crate::common::COMMAND_NAME;
+use std::{fs, path::PathBuf};
 
 /// Install - First time sync
 #[test]
@@ -25,7 +23,7 @@ fn operation_sync_first_time() -> Result<()> {
     // ---
     // Act
     // ---
-    let (stdout, stderr) = common::run_command(vec![
+    let (stdout, stderr) = utils::run_command(vec![
         COMMAND_NAME.to_string(),
         format!("--data-dir={}", name),
         "sync".to_string(),
@@ -67,8 +65,8 @@ fn operation_sync_update() -> Result<()> {
     // ---
     // Act
     // ---
-    common::run_command(command_vec.clone()).unwrap();
-    let (stdout, stderr) = common::run_command(command_vec).unwrap();
+    utils::run_command(command_vec.clone()).unwrap();
+    let (stdout, stderr) = utils::run_command(command_vec).unwrap();
     let is_schemes_dir_empty = fs::read_dir(&expected_schemes_path)?.next().is_none();
 
     // ------

@@ -1,4 +1,4 @@
-pub mod color;
+mod color;
 
 use serde::{Deserialize, Deserializer};
 use std::collections::HashMap;
