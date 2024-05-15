@@ -1,4 +1,4 @@
-name: Tests
+name: CI
 on:
   push:
     branches: [main]
@@ -19,8 +19,7 @@ jobs:
         id: cargo_cache_key
         run: |
           CARGO_CACHE_KEY="${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}"
-          echo "value=$CARGO_CACHE_KEY" >> $GITHUB_ENV
-          echo "::set-output name=value::$CARGO_CACHE_KEY"
+          echo "value=$CARGO_CACHE_KEY" >> $GITHUB_OUTPUT
 
   lint:
     needs: setup-environment
@@ -29,24 +28,10 @@ jobs:
       cache-key: ${{ needs.setup-environment.outputs.cargo_cache_key }}
 
   test:
-    name: Test
     needs: setup-environment
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions-rust-lang/setup-rust-toolchain@v1
-      - uses: actions/cache@v4
-        with:
-          path: |
-            ~/.cargo/registry
-            ~/.cargo/git
-            target
-            ~/.cargo/bin
-          key: ${{ needs.setup-environment.outputs.cargo_cache_key }}
-          id: cache-cargo-test
-
-      - name: Cargo test
-        run: cargo test --release --workspace --all-targets --all-features
+    uses: ./.github/workflows/test.yml
+    with:
+      cache-key: ${{ needs.setup-environment.outputs.cargo_cache_key }}
 
   check-msrv:
     uses: ./.github/workflows/msrv.yml

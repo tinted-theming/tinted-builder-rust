@@ -9,65 +9,39 @@ permissions:
   contents: write
 
 jobs:
-  publish_dryrun:
+  setup-environment:
     runs-on: ubuntu-latest
     outputs:
       cargo_version: ${{ steps.cargo_version.outputs.value }}
+      cargo_cache_key: ${{ steps.cargo_cache_key.outputs.value }}
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 1
           ref: ${{ github.ref }}
+      - uses: actions-rust-lang/setup-rust-toolchain@v1
 
-      - name: Setup Rust toolchain
-        uses: actions-rs/toolchain@v1
-        with:
-          profile: minimal
-          toolchain: stable
-          override: true
+      - name: Set cargo cache key
+        id: cargo_cache_key
+        run: |
+          CARGO_CACHE_KEY="${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}"
+          echo "value=$CARGO_CACHE_KEY" >> $GITHUB_OUTPUT
 
-      - name: Cache Cargo registry
-        uses: actions/cache@v4
+      - uses: actions/cache@v4
         with:
           path: |
             ~/.cargo/registry
             ~/.cargo/git
             target
-          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}-${{ hashFiles('**/rust-toolchain') }}
-
-      - name: Cache Cargo binaries
-        uses: actions/cache@v4
-        with:
-          path: |
             ~/.cargo/bin
-          key: ${{ runner.os }}-cargo-bin-${{ hashFiles('**/Cargo.lock') }}
-
-      - name: Install deps
-        run: |
-          if ! command -v jq &> /dev/null; then
-            if [[ "$RUNNER_OS" == "Linux" ]]; then
-              sudo apt-get update
-              sudo apt-get install -y jq
-            elif [[ "$RUNNER_OS" == "macOS" ]]; then
-              brew install jq
-            fi
-          fi
-          if ! command -v cargo-about &> /dev/null; then
-            cargo install --locked cargo-about
-          fi
-          if ! command -v cargo-deny &> /dev/null; then
-            cargo install --locked cargo-deny
-          fi
-        env:
-          RUNNER_OS: ${{ runner.os }}
+          key: ${{ steps.cargo_cache_key.outputs.value }}
+          id: cache-cargo-release
 
       - name: Get Cargo version
         id: cargo_version
         run: |
           VERSION=$(cargo read-manifest --manifest-path ./tinted-builder-rust/Cargo.toml | jq -r ".version")
-          echo "value=$VERSION" >> $GITHUB_ENV
-          echo "::set-output name=value::$VERSION"
+          echo "value=$VERSION" >> $GITHUB_OUTPUT
 
       - name: Abort if there is a Cargo.toml and git tag mismatch
         run: |
@@ -75,14 +49,40 @@ jobs:
             echo "There is a Cargo.toml version and git tag mismatch." && exit 1;
           fi
 
+  test:
+    needs: setup-environment
+    uses: ./.github/workflows/test.yml
+    with:
+      cache-key: ${{ needs.setup-environment.outputs.cargo_cache_key }}
+
+  publish-dry-run:
+    needs: [setup-environment, test]
+    runs-on: ubuntu-latest
+    env:
+      CARGO_CACHE_KEY: ${{ needs.setup-environment.outputs.cargo_cache_key }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions-rust-lang/setup-rust-toolchain@v1
+      - uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target
+            ~/.cargo/bin
+          key: ${{ env.CARGO_CACHE_KEY }}
+          id: cache-cargo-test
+
       - name: Attempt a publish dryrun
         run: |
-          make cli_publish_dry
+          cargo publish --dry-run -p tinted-builder-rust
 
   release:
-    needs: publish_dryrun
+    needs: [setup-environment, publish-dry-run]
     name: ${{ matrix.target }}
     runs-on: ${{ matrix.os }}
+    env:
+      CARGO_CACHE_KEY: ${{ needs.setup-environment.outputs.cargo_cache_key }}
     strategy:
       fail-fast: false
       matrix:
@@ -130,25 +130,26 @@ jobs:
             echo "EOF" >> $GITHUB_ENV
           fi
 
-      - name: Install Rust
-        uses: actions-rs/toolchain@v1
+      - uses: actions-rust-lang/setup-rust-toolchain@v1
         with:
-          toolchain: stable
-          profile: minimal
-          override: true
           target: ${{ matrix.target }}
 
-      - name: Setup cache
-        uses: Swatinem/rust-cache@v2.7.3
+      - uses: actions/cache@v4
         with:
-          key: ${{ matrix.target }}
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target
+            ~/.cargo/bin
+          key: ${{ env.CARGO_CACHE_KEY }}
+          id: cache-cargo-release
 
       - name: Build binary
         uses: actions-rs/cargo@v1
         with:
           use-cross: ${{ matrix.cross }}
-          command: build --package tinted-builder-rust
-          args: --release --locked --target=${{ matrix.target }} --color=always --verbose
+          command: build
+          args: -p tinted-builder-rust --release --locked --target=${{ matrix.target }} --color=always --verbose
 
       - name: Install cargo-deb
         if: ${{ matrix.deb == true }}
@@ -161,7 +162,7 @@ jobs:
         uses: actions-rs/cargo@v1
         with:
           command: deb
-          args: --no-build --no-strip --output=. --target=${{ matrix.target }}
+          args: -p tinted-builder-rust --no-build --no-strip --output=. --target=${{ matrix.target }}
 
       - name: Package
         shell: bash
