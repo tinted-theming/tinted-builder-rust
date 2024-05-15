@@ -3,6 +3,13 @@
 // compatibility for a time. Everyone should move to using
 // tinted-builder as the rust library.
 
+mod operations {
+    pub mod build;
+}
+mod utils;
+
+pub use crate::operations::build as operation_build;
+
 /// # Add tinted-builder library test since tinted-builder-rust is
 /// exporting the structs
 ///
