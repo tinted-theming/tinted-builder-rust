@@ -7,7 +7,7 @@ const REPO_NAME: &str = env!("CARGO_PKG_NAME");
 const SCHEMES_REPO_NAME: &str = "schemes";
 const SCHEMES_URL: &str = "https://github.com/tinted-theming/schemes";
 
-pub fn git_clone(repo_url: &str, target_dir: &Path) -> Result<()> {
+fn git_clone(repo_url: &str, target_dir: &Path) -> Result<()> {
     if target_dir.exists() {
         return Err(anyhow!(
             "Error cloning {}. Target directory '{}' already exists",
@@ -27,7 +27,7 @@ pub fn git_clone(repo_url: &str, target_dir: &Path) -> Result<()> {
     Ok(())
 }
 
-pub fn git_pull(repo_path: &Path) -> Result<()> {
+fn git_pull(repo_path: &Path) -> Result<()> {
     if !repo_path.is_dir() {
         return Err(anyhow!(
             "Error with git pull. {} is not a directory",
@@ -49,7 +49,7 @@ pub fn git_pull(repo_path: &Path) -> Result<()> {
     }
 }
 
-pub fn git_diff(target_dir: &Path) -> Result<bool> {
+fn git_diff(target_dir: &Path) -> Result<bool> {
     let output = Command::new("git")
         .arg("status")
         .arg("--porcelain")
