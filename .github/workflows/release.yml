@@ -77,7 +77,7 @@ jobs:
 
       - name: Attempt a publish dryrun
         run: |
-          make publish_dry
+          make cli_publish_dry
 
   release:
     needs: publish_dryrun
