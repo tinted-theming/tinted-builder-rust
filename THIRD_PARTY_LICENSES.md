@@ -4,9 +4,8 @@ This page lists the licenses of the projects used in cargo-about.
     
 ## Overview of licenses
 
-- Apache License 2.0 (37)
-- MIT License (4)
-- BSD 3-Clause &quot;New&quot; or &quot;Revised&quot; License (1)
+- Apache License 2.0 (40)
+- MIT License (8)
 - Mozilla Public License 2.0 (1)
 - Unicode License Agreement - Data Files and Software (2016) (1)
 
@@ -1467,6 +1466,9 @@ END OF TERMS AND CONDITIONS
 - [equivalent 1.0.1](https://github.com/cuviper/equivalent)
 - [hashbrown 0.14.3](https://github.com/rust-lang/hashbrown)
 - [indexmap 2.2.5](https://github.com/indexmap-rs/indexmap)
+- [regex-automata 0.4.6](https://github.com/rust-lang/regex/tree/master/regex-automata)
+- [regex-syntax 0.8.3](https://github.com/rust-lang/regex/tree/master/regex-syntax)
+- [regex 1.10.4](https://github.com/rust-lang/regex)
 - [strip-ansi-escapes 0.2.0](https://github.com/luser/strip-ansi-escapes)
 - [unicode-normalization 0.1.23](https://github.com/unicode-rs/unicode-normalization)
 
@@ -1679,7 +1681,7 @@ limitations under the License.
 
 #### Used by
 
-- [tinted-builder 0.1.0](https://github.com/tinted-theming/tinted-builder-rust)
+- [tinted-builder 0.2.0](https://github.com/tinted-theming/tinted-builder-rust)
 - [tinted-builder-rust 0.4.0](https://github.com/tinted-theming/tinted-builder-rust)
 - [ribboncurls 0.1.0](https://github.com/tinted-theming/ribboncurls)
 - [vte_generate_state_changes 0.1.1](https://github.com/jwilm/vte)
@@ -1778,41 +1780,6 @@ according to those terms.
 
 ```
 
-### BSD 3-Clause &quot;New&quot; or &quot;Revised&quot; License
-
-#### Used by
-
-- [unidecode 0.3.0](https://github.com/chowdhurya/rust-unidecode/)
-
-```
-Copyright (c) 2015, Amit Chowdhury
-All rights reserved.
-
-Redistribution and use in source and binary forms, with or without modification,
-are permitted provided that the following conditions are met:
-
- * Redistributions of source code must retain the above copyright notice, this
-   list of conditions and the following disclaimer.
- * Redistributions in binary form must reproduce the above copyright notice,
-   this list of conditions and the following disclaimer in the documentation
-   and/or other materials provided with the distribution.
- * The names of this software&#x27;s contributors may not be used to endorse or
-   promote products derived from this software without specific prior written
-   permission.
-
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS &quot;AS IS&quot; AND
-ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
-WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR
-ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
-(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
-ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
-SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-
-```
-
 ### MIT License
 
 #### Used by
@@ -1882,6 +1849,38 @@ DEALINGS IN THE SOFTWARE.
 
 #### Used by
 
+- [aho-corasick 1.1.3](https://github.com/BurntSushi/aho-corasick)
+- [memchr 2.7.2](https://github.com/BurntSushi/memchr)
+
+```
+The MIT License (MIT)
+
+Copyright (c) 2015 Andrew Gallant
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the &quot;Software&quot;), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED &quot;AS IS&quot;, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+THE SOFTWARE.
+
+```
+
+### MIT License
+
+#### Used by
+
 - [strsim 0.11.0](https://github.com/rapidfuzz/strsim-rs)
 
 ```
@@ -1908,6 +1907,20 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
+
+```
+
+### MIT License
+
+#### Used by
+
+- [aho-corasick 1.1.3](https://github.com/BurntSushi/aho-corasick)
+- [memchr 2.7.2](https://github.com/BurntSushi/memchr)
+
+```
+This project is dual-licensed under the Unlicense and MIT licenses.
+
+You may use this code under the terms of either license.
 
 ```
 
