@@ -1,5 +1,12 @@
 # Changelog
 
+## Unreleased
+
+### Changed
+
+- Disallow "BSD-3-Clause" licensed packages
+- Remove `unidecode` package since it does not have a supported license
+
 ## 0.1.0 - 2024-05-03
 
 ### Added
