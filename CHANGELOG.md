@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.5.0] - 2024-05-16
+
+### Changed
+
+- Use latest `tinted-builder` lib which removes dependency on all 
+  BSD-3-Clause licensed packages
+
 ## [0.4.0] - 2024-05-03
 
 ### Changed
