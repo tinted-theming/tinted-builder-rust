@@ -2,7 +2,7 @@
 
 [![Matrix Chat](https://img.shields.io/matrix/tinted-theming:matrix.org)](https://matrix.to/#/#tinted-theming:matrix.org)
 [![Crates.io](https://img.shields.io/crates/v/tinted-builder-rust.svg)](https://crates.io/crates/tinted-builder-rust)
-[![Tests](https://github.com/tinted-theming/tinted-builder-rust/actions/workflows/ci.yml/badge.svg)](https://github.com/tinted-theming/tinty/actions/workflows/ci.yml)
+[![Tests](https://github.com/tinted-theming/tinted-builder-rust/actions/workflows/ci.yml/badge.svg)](https://github.com/tinted-theming/tinted-builder-rust/actions/workflows/ci.yml)
 
 A builder for [base16] and [base24] templates using the `0.11.0` [builder
 specification].
@@ -93,4 +93,4 @@ Ribboncurls, have a look at [THIRD_PARTY_LICENSES.md].
 [LICENSE]: LICENSE
 [THIRD_PARTY_LICENSES.md]: THIRD_PARTY_LICENSES.md
 [CONTRIBUTING.md]: CONTRIBUTING.md
-[repository releases]: https://github.com/tinted-theming/tinty/releases/latest
+[repository releases]: https://github.com/tinted-theming/tinted-builder-rust/releases/latest
