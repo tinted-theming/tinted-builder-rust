@@ -1681,8 +1681,8 @@ limitations under the License.
 
 #### Used by
 
-- [tinted-builder 0.2.0](https://github.com/tinted-theming/tinted-builder-rust)
-- [tinted-builder-rust 0.5.0](https://github.com/tinted-theming/tinted-builder-rust)
+- [tinted-builder 0.3.0](https://github.com/tinted-theming/tinted-builder-rust)
+- [tinted-builder-rust 0.6.0](https://github.com/tinted-theming/tinted-builder-rust)
 - [ribboncurls 0.2.0](https://github.com/tinted-theming/ribboncurls)
 - [vte_generate_state_changes 0.1.1](https://github.com/jwilm/vte)
 
