@@ -4,7 +4,7 @@ This page lists the licenses of the projects used in cargo-about.
     
 ## Overview of licenses
 
-- Apache License 2.0 (40)
+- Apache License 2.0 (41)
 - MIT License (8)
 - Mozilla Public License 2.0 (1)
 - Unicode License Agreement - Data Files and Software (2016) (1)
@@ -439,8 +439,8 @@ This page lists the licenses of the projects used in cargo-about.
 
 #### Used by
 
-- [clap_builder 4.5.2](https://github.com/clap-rs/clap)
-- [clap_lex 0.7.0](https://github.com/clap-rs/clap/tree/master/clap_lex)
+- [clap_builder 4.5.7](https://github.com/clap-rs/clap)
+- [clap_lex 0.7.1](https://github.com/clap-rs/clap)
 
 ```
                                  Apache License
@@ -651,7 +651,7 @@ This page lists the licenses of the projects used in cargo-about.
 
 #### Used by
 
-- [anstyle-parse 0.2.3](https://github.com/rust-cli/anstyle.git)
+- [anstyle-parse 0.2.4](https://github.com/rust-cli/anstyle.git)
 
 ```
                                  Apache License
@@ -862,11 +862,12 @@ This page lists the licenses of the projects used in cargo-about.
 
 #### Used by
 
-- [anstream 0.6.13](https://github.com/rust-cli/anstyle.git)
-- [anstyle-query 1.0.2](https://github.com/rust-cli/anstyle)
-- [anstyle 1.0.6](https://github.com/rust-cli/anstyle.git)
-- [clap 4.5.2](https://github.com/clap-rs/clap)
-- [colorchoice 1.0.0](https://github.com/rust-cli/anstyle)
+- [anstream 0.6.14](https://github.com/rust-cli/anstyle.git)
+- [anstyle-query 1.1.0](https://github.com/rust-cli/anstyle)
+- [anstyle 1.0.7](https://github.com/rust-cli/anstyle.git)
+- [clap 4.5.7](https://github.com/clap-rs/clap)
+- [colorchoice 1.0.1](https://github.com/rust-cli/anstyle)
+- [is_terminal_polyfill 1.70.0](https://github.com/polyfill-rs/is_terminal_polyfill)
 
 ```
                                  Apache License
@@ -1263,21 +1264,22 @@ TERMS AND CONDITIONS FOR USE, REPRODUCTION, AND DISTRIBUTION
 
 #### Used by
 
-- [anyhow 1.0.80](https://github.com/dtolnay/anyhow)
-- [itoa 1.0.10](https://github.com/dtolnay/itoa)
-- [libc 0.2.153](https://github.com/rust-lang/libc)
-- [proc-macro2 1.0.78](https://github.com/dtolnay/proc-macro2)
-- [quote 1.0.35](https://github.com/dtolnay/quote)
-- [ryu 1.0.17](https://github.com/dtolnay/ryu)
-- [serde 1.0.197](https://github.com/serde-rs/serde)
-- [serde_derive 1.0.197](https://github.com/serde-rs/serde)
-- [serde_yaml 0.9.32](https://github.com/dtolnay/serde-yaml)
-- [syn 2.0.52](https://github.com/dtolnay/syn)
-- [thiserror-impl 1.0.57](https://github.com/dtolnay/thiserror)
-- [thiserror 1.0.57](https://github.com/dtolnay/thiserror)
+- [anyhow 1.0.86](https://github.com/dtolnay/anyhow)
+- [itoa 1.0.11](https://github.com/dtolnay/itoa)
+- [libc 0.2.155](https://github.com/rust-lang/libc)
+- [proc-macro2 1.0.85](https://github.com/dtolnay/proc-macro2)
+- [quote 1.0.36](https://github.com/dtolnay/quote)
+- [ryu 1.0.18](https://github.com/dtolnay/ryu)
+- [serde 1.0.203](https://github.com/serde-rs/serde)
+- [serde_derive 1.0.203](https://github.com/serde-rs/serde)
+- [serde_yaml 0.9.34+deprecated](https://github.com/dtolnay/serde-yaml)
+- [syn 2.0.66](https://github.com/dtolnay/syn)
+- [thiserror-impl 1.0.61](https://github.com/dtolnay/thiserror)
+- [thiserror 1.0.61](https://github.com/dtolnay/thiserror)
 - [unicode-ident 1.0.12](https://github.com/dtolnay/unicode-ident)
-- [utf8parse 0.2.1](https://github.com/alacritty/vte)
+- [utf8parse 0.2.2](https://github.com/alacritty/vte)
 - [vte 0.11.1](https://github.com/alacritty/vte)
+- [vte_generate_state_changes 0.1.2](https://github.com/alacritty/vte)
 
 ```
                               Apache License
@@ -1464,11 +1466,11 @@ END OF TERMS AND CONDITIONS
 #### Used by
 
 - [equivalent 1.0.1](https://github.com/cuviper/equivalent)
-- [hashbrown 0.14.3](https://github.com/rust-lang/hashbrown)
-- [indexmap 2.2.5](https://github.com/indexmap-rs/indexmap)
-- [regex-automata 0.4.6](https://github.com/rust-lang/regex/tree/master/regex-automata)
-- [regex-syntax 0.8.3](https://github.com/rust-lang/regex/tree/master/regex-syntax)
-- [regex 1.10.4](https://github.com/rust-lang/regex)
+- [hashbrown 0.14.5](https://github.com/rust-lang/hashbrown)
+- [indexmap 2.2.6](https://github.com/indexmap-rs/indexmap)
+- [regex-automata 0.4.7](https://github.com/rust-lang/regex/tree/master/regex-automata)
+- [regex-syntax 0.8.4](https://github.com/rust-lang/regex/tree/master/regex-syntax)
+- [regex 1.10.5](https://github.com/rust-lang/regex)
 - [strip-ansi-escapes 0.2.0](https://github.com/luser/strip-ansi-escapes)
 - [unicode-normalization 0.1.23](https://github.com/unicode-rs/unicode-normalization)
 
@@ -1684,7 +1686,6 @@ limitations under the License.
 - [tinted-builder 0.3.0](https://github.com/tinted-theming/tinted-builder-rust)
 - [tinted-builder-rust 0.6.0](https://github.com/tinted-theming/tinted-builder-rust)
 - [ribboncurls 0.2.0](https://github.com/tinted-theming/ribboncurls)
-- [vte_generate_state_changes 0.1.1](https://github.com/jwilm/vte)
 
 ```
 Apache License
@@ -1816,7 +1817,7 @@ SOFTWARE.
 
 #### Used by
 
-- [unsafe-libyaml 0.2.10](https://github.com/dtolnay/unsafe-libyaml)
+- [unsafe-libyaml 0.2.11](https://github.com/dtolnay/unsafe-libyaml)
 
 ```
 Permission is hereby granted, free of charge, to any
@@ -1881,7 +1882,7 @@ THE SOFTWARE.
 
 #### Used by
 
-- [strsim 0.11.0](https://github.com/rapidfuzz/strsim-rs)
+- [strsim 0.11.1](https://github.com/rapidfuzz/strsim-rs)
 
 ```
 The MIT License (MIT)
