@@ -77,6 +77,15 @@ jobs:
         run: |
           cargo publish --dry-run -p tinted-builder-rust
 
+  create-release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: taiki-e/create-gh-release-action@v1
+        with:
+          changelog: CHANGELOG.md
+          token: ${{ secrets.GITHUB_TOKEN }}
+
   release:
     needs: [setup-environment, publish-dry-run]
     name: ${{ matrix.target }}
@@ -112,98 +121,11 @@ jobs:
             deb: false
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+      - uses: taiki-e/upload-rust-binary-action@v1
         with:
-          fetch-depth: 1
-          ref: ${{ github.ref }}
-
-      # Fetch notes from CHANGELOG.md based on cargo.toml version
-      - name: Extract release notes
-        id: extract_notes
-        run: |
-          VERSION="${{ steps.cargo_version.outputs.value }}"
-          CHANGELOG_TEXT=$(sed -n "/## \[$VERSION\] /,/^## /p" "CHANGELOG.md" | sed '1d;$d')
-          if [[ -n "$CHANGELOG_TEXT" ]]; then
-            echo "CHANGELOG_TEXT<<EOF" >> $GITHUB_ENV
-            echo "$CHANGELOG_TEXT" >> $GITHUB_ENV
-            echo "EOF" >> $GITHUB_ENV
-          fi
-
-      - uses: actions-rust-lang/setup-rust-toolchain@v1
-        with:
+          bin: tinted-builder-rust
           target: ${{ matrix.target }}
-
-      - uses: actions/cache@v4
-        with:
-          path: |
-            ~/.cargo/registry
-            ~/.cargo/git
-            target
-            ~/.cargo/bin
-          key: ${{ env.CARGO_CACHE_KEY }}
-          id: cache-cargo-release
-
-      - name: Build binary
-        uses: actions-rs/cargo@v1
-        with:
-          use-cross: ${{ matrix.cross }}
-          command: build
-          args: -p tinted-builder-rust --release --locked --target=${{ matrix.target }} --color=always --verbose
-
-      - name: Install cargo-deb
-        if: ${{ matrix.deb == true }}
-        uses: actions-rs/install@v0.1
-        with:
-          crate: cargo-deb
-
-      - name: Build deb
-        if: ${{ matrix.deb == true }}
-        uses: actions-rs/cargo@v1
-        with:
-          command: deb
-          args: -p tinted-builder-rust --no-build --no-strip --output=. --target=${{ matrix.target }}
-
-      - name: Package
-        shell: bash
-        run: |
-          files="THIRD_PARTY_LICENSES.md LICENSE README.md"
-          $GITHUB_WORKSPACE/scripts/package_build \
-            "THIRD_PARTY_LICENSES.md LICENSE README.md" \
-            "${{ matrix.target }}" \
-            "$GITHUB_WORKSPACE" \
-            "${{ steps.cargo_version.outputs.value }}"
-
-      - name: Upload artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: ${{ matrix.target }}
-          path: |
-            *.deb
-            *.tar.gz
-            *.sha256
-
-      - name: Create release
-        uses: softprops/action-gh-release@v1
-        with:
-          files: |
-            build/*.deb
-            build/*.tar.gz
-            build/*.sha256
-          tag_name: ${{ github.ref_name }}
-          name: Release ${{ steps.cargo_version.outputs.value }}
-          draft: true
-          body: ${{ env.CHANGELOG_TEXT }}
-
-      - name: Cleanup
-        run: rm -r build/
-
-  publish:
-    needs: release
-    runs-on: ubuntu-latest
-    steps:
-      - name: Publish to crates.io
-        if: github.ref == 'refs/heads/main'
-        env:
-          CARGO_REGISTRY_TOKEN: ${{ secrets.CRATES_IO_TOKEN }}
-        run: cargo publish
+          tar: unix
+          zip: windows
+          token: ${{ secrets.GITHUB_TOKEN }}
