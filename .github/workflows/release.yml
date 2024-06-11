@@ -2,7 +2,7 @@ name: Release
 on:
   push:
     tags:
-      - "v*.*.*"
+      - "v[0-9]+\\.[0-9]+\\.[0-9]+"
 env:
   CARGO_INCREMENTAL: 0
 permissions:
@@ -49,35 +49,23 @@ jobs:
             echo "There is a Cargo.toml version and git tag mismatch." && exit 1;
           fi
 
+  lint:
+    needs: setup-environment
+    uses: ./.github/workflows/lint.yml
+    with:
+      cache-key: ${{ needs.setup-environment.outputs.cargo_cache_key }}
+
+  check-msrv:
+    uses: ./.github/workflows/msrv.yml
+
   test:
     needs: setup-environment
     uses: ./.github/workflows/test.yml
     with:
       cache-key: ${{ needs.setup-environment.outputs.cargo_cache_key }}
 
-  publish-dry-run:
-    needs: [setup-environment, test]
-    runs-on: ubuntu-latest
-    env:
-      CARGO_CACHE_KEY: ${{ needs.setup-environment.outputs.cargo_cache_key }}
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions-rust-lang/setup-rust-toolchain@v1
-      - uses: actions/cache@v4
-        with:
-          path: |
-            ~/.cargo/registry
-            ~/.cargo/git
-            target
-            ~/.cargo/bin
-          key: ${{ env.CARGO_CACHE_KEY }}
-          id: cache-cargo-test
-
-      - name: Attempt a publish dryrun
-        run: |
-          cargo publish --dry-run -p tinted-builder-rust
-
   create-release:
+    needs: [check-msrv, lint, test]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -87,45 +75,28 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
 
   release:
-    needs: [setup-environment, publish-dry-run]
+    needs: create-release
     name: ${{ matrix.target }}
     runs-on: ${{ matrix.os }}
-    env:
-      CARGO_CACHE_KEY: ${{ needs.setup-environment.outputs.cargo_cache_key }}
     strategy:
-      fail-fast: false
       matrix:
         include:
-          - prefix: x86_64-linux
-            target: x86_64-unknown-linux-gnu
+          - target: x86_64-unknown-linux-gnu
             os: ubuntu-latest
-            cross: false
-            deb: false
-          - prefix: i686-linux
-            target: i686-unknown-linux-gnu
+          - target: i686-unknown-linux-gnu
             os: ubuntu-latest
-            cross: true
-            deb: true
-          - prefix: aarch64-linux
-            target: aarch64-unknown-linux-gnu
+          - target: aarch64-unknown-linux-gnu
             os: ubuntu-latest
-            cross: true
-            deb: true
           - os: macos-11
             target: x86_64-apple-darwin
-            cross: true
-            deb: false
           - os: macos-11
             target: aarch64-apple-darwin
-            cross: true
-            deb: false
-
     steps:
       - uses: actions/checkout@v4
       - uses: taiki-e/upload-rust-binary-action@v1
         with:
           bin: tinted-builder-rust
+          manifest-path: tinted-builder-rust/Cargo.toml
           target: ${{ matrix.target }}
-          tar: unix
-          zip: windows
           token: ${{ secrets.GITHUB_TOKEN }}
+          checksum: sha256
