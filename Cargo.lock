@@ -283,11 +283,12 @@ checksum = "adad44e29e4c806119491a7f06f03de4d1af22c3a680dd47f1e6e179439d1f56"
 
 [[package]]
 name = "ribboncurls"
-version = "0.1.0"
+version = "0.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b5a6138f1d7abcd2203e9761e1f03ee4b65c3fcb0034e5f0564d739826f407ad"
+checksum = "12e393c8f112899b15eb61ccb37d5b34d349cb92ae888130cf8afef6a8a3530c"
 dependencies = [
  "html-escape",
+ "regex",
  "serde",
  "serde_yaml",
  "thiserror",
@@ -380,7 +381,7 @@ dependencies = [
 
 [[package]]
 name = "tinted-builder"
-version = "0.2.0"
+version = "0.3.0"
 dependencies = [
  "anyhow",
  "clap",
