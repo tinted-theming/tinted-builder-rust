@@ -1,6 +1,12 @@
 # Changelog
 
-## Unreleased
+## 0.3.0 - 2024-06-11
+
+## Changed
+
+- Updated to latest Ribboncurls
+
+## 0.2.0 - 2024-05-16
 
 ### Changed
 
