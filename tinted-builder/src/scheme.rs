@@ -2,7 +2,7 @@ mod color;
 
 use regex::Regex;
 use serde::{Deserialize, Deserializer};
-use std::collections::HashMap;
+use std::{collections::HashMap, fmt};
 
 use crate::constants::{REQUIRED_BASE16_PALETTE_KEYS, REQUIRED_BASE24_PALETTE_KEYS};
 
@@ -28,6 +28,33 @@ pub struct Scheme {
     pub description: Option<String>,
     pub variant: String,
     pub palette: HashMap<String, Color>,
+}
+
+impl fmt::Display for Scheme {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        writeln!(f, "author: {}", self.author)?;
+        if let Some(ref desc) = self.description {
+            writeln!(f, "description: {}", desc)?;
+        }
+        writeln!(f, "name: {}", self.name)?;
+        writeln!(f, "slug: {}", self.slug)?;
+        writeln!(f, "system: {}", self.system)?;
+        writeln!(f, "variant: {}", self.variant)?;
+        writeln!(f, "palette:")?;
+
+        let mut palette_vec: Vec<(String, Color)> = self
+            .palette
+            .clone()
+            .iter()
+            .map(|(k, v)| (k.to_string(), v.clone()))
+            .collect();
+        palette_vec.sort_by_key(|k| k.0.clone());
+
+        for (key, value) in palette_vec {
+            writeln!(f, "  {}: {}", key, value)?;
+        }
+        Ok(())
+    }
 }
 
 pub(crate) fn slugify(input: &str) -> String {

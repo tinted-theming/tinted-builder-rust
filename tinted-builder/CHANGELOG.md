@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.4.1 - 2024-06-15
+
+## Fixed
+
+- Implement `Display` trait for `Scheme` and `Color`
+  `Scheme` themselves.
+
 ## 0.4.0 - 2024-06-15
 
 ## Added
