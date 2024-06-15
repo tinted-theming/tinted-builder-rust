@@ -10,8 +10,7 @@ pub struct Template {
     content: String,
 }
 
-#[allow(dead_code)]
-pub fn write_to_file(path: &Path, contents: &str) -> Result<()> {
+pub(crate) fn write_to_file(path: &Path, contents: &str) -> Result<()> {
     if path.exists() {
         remove_file(path).with_context(|| format!("Unable to remove file: {}", path.display()))?;
     }

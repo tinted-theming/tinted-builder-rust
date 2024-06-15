@@ -1,7 +1,7 @@
 mod cli;
 mod operations {
-    pub mod build;
-    pub mod sync;
+    pub(crate) mod build;
+    pub(crate) mod sync;
 }
 mod utils;
 
@@ -12,7 +12,7 @@ use crate::cli::get_matches;
 
 const REPO_NAME: &str = env!("CARGO_PKG_NAME");
 
-pub fn replace_tilde_slash_with_home(path_str: &str) -> Result<PathBuf> {
+pub(crate) fn replace_tilde_slash_with_home(path_str: &str) -> Result<PathBuf> {
     let trimmed_path_str = path_str.trim();
     if trimmed_path_str.starts_with("~/") {
         match dirs::home_dir() {

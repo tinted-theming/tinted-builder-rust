@@ -66,7 +66,7 @@ fn git_diff(target_dir: &Path) -> Result<bool> {
 }
 
 /// Sync schemes repo; Install if it does not exist, otherwise update
-pub fn sync(schemes_path: &Path) -> Result<()> {
+pub(crate) fn sync(schemes_path: &Path) -> Result<()> {
     if schemes_path.is_dir() {
         let is_diff = git_diff(schemes_path)?;
 

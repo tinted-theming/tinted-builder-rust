@@ -38,7 +38,7 @@ fn build_cli() -> Command {
         )
 }
 
-pub fn get_matches() -> ArgMatches {
+pub(crate) fn get_matches() -> ArgMatches {
     let styles = styling::Styles::styled()
         .header(styling::AnsiColor::Green.on_default() | styling::Effects::BOLD)
         .usage(styling::AnsiColor::Green.on_default() | styling::Effects::BOLD)

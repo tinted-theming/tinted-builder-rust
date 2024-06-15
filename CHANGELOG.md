@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Changed
+
+- Use latest `tinted-builder` crate
+
 ## [0.6.0] - 2024-06-11
 
 ### Changed

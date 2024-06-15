@@ -5,17 +5,18 @@ use serde::{Deserialize, Deserializer};
 use std::collections::HashMap;
 
 use crate::constants::{REQUIRED_BASE16_PALETTE_KEYS, REQUIRED_BASE24_PALETTE_KEYS};
-use crate::scheme::color::Color;
+
+pub use crate::scheme::color::Color;
 
 #[derive(Deserialize)]
 pub struct SchemeWrapper {
-    pub system: String,
-    pub name: String,
-    pub slug: Option<String>,
-    pub author: String,
-    pub description: Option<String>,
-    pub variant: Option<String>,
-    pub palette: HashMap<String, String>,
+    pub(crate) system: String,
+    pub(crate) name: String,
+    pub(crate) slug: Option<String>,
+    pub(crate) author: String,
+    pub(crate) description: Option<String>,
+    pub(crate) variant: Option<String>,
+    pub(crate) palette: HashMap<String, String>,
 }
 
 #[derive(Debug)]
@@ -29,7 +30,7 @@ pub struct Scheme {
     pub palette: HashMap<String, Color>,
 }
 
-pub fn slugify(input: &str) -> String {
+pub(crate) fn slugify(input: &str) -> String {
     let char_map: HashMap<char, &str> = [
         ('á', "a"),
         ('à', "a"),

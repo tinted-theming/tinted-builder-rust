@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.4.0 - 2024-06-15
+
+## Added
+
+- Add `Color` struct to public exports to allow users to construct a
+  `Scheme` themselves.
+
 ## 0.3.0 - 2024-06-11
 
 ## Changed
