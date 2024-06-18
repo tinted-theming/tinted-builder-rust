@@ -1,14 +1,14 @@
 mod color;
 
 use regex::Regex;
-use serde::{Deserialize, Deserializer};
+use serde::{Deserialize, Deserializer, Serialize};
 use std::{collections::HashMap, fmt};
 
 use crate::constants::{REQUIRED_BASE16_PALETTE_KEYS, REQUIRED_BASE24_PALETTE_KEYS};
 
 pub use crate::scheme::color::Color;
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Serialize)]
 pub struct SchemeWrapper {
     pub(crate) system: String,
     pub(crate) name: String,
@@ -19,7 +19,7 @@ pub struct SchemeWrapper {
     pub(crate) palette: HashMap<String, String>,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Serialize)]
 pub struct Scheme {
     pub system: String,
     pub name: String,

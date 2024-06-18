@@ -1,8 +1,9 @@
+use serde::{Deserialize, Serialize};
 use std::fmt;
 
 use anyhow::{Context, Result};
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct Color {
     pub hex: (String, String, String),
     pub rgb: (u8, u8, u8),
