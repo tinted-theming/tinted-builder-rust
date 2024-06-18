@@ -1,7 +1,8 @@
 mod color;
 
 use regex::Regex;
-use serde::{Deserialize, Deserializer, Serialize};
+use serde::ser::{SerializeMap, SerializeStruct};
+use serde::{Deserialize, Deserializer, Serialize, Serializer};
 use std::{collections::HashMap, fmt};
 
 use crate::constants::{REQUIRED_BASE16_PALETTE_KEYS, REQUIRED_BASE24_PALETTE_KEYS};
@@ -19,7 +20,7 @@ pub struct SchemeWrapper {
     pub(crate) palette: HashMap<String, String>,
 }
 
-#[derive(Debug, Serialize)]
+#[derive(Debug, Clone)]
 pub struct Scheme {
     pub system: String,
     pub name: String,
@@ -188,5 +189,45 @@ impl<'de> Deserialize<'de> for Scheme {
             variant,
             palette: palette_result?,
         })
+    }
+}
+
+impl Serialize for Scheme {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let mut state = serializer.serialize_struct("Scheme", 7)?;
+        state.serialize_field("system", &self.system)?;
+        state.serialize_field("name", &self.name)?;
+        state.serialize_field("slug", &self.slug)?;
+        state.serialize_field("author", &self.author)?;
+        state.serialize_field("description", &self.description)?;
+        state.serialize_field("variant", &self.variant)?;
+
+        // Collect and sort the palette by key
+        let mut sorted_palette: Vec<(&String, &Color)> = self.palette.iter().collect();
+        sorted_palette.sort_by(|a, b| a.0.cmp(b.0));
+
+        // Serialize the sorted palette as a map within the struct
+        state.serialize_field("palette", &SortedPalette(sorted_palette))?;
+
+        state.end()
+    }
+}
+
+// Helper struct for serializing sorted palette
+struct SortedPalette<'a>(Vec<(&'a String, &'a Color)>);
+
+impl<'a> Serialize for SortedPalette<'a> {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let mut map = serializer.serialize_map(Some(self.0.len()))?;
+        for (key, value) in &self.0 {
+            map.serialize_entry(key, &value.to_hex())?;
+        }
+        map.end()
     }
 }
