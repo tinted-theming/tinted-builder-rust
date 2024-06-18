@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.4.3 - 2024-06-18
+
+## Fixed
+
+- Fix `Scheme` serialize bug
+
 ## 0.4.2 - 2024-06-18
 
 ## Fixed
