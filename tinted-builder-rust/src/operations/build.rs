@@ -15,34 +15,6 @@ fn match_scheme_file_extension(extension: &str) -> bool {
     extension == "yaml" || extension == "yml"
 }
 
-// Output dir may only contain extensions registered in the config.yaml
-fn is_output_dir_as_expected(path: &Path, extensions: Vec<String>) -> Result<bool> {
-    let entries = fs::read_dir(path)?;
-    for entry in entries {
-        let entry = entry?;
-        if entry.metadata()?.is_dir() {
-            return Ok(false);
-        }
-
-        if let Some(ext) = entry.path().extension() {
-            for extension in &extensions {
-                match ext.to_str() {
-                    Some(ext) => {
-                        if ext != extension {
-                            return Ok(false);
-                        }
-                    }
-                    _ => {
-                        return Ok(false);
-                    }
-                }
-            }
-        }
-    }
-
-    Ok(true)
-}
-
 // Allow for the use of `.yaml` and `.yml` extensions
 fn get_theme_template_path(theme_template_path: &Path) -> Result<PathBuf> {
     if theme_template_path.join("templates/config.yml").is_file() {
@@ -98,7 +70,7 @@ struct TemplateConfig {
 }
 
 /// Build theme template using provided schemes
-pub fn build(theme_template_path: &Path, user_schemes_path: &Path) -> Result<()> {
+pub fn build(theme_template_path: &Path, user_schemes_path: &Path, is_quiet: bool) -> Result<()> {
     if !user_schemes_path.exists() {
         return Err(anyhow!(
             "Schemes don't exist locally. First run `{} sync` and try again",
@@ -117,12 +89,6 @@ pub fn build(theme_template_path: &Path, user_schemes_path: &Path) -> Result<()>
     let template_config_content = read_to_string(template_config_path)?;
     let template_config: HashMap<String, TemplateConfig> =
         serde_yaml::from_str(&template_config_content)?;
-    let extensions: Vec<String> = template_config
-        .iter()
-        .filter_map(|(_, TemplateConfig { extension, .. })| {
-            extension.strip_prefix('.').map(|s| s.to_string())
-        })
-        .collect();
 
     for (key, value) in template_config.iter() {
         let extension = value
@@ -141,20 +107,16 @@ pub fn build(theme_template_path: &Path, user_schemes_path: &Path) -> Result<()>
             .unwrap_or(vec![DEFAULT_SYSTEM.to_string()]);
         let template = Template::new(template_content)?;
         let output_str = &value.output;
-        let output_path = theme_template_path.join(output_str);
+        let output_path = if output_str.is_empty() {
+            PathBuf::from(theme_template_path)
+        } else {
+            theme_template_path.join(output_str)
+        };
 
         if output_str.starts_with('/') {
             return Err(anyhow!(
                 "`output` value in config.yaml only accepts relative paths: {}",
                 output_str
-            ));
-        }
-
-        if output_path.exists() && !is_output_dir_as_expected(&output_path, extensions.clone())? {
-            let abs_path = output_path.canonicalize()?;
-
-            return Err(anyhow!(
-                "Output directory contains directories or non-theme files.\nManually remove the directory and try again: {}", abs_path.display()
             ));
         }
 
@@ -190,14 +152,16 @@ pub fn build(theme_template_path: &Path, user_schemes_path: &Path) -> Result<()>
                 )?;
             }
 
-            println!(
-                "{} themes generated for \"{}\" at \"{}/{}-*.{}\"",
-                system,
-                key,
-                output_path.display(),
-                system,
-                extension,
-            );
+            if !is_quiet {
+                println!(
+                    "{} themes generated for \"{}\" at \"{}/{}-*.{}\"",
+                    system,
+                    key,
+                    output_path.display(),
+                    system,
+                    extension,
+                );
+            }
         }
     }
 

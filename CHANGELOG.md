@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.7.0] - 2024-06-22
+
+### Added
+
+- Add `--quiet` flag for the `build` subcommand to silence stdout
+
+### Changed
+
+- Remove requirement that all output dir files need the same extension
+
 ## [0.6.1] - 2024-06-22
 
 ### Changed
@@ -83,6 +93,7 @@
 - `sync` subcommand support to sync with latest Tinted Theming schemes
 - `build` subcommand to trigger theme template build
 
+[0.7.0]: https://github.com/tinted-theming/tinted-builder-rust/compare/v0.6.1...v0.7.0
 [0.6.1]: https://github.com/tinted-theming/tinted-builder-rust/compare/v0.6.0...v0.6.1
 [0.6.0]: https://github.com/tinted-theming/tinted-builder-rust/compare/v0.5.0...v0.6.0
 [0.5.0]: https://github.com/tinted-theming/tinted-builder-rust/compare/v0.4.0...v0.5.0

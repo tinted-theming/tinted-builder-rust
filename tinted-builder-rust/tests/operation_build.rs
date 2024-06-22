@@ -32,6 +32,72 @@ fn setup(system: &str, scheme_name: &str) -> Result<(String, String, String, Str
 
 /// Tests schemes/*.yaml generation with base16 system
 #[test]
+fn test_operation_build_quiet_flag() -> Result<()> {
+    // -------
+    // Arrange
+    // -------
+    let scheme_name = "silk-light";
+    let system = "base16";
+    let name = "operation_build_quiet_flag";
+    let template_theme_path = PathBuf::from(format!("./template-{}", name));
+    let template_templates_path = template_theme_path.join("templates");
+    let template_config_path = template_templates_path.join("config.yaml");
+    let template_mustache_path = template_templates_path.join("base16-template.mustache");
+    let schemes_path = template_theme_path.join("schemes");
+    let scheme_file_path = schemes_path.join(format!("{}.yaml", &scheme_name));
+    let themes_path = template_theme_path.join("output-themes");
+    let rendered_theme_path = themes_path.join(format!("base16-{}.md", &scheme_name));
+    let (
+        config_file_content,
+        scheme_file_content,
+        template_file_content,
+        template_rendered_content_fixture,
+    ) = setup(system, scheme_name)?;
+
+    if themes_path.is_dir() {
+        fs::remove_dir_all(&themes_path)?;
+    }
+    if template_theme_path.is_dir() {
+        fs::remove_dir_all(&template_theme_path)?;
+    }
+    fs::create_dir(&template_theme_path)?;
+    fs::create_dir(&schemes_path)?;
+    fs::create_dir(&template_templates_path)?;
+    write_to_file(&scheme_file_path, &scheme_file_content)?;
+    write_to_file(&template_config_path, &config_file_content)?;
+    write_to_file(&template_mustache_path, &template_file_content)?;
+
+    // ---
+    // Act
+    // ---
+    let (stdout, stderr) = utils::run_command(vec![
+        COMMAND_NAME.to_string(),
+        format!("--schemes-dir={}", schemes_path.display()),
+        "build".to_string(),
+        template_theme_path.display().to_string(),
+        "--quiet".to_string(),
+    ])
+    .unwrap();
+    let rendered_content = fs::read_to_string(rendered_theme_path)?;
+
+    // ------
+    // Assert
+    // ------
+    assert_eq!(rendered_content, template_rendered_content_fixture);
+    assert!(
+        stderr.is_empty(),
+        "stderr does not contain the expected output"
+    );
+    assert!(
+        stdout.is_empty(),
+        "stdout does not contain the exptected output"
+    );
+
+    Ok(())
+}
+
+/// Tests schemes/*.yaml generation with base16 system
+#[test]
 fn test_operation_build_base16() -> Result<()> {
     // -------
     // Arrange

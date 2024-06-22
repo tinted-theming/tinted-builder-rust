@@ -54,10 +54,13 @@ fn main() -> Result<()> {
 
     match matches.subcommand() {
         Some(("build", sub_matches)) => {
-            if let Some(template_dir) = sub_matches.get_one::<String>("template-dir") {
+            if let (Some(template_dir), Some(is_quiet)) = (
+                sub_matches.get_one::<String>("template-dir"),
+                sub_matches.get_one::<bool>("quiet"),
+            ) {
                 let template_path = PathBuf::from(template_dir);
 
-                operations::build::build(&template_path, &schemes_path)?;
+                operations::build::build(&template_path, &schemes_path, *is_quiet)?;
             }
         }
         Some(("sync", _)) => {

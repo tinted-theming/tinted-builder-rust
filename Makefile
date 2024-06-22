@@ -22,6 +22,11 @@ cli_publish_dry: cli_test
 	@echo "----------------------"
 	cargo publish --dry-run --package tinted-builder-rust
 
+test: lib_test cli_test
+	@echo "-------------"
+	@echo "Running tests"
+	@echo "-------------"
+
 lib_test: lib_build
 	@echo "-----------------"
 	@echo "Running lib tests"

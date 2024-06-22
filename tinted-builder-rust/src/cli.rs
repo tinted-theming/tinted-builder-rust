@@ -30,6 +30,13 @@ fn build_cli() -> Command {
                     Arg::new("template-dir")
                         .help("Local path to the theme template you want to build")
                         .required(true),
+                )
+                .arg(
+                    Arg::new("quiet")
+                        .long("quiet")
+                        .short('q')
+                        .help("Silence stdout")
+                        .action(ArgAction::SetTrue),
                 ),
         )
         .subcommand(
