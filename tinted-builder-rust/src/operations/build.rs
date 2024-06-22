@@ -15,7 +15,8 @@ fn match_scheme_file_extension(extension: &str) -> bool {
     extension == "yaml" || extension == "yml"
 }
 
-fn is_output_dir_as_expected(path: &Path, extension: &str) -> Result<bool> {
+// Output dir may only contain extensions registered in the config.yaml
+fn is_output_dir_as_expected(path: &Path, extensions: Vec<String>) -> Result<bool> {
     let entries = fs::read_dir(path)?;
     for entry in entries {
         let entry = entry?;
@@ -23,8 +24,19 @@ fn is_output_dir_as_expected(path: &Path, extension: &str) -> Result<bool> {
             return Ok(false);
         }
 
-        if entry.path().ends_with(extension) {
-            return Ok(false);
+        if let Some(ext) = entry.path().extension() {
+            for extension in &extensions {
+                match ext.to_str() {
+                    Some(ext) => {
+                        if ext != extension {
+                            return Ok(false);
+                        }
+                    }
+                    _ => {
+                        return Ok(false);
+                    }
+                }
+            }
         }
     }
 
@@ -105,6 +117,12 @@ pub fn build(theme_template_path: &Path, user_schemes_path: &Path) -> Result<()>
     let template_config_content = read_to_string(template_config_path)?;
     let template_config: HashMap<String, TemplateConfig> =
         serde_yaml::from_str(&template_config_content)?;
+    let extensions: Vec<String> = template_config
+        .iter()
+        .filter_map(|(_, TemplateConfig { extension, .. })| {
+            extension.strip_prefix('.').map(|s| s.to_string())
+        })
+        .collect();
 
     for (key, value) in template_config.iter() {
         let extension = value
@@ -132,7 +150,7 @@ pub fn build(theme_template_path: &Path, user_schemes_path: &Path) -> Result<()>
             ));
         }
 
-        if output_path.exists() && !is_output_dir_as_expected(&output_path, extension)? {
+        if output_path.exists() && !is_output_dir_as_expected(&output_path, extensions.clone())? {
             let abs_path = output_path.canonicalize()?;
 
             return Err(anyhow!(

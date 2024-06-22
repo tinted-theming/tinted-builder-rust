@@ -6,6 +6,11 @@
 
 - Use latest `tinted-builder` crate
 
+### Fixed
+
+- Allow output directories to contain any extension registered in the
+  template config.yaml
+
 ## [0.6.0] - 2024-06-11
 
 ### Changed
