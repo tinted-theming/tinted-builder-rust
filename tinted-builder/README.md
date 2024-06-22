@@ -24,11 +24,10 @@ cargo add tinted-builder
 ```rust
 use tinted_builder::{Scheme, Template};
 
-fn main() {
-  let template = String::from(r#"/* Some CSS file with {{scheme-name}} theme */
+let template = String::from(r#"/* Some CSS file with {{scheme-name}} theme */
 .someCssSelector { background-color: #{{base00-hex}} }
 .someOtherCssSelector { background-color: #{{base0F-hex}} }"#);
-  let scheme_str = r#"system: "base16"
+let scheme_str = r#"system: "base16"
 name: "UwUnicorn"
 author: "Fernando Marques (https://github.com/RakkiUwU) and Gabriel Fontes (https://github.com/Misterio77)"
 variant: "dark"
@@ -49,16 +48,15 @@ palette:
   base0D: "6a9eb5"
   base0E: "78a38f"
   base0F: "a3a079""#;
-  let template = Template::new(template).unwrap();
-  let scheme: Scheme = serde_yaml::from_str(&scheme_str).unwrap();
-  let output = template
-    .render(&scheme)
-    .unwrap();
+let template = Template::new(template).unwrap();
+let scheme: Scheme = serde_yaml::from_str(&scheme_str).unwrap();
+let output = template
+  .render(&scheme)
+  .unwrap();
 
-    assert_eq!(output, r#"/* Some CSS file with UwUnicorn theme */
+  assert_eq!(output, r#"/* Some CSS file with UwUnicorn theme */
 .someCssSelector { background-color: #241b26 }
 .someOtherCssSelector { background-color: #a3a079 }"#);
-}
 ```
 
 The Scheme struct is as follows:
