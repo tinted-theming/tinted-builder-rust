@@ -1,7 +1,7 @@
 [package]
 name = "tinted-builder"
 description = "A Tinted Theming template builder which uses yaml color schemes to generate theme files."
-version = "0.4.3"
+version = "0.4.4"
 edition = "2021"
 license = "MIT OR Apache-2.0"
 readme = "README.md"
@@ -17,7 +17,7 @@ anyhow = "1.0.80"
 clap = "4.5.2"
 dirs = "5.0.1"
 regex = "1.10.4"
-ribboncurls = "0.2.0"
+ribboncurls = "0.2.1"
 serde = { version = "1.0.197", features = ["derive"] }
 serde_yaml = "0.9.32"
 unicode-normalization = "0.1.23"

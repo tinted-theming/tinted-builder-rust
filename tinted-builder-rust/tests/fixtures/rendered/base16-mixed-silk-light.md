@@ -4,8 +4,8 @@ variant: light
 slug: silk-light
 slug_underscored: silk_light
 description: 
-author: Gabriel Fontes (https://github.com/Misterio77)
-author-escaped: Gabriel Fontes (https://github.com/Misterio77)
+author: Gabriel Fontes ('https://github.com/Misterio77')
+author-escaped: Gabriel Fontes (&#39;https://github.com/Misterio77&#39;)
 is light: true
 is dark: false
 

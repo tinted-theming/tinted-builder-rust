@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.4.4 - 2024-06-22
+
+## Fixed
+
+- Fix bug where single quote is not escaped when rendering escaped
+  variables
+
 ## 0.4.3 - 2024-06-18
 
 ## Fixed
