@@ -103,3 +103,5 @@ jobs:
 
   build-docker-image:
     uses: ./.github/workflows/push-ghcr-image.yml
+    secrets:
+      DOCKER_GHCR: ${{ secrets.DOCKER_GHCR }}

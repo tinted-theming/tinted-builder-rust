@@ -1,6 +1,10 @@
 name: Build and push latest GHCR Docker image
 on:
   workflow_call:
+    secrets:
+      DOCKER_GHCR:
+        description: Docker GHCR token
+        required: true
 
 jobs:
   push-image:
@@ -9,19 +13,11 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.DOCKER_GHCR }}
 
       - name: Fetch all tags
         run: git fetch --tags
-
-      - name: Get latest tag
-        id: get-latest-tag
-        run: |
-          LATEST_TAG=$(git tag --list 'v[0-9]*.[0-9]*.[0-9]*' | sort -V | tail -n 1)
-          echo "LATEST_TAG=${LATEST_TAG}" >> $GITHUB_ENV
-          echo "Latest tag: ${LATEST_TAG}"
-
-      - name: Verify LATEST_TAG
-        run: echo "LATEST_TAG is ${{ env.LATEST_TAG }}"
 
       - name: Build Docker image
         run: docker build -t tinted-builder-rust .
@@ -46,6 +42,6 @@ jobs:
 
       - name: Add 'latest' tag to LATEST_TAG commit
         run: |
-          LATEST_TAG_COMMIT=$(git rev-list -n 1 ${{ env.LATEST_TAG }})
+          LATEST_TAG_COMMIT=$(git rev-list -n 1 ${{ github.ref_name }})
           git tag latest ${LATEST_TAG_COMMIT}
           git push origin latest
