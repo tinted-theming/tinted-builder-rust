@@ -96,6 +96,56 @@ fn test_operation_build_quiet_flag() -> Result<()> {
     Ok(())
 }
 
+#[test]
+fn test_operation_build_with_sync() -> Result<()> {
+    // -------
+    // Arrange
+    // -------
+    let name = "test_operation_build_with_sync";
+    let template_theme_path = PathBuf::from(format!("./template-{}", name));
+    let name = "test_operation_sync_first_time";
+    let expected_output = "schemes installed";
+    let expected_schemes_path = PathBuf::from(format!("./{}/schemes", name));
+    println!("expect: {:?}", expected_schemes_path);
+    let expected_data_path = PathBuf::from(name);
+    let expected_git_clone_str = format!("Cloning into '{}/schemes'", name);
+    if expected_data_path.exists() {
+        fs::remove_dir_all(&expected_data_path)?;
+        fs::create_dir(expected_data_path)?;
+    }
+
+    // ---
+    // Act
+    // ---
+    // Build act
+    let (stdout, stderr) = utils::run_command(vec![
+        COMMAND_NAME.to_string(),
+        format!("--data-dir={}", name),
+        "build".to_string(),
+        template_theme_path.display().to_string(),
+        "--sync".to_string(),
+    ])
+    .unwrap();
+
+    // Sync act
+    let is_schemes_dir_empty = fs::read_dir(&expected_schemes_path)?.next().is_none();
+
+    // ------
+    // Assert
+    // ------
+    assert!(
+        stdout.contains(expected_output),
+        "stdout does not contain the expected output"
+    );
+    assert!(
+        stderr.contains(&expected_git_clone_str),
+        "stderr does not contain the expected output"
+    );
+    assert!(expected_schemes_path.exists() && !is_schemes_dir_empty,);
+
+    Ok(())
+}
+
 /// Tests schemes/*.yaml generation with base16 system
 #[test]
 fn test_operation_build_base16() -> Result<()> {

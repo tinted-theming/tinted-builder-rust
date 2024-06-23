@@ -37,6 +37,12 @@ fn build_cli() -> Command {
                         .short('q')
                         .help("Silence stdout")
                         .action(ArgAction::SetTrue),
+                )
+                .arg(
+                    Arg::new("sync")
+                        .long("sync")
+                        .help("Sync with latest schemes before build")
+                        .action(ArgAction::SetTrue),
                 ),
         )
         .subcommand(

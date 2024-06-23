@@ -61,8 +61,8 @@ The following is a table of the available subcommands for the CLI tool (tinted-b
 
 | Subcommand | Description                          | Arguments            | Example Usage                              | Flags |
 |------------|--------------------------------------|----------------------|--------------------------------------------|-------|
-| `sync`  | Installs and or updates latest schemes. | - | `tinted-builder-rust sync` | `--quiet` or `-q` to silence output |
-| `build` | Builds the themes of a template. | `template_path`: Path to template directory. | `tinted-builder-rust build ./path/to/base16-template` | `--quiet` or `-q` to silence output |
+| `sync`  | Installs and or updates latest schemes. | - | `tinted-builder-rust sync` | `--quiet` (silence stderr and stdout) |
+| `build` | Builds the themes of a template. | `template_path`: Path to template directory. | `tinted-builder-rust build ./path/to/base16-template` | `--quiet` (silence stderr and stdout), `--sync` (equivalent of running `tinted-builder-rust sync` before `tinted-builder-rust build`) |
 
 ## Flags
 
