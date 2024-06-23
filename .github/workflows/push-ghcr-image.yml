@@ -9,6 +9,11 @@ on:
       git_tag_name:
         required: true
         type: string
+  workflow_dispatch:
+    inputs:
+      git_tag_name:
+        description: Git version tag (eg. v0.9.0)
+        required: true
 
 jobs:
   push-image:
@@ -28,14 +33,14 @@ jobs:
 
       - name: Tag Docker image
         run: |
-          docker tag tinted-builder-rust ghcr.io/tinted-theming/tinted-builder-rust:${{ env.LATEST_TAG }}
-          docker tag ghcr.io/tinted-theming/tinted-builder-rust:${{ env.LATEST_TAG }} ghcr.io/tinted-theming/tinted-builder-rust:latest
+          docker tag tinted-builder-rust ghcr.io/tinted-theming/tinted-builder-rust:${{ inputs.git_tag_name }}
+          docker tag ghcr.io/tinted-theming/tinted-builder-rust:${{ inputs.git_tag_name }} ghcr.io/tinted-theming/tinted-builder-rust:latest
 
       - name: Log in to GitHub Container Registry
         run: echo ${{ secrets.DOCKER_GHCR }} | docker login ghcr.io -u tinted-theming-bot --password-stdin
 
       - name: Push Docker image
-        run: docker push ghcr.io/tinted-theming/tinted-builder-rust:${{ env.LATEST_TAG }}
+        run: docker push ghcr.io/tinted-theming/tinted-builder-rust:${{ inputs.git_tag_name }}
 
       - name: Remove existing 'latest' tag
         run: |
@@ -46,6 +51,6 @@ jobs:
 
       - name: Add 'latest' tag to LATEST_TAG commit
         run: |
-          LATEST_TAG_COMMIT=$(git rev-list -n 1 ${{ inputs.git_tag_name }})
-          git tag latest ${LATEST_TAG_COMMIT}
+          git_tag_commit_hash=$(git rev-list -n 1 ${{ inputs.git_tag_name }})
+          git tag latest ${git_tag_commit_hash}
           git push origin latest

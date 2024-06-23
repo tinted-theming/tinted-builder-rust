@@ -130,7 +130,9 @@ jobs:
           checksum: sha256
 
   build-docker-image:
-    needs: release
+    needs:
+      - setup-environment
+      - release
     uses: ./.github/workflows/push-ghcr-image.yml
     with:
       git_tag_name: v${{ needs.setup-environment.outputs.git_tag_name }}
