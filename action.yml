@@ -1,0 +1,9 @@
+name: Tinted Builder Rust
+description: Build all the schemes for a base16 or tinted repo
+
+runs:
+  using: docker
+  image: ghcr.io/tinted-theming/tinted-builder-rust:latest
+  entrypoint: ["/bin/sh", "-c"]
+  args:
+    - "tinted-builder-rust sync && tinted-builder-rust build ."
