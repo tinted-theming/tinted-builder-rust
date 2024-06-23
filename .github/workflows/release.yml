@@ -126,3 +126,9 @@ jobs:
       git_tag_name: v${{ needs.setup-environment.outputs.git_tag_name }}
     secrets:
       DOCKER_GHCR: ${{ secrets.DOCKER_GHCR }}
+
+  publish-crate:
+    needs: release
+    uses: ./.github/workflows/publish-crate.yml
+    secrets:
+      CRATES_IO_TOKEN: ${{ secrets.CRATES_IO_TOKEN }}
