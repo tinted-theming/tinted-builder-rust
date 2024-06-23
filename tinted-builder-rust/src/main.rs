@@ -63,8 +63,12 @@ fn main() -> Result<()> {
                 operations::build::build(&template_path, &schemes_path, *is_quiet)?;
             }
         }
-        Some(("sync", _)) => {
-            operations::sync::sync(&schemes_path)?;
+        Some(("sync", sub_matches)) => {
+            let is_quiet: bool = sub_matches
+                .get_one::<bool>("quiet")
+                .map(|b| b.to_owned())
+                .unwrap_or(false);
+            operations::sync::sync(&schemes_path, is_quiet)?;
         }
         _ => {
             println!("Basic usage: {} apply <SCHEME_NAME>", REPO_NAME);

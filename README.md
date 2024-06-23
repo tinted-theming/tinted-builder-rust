@@ -59,10 +59,10 @@ tinted-builder-rust build path/to/base16-template
 
 The following is a table of the available subcommands for the CLI tool (tinted-builder-rust), including the descriptions and any notable arguments.
 
-| Subcommand | Description                          | Arguments            | Example Usage                              |
-|------------|--------------------------------------|----------------------|--------------------------------------------|
-| `sync`  | Installs and or updates latest schemes. | - | `tinted-builder-rust sync` |
-| `build` | Builds the themes of a template. | `template_path`: Path to template directory. | `tinted-builder-rust build ./path/to/base16-template` |
+| Subcommand | Description                          | Arguments            | Example Usage                              | Flags |
+|------------|--------------------------------------|----------------------|--------------------------------------------|-------|
+| `sync`  | Installs and or updates latest schemes. | - | `tinted-builder-rust sync` | `--quiet` or `-q` to silence output |
+| `build` | Builds the themes of a template. | `template_path`: Path to template directory. | `tinted-builder-rust build ./path/to/base16-template` | `--quiet` or `-q` to silence output |
 
 ## Flags
 

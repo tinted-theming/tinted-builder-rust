@@ -7,7 +7,7 @@ const REPO_NAME: &str = env!("CARGO_PKG_NAME");
 const SCHEMES_REPO_NAME: &str = "schemes";
 const SCHEMES_URL: &str = "https://github.com/tinted-theming/schemes";
 
-fn git_clone(repo_url: &str, target_dir: &Path) -> Result<()> {
+fn git_clone(repo_url: &str, target_dir: &Path, is_quiet: bool) -> Result<()> {
     if target_dir.exists() {
         return Err(anyhow!(
             "Error cloning {}. Target directory '{}' already exists",
@@ -16,12 +16,15 @@ fn git_clone(repo_url: &str, target_dir: &Path) -> Result<()> {
         ));
     }
 
-    Command::new("git")
-        .arg("clone")
-        .arg(repo_url)
-        .arg(target_dir)
-        .stdout(Stdio::null())
-        .status()
+    let mut cmd = Command::new("git");
+
+    cmd.arg("clone").arg(repo_url).arg(target_dir);
+
+    if is_quiet {
+        cmd.stdout(Stdio::null()).stderr(Stdio::null());
+    };
+
+    cmd.status()
         .with_context(|| format!("Failed to clone repository from {}", repo_url))?;
 
     Ok(())
@@ -66,7 +69,7 @@ fn git_diff(target_dir: &Path) -> Result<bool> {
 }
 
 /// Sync schemes repo; Install if it does not exist, otherwise update
-pub(crate) fn sync(schemes_path: &Path) -> Result<()> {
+pub(crate) fn sync(schemes_path: &Path, is_quiet: bool) -> Result<()> {
     if schemes_path.is_dir() {
         let is_diff = git_diff(schemes_path)?;
 
@@ -75,13 +78,18 @@ pub(crate) fn sync(schemes_path: &Path) -> Result<()> {
                 format!("Error pulling {} from {}", SCHEMES_REPO_NAME, SCHEMES_URL)
             })?;
 
-            println!("{} up to date", SCHEMES_REPO_NAME);
-        } else {
+            if !is_quiet {
+                println!("{} up to date", SCHEMES_REPO_NAME);
+            }
+        } else if !is_quiet {
             println!("{} contains uncommitted changes, please commit or remove and then run `{} update` again.", SCHEMES_REPO_NAME, REPO_NAME);
         }
     } else {
-        git_clone(SCHEMES_URL, schemes_path)?;
-        println!("{} installed", SCHEMES_REPO_NAME);
+        git_clone(SCHEMES_URL, schemes_path, is_quiet)?;
+
+        if !is_quiet {
+            println!("{} installed", SCHEMES_REPO_NAME);
+        }
     }
 
     Ok(())

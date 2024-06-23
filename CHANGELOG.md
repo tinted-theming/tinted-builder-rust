@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.8.0] - 2024-06-23
+
+### Added
+
+- Add `--quiet` flag for the `sync` subcommand to silence stdout
+
 ## [0.7.0] - 2024-06-22
 
 ### Added

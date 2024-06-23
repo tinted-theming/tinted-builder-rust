@@ -41,7 +41,14 @@ fn build_cli() -> Command {
         )
         .subcommand(
             Command::new("sync")
-                .about("Clones {} and if it exists it does a git pull on the local clone"),
+                .about("Clones {} and if it exists it does a git pull on the local clone")
+                .arg(
+                    Arg::new("quiet")
+                        .long("quiet")
+                        .short('q')
+                        .help("Silence stdout")
+                        .action(ArgAction::SetTrue),
+                ),
         )
 }
 
