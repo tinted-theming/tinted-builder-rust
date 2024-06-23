@@ -35,7 +35,7 @@ jobs:
           key: ${{ steps.cargo_cache_key.outputs.value }}
           id: cache-cargo-release
 
-      - name: Get Cargo version
+      - name: Set git_tag_name from latest Cargo.toml version
         id: git_tag_name
         run: |
           VERSION=$(cargo read-manifest --manifest-path ./tinted-builder-rust/Cargo.toml | jq -r ".version")
@@ -44,7 +44,7 @@ jobs:
       - name: Ensure the release tag does not exist
         run: |
           version="${{ steps.git_tag_name.outputs.value }}"
-          if ! git rev-parse "$version" >/dev/null 2>&1; then
+          if git rev-parse "$version" >/dev/null 2>&1; then
             echo "This git tag already exists: $version"
             exit 1
           fi
@@ -54,7 +54,7 @@ jobs:
           crate_name="tinted-builder-rust"
           version="${{ steps.git_tag_name.outputs.value }}"
           response=$(curl -s "https://crates.io/api/v1/crates/$crate_name")
-          if ! echo "$response" | grep -q "\"num\":\"$version\""; then
+          if echo "$response" | grep -q "\"num\":\"$version\""; then
             echo "Version $version of $crate_name already exists."
             exit 1
           fi
@@ -75,25 +75,34 @@ jobs:
       cache-key: ${{ needs.setup-environment.outputs.cargo_cache_key }}
 
   tag-release:
-    needs: [check-msrv, lint, test]
+    needs:
+      - setup-environment
+      - check-msrv
+      - lint
+      - test
     uses: ./.github/workflows/tag-release.yml
     with:
-      git_tag_name: v${{ needs.setup-environment.outputs.git_tag_name }}
+      git_tag_name: ${{ needs.setup-environment.outputs.git_tag_name }}
     secrets:
       DOCKER_GHCR: ${{ secrets.DOCKER_GHCR }}
 
   create-release:
-    needs: tag-release
+    needs: 
+      - setup-environment
+      - tag-release
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: taiki-e/create-gh-release-action@v1
         with:
+          ref: 'refs/tags/${{ needs.setup-environment.outputs.git_tag_name }}'
           changelog: CHANGELOG.md
           token: ${{ secrets.GITHUB_TOKEN }}
 
   release:
-    needs: create-release
+    needs:
+      - setup-environment
+      - create-release
     name: ${{ matrix.target }}
     runs-on: ${{ matrix.os }}
     strategy:
@@ -113,6 +122,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: taiki-e/upload-rust-binary-action@v1
         with:
+          ref: refs/tags/${{ needs.setup-environment.outputs.git_tag_name }}
           bin: tinted-builder-rust
           manifest-path: tinted-builder-rust/Cargo.toml
           target: ${{ matrix.target }}
