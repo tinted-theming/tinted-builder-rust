@@ -1,13 +1,11 @@
-name: Update Docker image
+name: Build and push latest GHCR Docker image
 on:
-  workflow_dispatch:
+  workflow_call:
 
 jobs:
   push-image:
     name: Push latest image
     runs-on: ubuntu-latest
-    outputs:
-      cargo_cache_key: ${{ steps.cargo_cache_key.outputs.value }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -31,10 +29,23 @@ jobs:
       - name: Tag Docker image
         run: |
           docker tag tinted-builder-rust ghcr.io/tinted-theming/tinted-builder-rust:${{ env.LATEST_TAG }}
-          docker tag tinted-builder-rust ghcr.io/tinted-theming/tinted-builder-rust:latest
+          docker tag ghcr.io/tinted-theming/tinted-builder-rust:${{ env.LATEST_TAG }} ghcr.io/tinted-theming/tinted-builder-rust:latest
 
       - name: Log in to GitHub Container Registry
         run: echo ${{ secrets.DOCKER_GHCR }} | docker login ghcr.io -u tinted-theming-bot --password-stdin
 
       - name: Push Docker image
         run: docker push ghcr.io/tinted-theming/tinted-builder-rust:${{ env.LATEST_TAG }}
+
+      - name: Remove existing 'latest' tag
+        run: |
+          if git rev-parse latest >/dev/null 2>&1; then
+            git tag -d latest
+            git push origin :refs/tags/latest
+          fi
+
+      - name: Add 'latest' tag to LATEST_TAG commit
+        run: |
+          LATEST_TAG_COMMIT=$(git rev-list -n 1 ${{ env.LATEST_TAG }})
+          git tag latest ${LATEST_TAG_COMMIT}
+          git push origin latest

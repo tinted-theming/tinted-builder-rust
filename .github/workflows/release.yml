@@ -100,3 +100,6 @@ jobs:
           target: ${{ matrix.target }}
           token: ${{ secrets.GITHUB_TOKEN }}
           checksum: sha256
+
+  build-docker-image:
+    uses: ./.github/workflows/push-ghcr-image.yml
