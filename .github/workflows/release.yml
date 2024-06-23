@@ -1,8 +1,6 @@
 name: Release
 on:
-  push:
-    tags:
-      - "v[0-9]+\\.[0-9]+\\.[0-9]+"
+  workflow_dispatch:
 env:
   CARGO_INCREMENTAL: 0
 permissions:
@@ -12,7 +10,7 @@ jobs:
   setup-environment:
     runs-on: ubuntu-latest
     outputs:
-      cargo_version: ${{ steps.cargo_version.outputs.value }}
+      git_tag_name: ${{ steps.git_tag_name.outputs.value }}
       cargo_cache_key: ${{ steps.cargo_cache_key.outputs.value }}
     steps:
       - uses: actions/checkout@v4
@@ -38,15 +36,27 @@ jobs:
           id: cache-cargo-release
 
       - name: Get Cargo version
-        id: cargo_version
+        id: git_tag_name
         run: |
           VERSION=$(cargo read-manifest --manifest-path ./tinted-builder-rust/Cargo.toml | jq -r ".version")
-          echo "value=$VERSION" >> $GITHUB_OUTPUT
+          echo "value=v$VERSION" >> $GITHUB_OUTPUT
 
-      - name: Abort if there is a Cargo.toml and git tag mismatch
+      - name: Ensure the release tag does not exist
         run: |
-          if [[ "v${{ steps.cargo_version.outputs.value }}" != "${{ github.ref_name }}" ]]; then
-            echo "There is a Cargo.toml version and git tag mismatch." && exit 1;
+          version="${{ steps.git_tag_name.outputs.value }}"
+          if ! git rev-parse "$version" >/dev/null 2>&1; then
+            echo "This git tag already exists: $version"
+            exit 1
+          fi
+
+      - name: Ensure crate version doesn't already exist
+        run: |
+          crate_name="tinted-builder-rust"
+          version="${{ steps.git_tag_name.outputs.value }}"
+          response=$(curl -s "https://crates.io/api/v1/crates/$crate_name")
+          if ! echo "$response" | grep -q "\"num\":\"$version\""; then
+            echo "Version $version of $crate_name already exists."
+            exit 1
           fi
 
   lint:
@@ -64,8 +74,16 @@ jobs:
     with:
       cache-key: ${{ needs.setup-environment.outputs.cargo_cache_key }}
 
-  create-release:
+  tag-release:
     needs: [check-msrv, lint, test]
+    uses: ./.github/workflows/tag-release.yml
+    with:
+      git_tag_name: v${{ needs.setup-environment.outputs.git_tag_name }}
+    secrets:
+      DOCKER_GHCR: ${{ secrets.DOCKER_GHCR }}
+
+  create-release:
+    needs: tag-release
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -102,6 +120,9 @@ jobs:
           checksum: sha256
 
   build-docker-image:
+    needs: release
     uses: ./.github/workflows/push-ghcr-image.yml
+    with:
+      git_tag_name: v${{ needs.setup-environment.outputs.git_tag_name }}
     secrets:
       DOCKER_GHCR: ${{ secrets.DOCKER_GHCR }}

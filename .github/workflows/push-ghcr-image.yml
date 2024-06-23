@@ -5,6 +5,10 @@ on:
       DOCKER_GHCR:
         description: Docker GHCR token
         required: true
+    inputs:
+      git_tag_name:
+        required: true
+        type: string
 
 jobs:
   push-image:
@@ -42,6 +46,6 @@ jobs:
 
       - name: Add 'latest' tag to LATEST_TAG commit
         run: |
-          LATEST_TAG_COMMIT=$(git rev-list -n 1 ${{ github.ref_name }})
+          LATEST_TAG_COMMIT=$(git rev-list -n 1 ${{ inputs.git_tag_name }})
           git tag latest ${LATEST_TAG_COMMIT}
           git push origin latest
