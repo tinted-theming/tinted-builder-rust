@@ -30,7 +30,7 @@ fn git_clone(repo_url: &str, target_dir: &Path, is_quiet: bool) -> Result<()> {
     Ok(())
 }
 
-fn git_pull(repo_path: &Path) -> Result<()> {
+fn git_pull(repo_path: &Path, is_quiet: bool) -> Result<()> {
     if !repo_path.is_dir() {
         return Err(anyhow!(
             "Error with git pull. {} is not a directory",
@@ -38,10 +38,15 @@ fn git_pull(repo_path: &Path) -> Result<()> {
         ));
     }
 
-    let status = Command::new("git")
-        .arg("pull")
-        .current_dir(repo_path)
-        .stdout(Stdio::null())
+    let mut cmd = Command::new("git");
+
+    cmd.arg("pull").current_dir(repo_path);
+
+    if is_quiet {
+        cmd.stdout(Stdio::null()).stderr(Stdio::null());
+    }
+
+    let status = cmd
         .status()
         .with_context(|| format!("Failed to execute process in {}", repo_path.display()))?;
 
@@ -74,7 +79,7 @@ pub(crate) fn sync(schemes_path: &Path, is_quiet: bool) -> Result<()> {
         let is_diff = git_diff(schemes_path)?;
 
         if !is_diff {
-            git_pull(schemes_path).with_context(|| {
+            git_pull(schemes_path, is_quiet).with_context(|| {
                 format!("Error pulling {} from {}", SCHEMES_REPO_NAME, SCHEMES_URL)
             })?;
 
