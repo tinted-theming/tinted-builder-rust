@@ -3,7 +3,7 @@ description: 'Build all the schemes for a base16 or tinted repo'
 
 runs:
   using: 'docker'
-  image: 'docker://ghcr.io/tinted-theming/tinted-builder-rust:v0.9.0'
+  image: 'docker://ghcr.io/tinted-theming/tinted-builder-rust:v0.9.1'
   args:
     - build
     - .
