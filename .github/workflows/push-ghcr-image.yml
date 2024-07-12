@@ -34,7 +34,7 @@ jobs:
       - name: Tag Docker image
         run: |
           docker tag tinted-builder-rust ghcr.io/tinted-theming/tinted-builder-rust:${{ inputs.git_tag_name }}
-          docker tag tinted-biulder-rust ghcr.io/tinted-theming/tinted-builder-rust:latest
+          docker tag tinted-builder-rust ghcr.io/tinted-theming/tinted-builder-rust:latest
 
       - name: Log in to GitHub Container Registry
         run: echo ${{ secrets.DOCKER_GHCR }} | docker login ghcr.io -u tinted-theming-bot --password-stdin
