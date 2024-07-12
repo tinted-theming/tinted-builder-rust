@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.5.0 - 2024-07-12
+
+## Changed
+
+- Ensure printed scheme puts all values in double quotes
+
 ## 0.4.5 - 2024-07-12
 
 ## Fixed

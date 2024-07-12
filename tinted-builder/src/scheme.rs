@@ -33,14 +33,14 @@ pub struct Scheme {
 
 impl fmt::Display for Scheme {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        writeln!(f, "author: {}", self.author)?;
+        writeln!(f, "author: \"{}\"", self.author)?;
         if let Some(ref desc) = self.description {
-            writeln!(f, "description: {}", desc)?;
+            writeln!(f, "description: \"{}\"", desc)?;
         }
-        writeln!(f, "name: {}", self.name)?;
-        writeln!(f, "slug: {}", self.slug)?;
-        writeln!(f, "system: {}", self.system)?;
-        writeln!(f, "variant: {}", self.variant)?;
+        writeln!(f, "name: \"{}\"", self.name)?;
+        writeln!(f, "slug: \"{}\"", self.slug)?;
+        writeln!(f, "system: \"{}\"", self.system)?;
+        writeln!(f, "variant: \"{}\"", self.variant)?;
         writeln!(f, "palette:")?;
 
         let mut palette_vec: Vec<(String, Color)> = self
@@ -52,7 +52,7 @@ impl fmt::Display for Scheme {
         palette_vec.sort_by_key(|k| k.0.clone());
 
         for (key, value) in palette_vec {
-            writeln!(f, "  {}: {}", key, value)?;
+            writeln!(f, "  {}: \"{}\"", key, value)?;
         }
         Ok(())
     }
