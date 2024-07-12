@@ -1,12 +1,12 @@
 # Changelog
 
-## Unreleased
+## [0.9.3] - 2024-07-12
 
 ### Updated
 
-- Use latest tinted-builder lib
+- Use latest tinted-builder lib which includes patch fixes
 
-## [0.9.2] - 2024-06-24
+## [0.9.2] - 2024-07-12
 
 ### Fixed
 
