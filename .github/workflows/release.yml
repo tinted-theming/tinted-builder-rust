@@ -92,7 +92,7 @@ jobs:
       - release
     uses: ./.github/workflows/push-ghcr-image.yml
     with:
-      git_tag_name: v${{ needs.setup-environment.outputs.git_tag_name }}
+      git_tag_name: ${{ needs.setup-environment.outputs.git_tag_name }}
     secrets:
       DOCKER_GHCR: ${{ secrets.DOCKER_GHCR }}
 
