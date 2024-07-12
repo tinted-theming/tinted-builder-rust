@@ -120,7 +120,7 @@ pub(crate) fn slugify(input: &str) -> String {
         }
     }
 
-    let re = Regex::new(r"-+").unwrap();
+    let re = Regex::new(r"-+").expect("Unable to unwrap regex");
     let cleaned_slug = re.replace_all(&slug, "-").to_string();
 
     cleaned_slug.trim_matches('-').to_string()

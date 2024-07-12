@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.9.2] - 2024-06-24
+
+### Fixed
+
+- Use latest tinted-builder lib which does not generate schemes with
+  a hash prefix value
+
 ## [0.9.1] - 2024-06-24
 
 ### Fixed
@@ -111,6 +118,7 @@
 - `sync` subcommand support to sync with latest Tinted Theming schemes
 - `build` subcommand to trigger theme template build
 
+[0.9.2]: https://github.com/tinted-theming/tinted-builder-rust/compare/v0.9.1...v0.9.2
 [0.9.1]: https://github.com/tinted-theming/tinted-builder-rust/compare/v0.9.0...v0.9.1
 [0.9.0]: https://github.com/tinted-theming/tinted-builder-rust/compare/v0.8.0...v0.9.0
 [0.8.0]: https://github.com/tinted-theming/tinted-builder-rust/compare/v0.7.0...v0.8.0

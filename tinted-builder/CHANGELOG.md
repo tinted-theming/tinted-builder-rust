@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.4.5 - 2024-07-12
+
+## Fixed
+
+- Remove hash from `Color::to_hex` returned string
+
 ## 0.4.4 - 2024-06-22
 
 ## Fixed
