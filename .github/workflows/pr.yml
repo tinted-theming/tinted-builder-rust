@@ -1,9 +1,7 @@
-name: CI
+name: Pull Request
 on:
-  push:
+  pull_request:
     branches: [main]
-permissions:
-  contents: write
 
 jobs:
   setup-environment:
@@ -30,6 +28,3 @@ jobs:
     uses: ./.github/workflows/test.yml
     with:
       cache-key: ${{ needs.setup-environment.outputs.cargo_cache_key }}
-
-  check-msrv:
-    uses: ./.github/workflows/msrv.yml
