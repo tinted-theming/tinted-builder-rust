@@ -3,8 +3,8 @@ use serde::Deserialize;
 use std::collections::HashMap;
 use std::fs::{self, create_dir_all, read_to_string};
 use std::path::{Path, PathBuf};
-use tinted_builder::Scheme;
-use tinted_builder::Template;
+use tinted_builder::{Scheme, SchemeType};
+use tinted_builder::{Template, TemplateContent};
 
 use crate::utils::write_to_file;
 
@@ -54,7 +54,8 @@ fn generate_theme(
             fs::create_dir_all(output_dir)?;
         }
 
-        let output = template.render(&scheme)?;
+        let scheme_type = SchemeType::Yaml(scheme.clone());
+        let output = template.render(&scheme_type)?;
         write_to_file(&output_path, &output)?;
     }
 
@@ -105,7 +106,7 @@ pub fn build(theme_template_path: &Path, user_schemes_path: &Path, is_quiet: boo
             .supported_systems
             .clone()
             .unwrap_or(vec![DEFAULT_SYSTEM.to_string()]);
-        let template = Template::new(template_content)?;
+        let template = Template::new(TemplateContent::Yaml(template_content))?;
         let output_str = &value.output;
         let output_path = if output_str.is_empty() {
             PathBuf::from(theme_template_path)

@@ -98,13 +98,13 @@ cargo add tinted-builder-rust
 ### Library Usage
 
 ```rust
-use tinted_builder_rust::{Scheme, Template};
+use tinted_builder_rust::{Scheme, Template, TemplateContent};
 use std::fs::read_to_string;
 
 let template_str = read_to_string("path/to/template.mustache").unwrap();
 let scheme_str = read_to_string("path/to/scheme.yml").unwrap();
 
-let template = Template::new(template_str).unwrap();
+let template = Template::new(TemplateContent::Yaml(template_str)).unwrap();
 let scheme: Scheme = serde_yaml::from_str(&scheme_str).unwrap();
 
 template

@@ -3,5 +3,5 @@ mod constants;
 mod scheme;
 mod template;
 
-pub use scheme::{Color, Scheme};
-pub use template::Template;
+pub use scheme::{Color, Scheme, SchemeType, TmScheme};
+pub use template::{Template, TemplateContent};

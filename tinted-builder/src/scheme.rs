@@ -9,6 +9,22 @@ use crate::constants::{REQUIRED_BASE16_PALETTE_KEYS, REQUIRED_BASE24_PALETTE_KEY
 
 pub use crate::scheme::color::Color;
 
+pub enum SchemeType {
+    Yaml(Scheme),
+    TmTheme(TmScheme),
+}
+
+#[derive(Debug, Clone)]
+pub struct TmScheme {
+    pub system: String,
+    // pub name: String,
+    // pub slug: String,
+    // pub author: String,
+    // pub description: Option<String>,
+    // pub variant: String,
+    // pub palette: HashMap<String, Color>,
+}
+
 #[derive(Deserialize, Serialize)]
 pub struct SchemeWrapper {
     pub(crate) system: String,
