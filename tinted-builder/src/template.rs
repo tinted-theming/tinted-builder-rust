@@ -2,9 +2,9 @@ use anyhow::{anyhow, Context, Result};
 use quick_xml::events::Event;
 use quick_xml::name::QName;
 use quick_xml::Reader;
-use serde::Deserialize;
+use std::borrow::{Borrow, BorrowMut};
+use std::cell::RefCell;
 use std::collections::HashMap;
-use std::fmt;
 use std::fs::{remove_file, File};
 use std::io::Write;
 use std::path::Path;
@@ -127,12 +127,18 @@ impl Template {
                 let mut current_key = String::new();
                 let mut current_value = String::new();
                 let mut current_settings = HashMap::new();
-                let mut theme_name = String::new();
-                let mut uuid = String::new();
-                let mut settings = Vec::new();
+                let mut theme_properties = HashMap::new();
+                let global_settings: RefCell<Vec<Setting>> = RefCell::new(Vec::new());
+                let local_settings: RefCell<Vec<Setting>> = RefCell::new(Vec::new());
+                let mut settings = &global_settings;
+                let mut in_root_dict = false;
+                let mut in_global_dict = false; // First item is global
                 let mut in_settings_dict = false;
                 let mut current_setting_name = None;
                 let mut current_scope = None;
+                let mut dict_depth = 0;
+                let mut settings_dict_depth = 0;
+                let global_dict_depth = 3;
 
                 // Read the XML events
                 loop {
@@ -145,15 +151,28 @@ impl Template {
                                 current_value.clear();
                             }
                             QName(b"array") => {
-                                if !in_settings_dict {
-                                    in_settings_dict = true;
+                                current_key.clear();
+                                if !in_root_dict {
+                                    in_root_dict = true;
+                                    in_global_dict = true;
                                 }
                             }
                             QName(b"dict") => {
-                                if in_settings_dict {
-                                    // New settings dict inside an array
+                                dict_depth += 1;
+
+                                // if current_key == "settings" {
+                                //     settings_dict_depth = dict_depth;
+                                // }
+
+                                // Don't do anything for root dict
+                                if in_root_dict {
+                                    if !in_settings_dict {
+                                        in_settings_dict = true;
+                                    }
+
                                     if !current_settings.is_empty() {
-                                        settings.push(Setting {
+                                        // Push the current settings to the settings vector
+                                        settings.borrow_mut().push(Setting {
                                             name: current_setting_name.take(),
                                             scope: current_scope.take(),
                                             settings: current_settings.clone(),
@@ -166,35 +185,57 @@ impl Template {
                         },
                         Event::End(ref e) => match e.name() {
                             QName(b"key") => {
-                                if current_key == "name" && !in_settings_dict {
-                                    theme_name = current_value.clone();
-                                } else if current_key == "uuid" && !in_settings_dict {
-                                    uuid = current_value.clone();
-                                } else if current_key == "name" {
-                                    current_setting_name = Some(current_value.clone());
-                                } else if current_key == "scope" {
-                                    current_scope = Some(current_value.clone());
-                                }
+                                // Handle key based on context
                             }
                             QName(b"string") => {
-                                current_settings.insert(current_key.clone(), current_value.clone());
+                                dbg!(&current_key);
+
+                                if current_key == "name" {
+                                    current_setting_name = Some(current_value.clone());
+                                }
+
+                                if current_key == "scope" {
+                                    current_scope = Some(current_value.clone());
+                                }
+
+                                if in_root_dict {
+                                    dbg!(&current_key);
+                                    dbg!(&current_value);
+                                    current_settings
+                                        .insert(current_key.clone(), current_value.clone());
+                                } else if current_key == "name" || current_key == "uuid" {
+                                    theme_properties
+                                        .insert(current_key.clone(), current_value.clone());
+                                }
                             }
                             QName(b"dict") => {
-                                if in_settings_dict && !current_settings.is_empty() {
-                                    settings.push(Setting {
+                                // dbg!("last");
+                                // dbg!(&current_settings);
+                                if !current_settings.is_empty() {
+                                    // Push the current settings to the settings vector
+                                    dbg!(&current_setting_name);
+                                    settings.borrow_mut().push(Setting {
                                         name: current_setting_name.take(),
                                         scope: current_scope.take(),
                                         settings: current_settings.clone(),
                                     });
                                     current_settings.clear();
                                 }
+
+                                dict_depth -= 1;
+
+                                if in_global_dict && dict_depth == (global_dict_depth - 1) {
+                                    in_global_dict = false;
+                                    settings = &local_settings;
+                                }
                             }
                             QName(b"array") => {
-                                in_settings_dict = false;
+                                in_root_dict = false;
                             }
                             _ => (),
                         },
                         Event::Text(e) => {
+                            // println!("{:?}", e);
                             let text = e.unescape()?.into_owned();
                             if current_key.is_empty() {
                                 current_key = text;
@@ -210,22 +251,22 @@ impl Template {
                 }
 
                 // Create the Theme struct
+                let global_settings: Vec<Box<Setting>> = (*(global_settings.borrow()))
+                    .iter()
+                    .cloned()
+                    .map(Box::new)
+                    .collect();
+                let local_settings: Vec<Box<Setting>> = (*(local_settings.borrow()))
+                    .iter()
+                    .cloned()
+                    .map(Box::new)
+                    .collect();
                 let theme = Theme {
-                    name: theme_name,
-                    uuid,
-                    settings,
+                    properties: theme_properties,
+                    global_settings,
+                    settings: local_settings,
                 };
 
-                // Print the parsed theme
-                // let content: Plist = quick_xml::reader::Reader::from_str(content);
-                // dbg!(content);
-                // let context = serde_yaml::to_string(&Self::to_template_context(scheme_type))?;
-                // let rendered = ribboncurls::render(content, &context, None)?;
-
-                // Ok(rendered)
-                // let context = serde_yaml::to_string(&Self::to_template_context(scheme))?;
-                // let rendered = ribboncurls::render(&self.content, &context, None)?;
-                //
                 dbg!(theme);
 
                 Ok(String::from("hello"))
@@ -254,168 +295,16 @@ impl Template {
     }
 }
 
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 struct Theme {
-    name: String,
-    uuid: String,
-    settings: Vec<Setting>,
+    properties: HashMap<String, String>,
+    global_settings: Vec<Box<Setting>>,
+    settings: Vec<Box<Setting>>,
 }
 
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 struct Setting {
     name: Option<String>,
     scope: Option<String>,
     settings: HashMap<String, String>,
 }
-
-// #[derive(Debug, Deserialize)]
-// struct Plist {
-//     #[serde(rename = "dict")]
-//     dict: Dict,
-// }
-
-// #[derive(Debug, Deserialize)]
-// struct Dict {
-//     #[serde(rename = "$value")]
-//     elements: Vec<DictElement>,
-// }
-
-// #[derive(Debug, Deserialize)]
-// #[serde(untagged)]
-// enum DictElement {
-//     Key(Key),
-//     String(Value),
-//     Array(Array),
-//     Dict(NestedDict),
-//     Other(OtherElement), // Add a catch-all variant
-// }
-
-// #[derive(Debug, Deserialize)]
-// struct Key {
-//     #[serde(rename = "key")]
-//     key: String,
-// }
-
-// #[derive(Debug, Deserialize)]
-// struct Value {
-//     #[serde(rename = "string")]
-//     value: String,
-// }
-
-// #[derive(Debug, Deserialize)]
-// struct Array {
-//     #[serde(rename = "array")]
-//     array: Vec<Dict>,
-// }
-
-// #[derive(Debug, Deserialize)]
-// struct NestedDict {
-//     #[serde(rename = "dict")]
-//     dict: Dict,
-// }
-
-// #[derive(Debug, Deserialize)]
-// struct OtherElement {
-//     #[serde(rename = "$value")]
-//     content: Vec<OtherContent>,
-// }
-
-// #[derive(Debug, Deserialize)]
-// #[serde(untagged)]
-// enum OtherContent {
-//     Key(Key),
-//     String(Value),
-//     Array(Array),
-//     Dict(NestedDict),
-// }
-
-// impl fmt::Display for OtherContent {
-//     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-//         match self {
-//             OtherContent::Key(k) => write!(f, "Key: {}", k.key),
-//             OtherContent::String(v) => write!(f, "String: {}", v.value),
-//             OtherContent::Array(a) => write!(f, "Array with {} items", a.array.len()),
-//             OtherContent::Dict(d) => write!(f, "Nested Dict"),
-//         }
-//     }
-// }
-
-// impl Dict {
-//     fn get_key_value(&self) -> Vec<(String, String)> {
-//         let mut result = Vec::new();
-//         let mut key_opt: Option<String> = None;
-
-//         for element in &self.elements {
-//             match element {
-//                 DictElement::Key(key) => key_opt = Some(key.key.clone()),
-//                 DictElement::String(value) => {
-//                     if let Some(key) = key_opt.take() {
-//                         result.push((key, value.value.clone()));
-//                     }
-//                 }
-//                 _ => {} // Ignore other elements for key-value extraction
-//             }
-//         }
-
-//         result
-//     }
-// }
-// ------------
-
-// #[derive(Debug, Deserialize)]
-// struct Plist {
-//     #[serde(rename = "dict")]
-//     dict: Dict,
-// }
-
-// #[derive(Debug, Deserialize)]
-// struct Dict {
-//     #[serde(rename = "key")]
-//     keys: Vec<String>,
-//     #[serde(rename = "string")]
-//     strings: Vec<String>,
-//     #[serde(rename = "array")]
-//     array: Option<SettingsArray>,
-// }
-
-// #[derive(Debug, Deserialize)]
-// struct SettingsArray {
-//     #[serde(rename = "dict")]
-//     dicts: Vec<SettingsDict>,
-// }
-
-// #[derive(Debug, Deserialize)]
-// struct SettingsDict {
-//     #[serde(rename = "key")]
-//     keys: Vec<String>,
-//     #[serde(rename = "string")]
-//     strings: Vec<String>,
-//     #[serde(rename = "dict")]
-//     settings: Option<Box<InnerSettings>>,
-// }
-
-// #[derive(Debug, Deserialize)]
-// struct InnerSettings {
-//     #[serde(rename = "key")]
-//     keys: Vec<String>,
-//     #[serde(rename = "string")]
-//     strings: Vec<String>,
-//     #[serde(rename = "dict")]
-//     dicts: Option<Vec<Box<InnerSettings>>>,
-// }
-
-// -----------------
-
-// #[derive(Debug, Deserialize)]
-// struct Plist {
-//     #[serde(rename = "dict")]
-//     value: HashMap<String, XmlValue>,
-// }
-
-// #[derive(Debug, Deserialize)]
-// #[serde(untagged)]
-// enum XmlValue {
-//     String(String),
-//     Array(Vec<HashMap<String, XmlValue>>),
-//     Dict(HashMap<String, XmlValue>),
-// }

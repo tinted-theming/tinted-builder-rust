@@ -101,7 +101,7 @@ fn main() {
     });
     let template = Template::new(TemplateContent::TmTheme(template.to_string())).unwrap();
     let output = template.render(&scheme_type).unwrap();
-    dbg!(output);
+    // dbg!(output);
     // let scheme: Scheme = serde_yaml::from_str(&scheme_str).unwrap();
     // let scheme_type = SchemeType::Yaml(scheme);
     // let output = template.render(&scheme_type).unwrap();
