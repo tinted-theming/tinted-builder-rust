@@ -11,24 +11,76 @@ pub use crate::scheme::color::Color;
 
 #[derive(Deserialize, Serialize)]
 pub struct SchemeWrapper {
-    pub(crate) system: String,
+    pub(crate) system: SchemeSystem,
     pub(crate) name: String,
     pub(crate) slug: Option<String>,
     pub(crate) author: String,
     pub(crate) description: Option<String>,
-    pub(crate) variant: Option<String>,
+    pub(crate) variant: Option<SchemeVariant>,
     pub(crate) palette: HashMap<String, String>,
 }
 
 #[derive(Debug, Clone)]
 pub struct Scheme {
-    pub system: String,
+    pub system: SchemeSystem,
     pub name: String,
     pub slug: String,
     pub author: String,
     pub description: Option<String>,
-    pub variant: String,
+    pub variant: SchemeVariant,
     pub palette: HashMap<String, Color>,
+}
+
+#[non_exhaustive]
+#[derive(Debug, Clone, Default, PartialEq, Deserialize, Serialize)]
+#[serde(rename_all = "lowercase")]
+pub enum SchemeSystem {
+    #[default]
+    Base16,
+    Base24,
+}
+
+impl SchemeSystem {
+    pub fn as_str(&self) -> &str {
+        match self {
+            SchemeSystem::Base16 => "base16",
+            SchemeSystem::Base24 => "base24",
+        }
+    }
+}
+
+impl fmt::Display for SchemeSystem {
+    /// Formats the `SchemeSystem` for display purposes.
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{}", self.as_str())?;
+        Ok(())
+    }
+}
+
+#[non_exhaustive]
+#[derive(Debug, Clone, Default, Deserialize, Serialize)]
+#[serde(rename_all = "lowercase")]
+pub enum SchemeVariant {
+    #[default]
+    Dark,
+    Light,
+}
+
+impl SchemeVariant {
+    pub fn as_str(&self) -> &str {
+        match self {
+            SchemeVariant::Dark => "dark",
+            SchemeVariant::Light => "light",
+        }
+    }
+}
+
+impl fmt::Display for SchemeVariant {
+    /// Formats the `SchemeVariant` for display purposes.
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{}", self.as_str())?;
+        Ok(())
+    }
 }
 
 impl fmt::Display for Scheme {
@@ -135,7 +187,7 @@ impl<'de> Deserialize<'de> for Scheme {
         let slug = wrapper
             .slug
             .map_or(slugify(&wrapper.name), |slug| slugify(&slug));
-        let variant = wrapper.variant.unwrap_or(String::from("dark"));
+        let variant = wrapper.variant.unwrap_or(SchemeVariant::Dark);
 
         match wrapper.system.as_str() {
             "base16" => {

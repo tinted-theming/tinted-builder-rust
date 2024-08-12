@@ -63,14 +63,15 @@ The Scheme struct is as follows:
 
 ```rust
 use std::collections::HashMap;
+use tinted_builder::{SchemeSystem, SchemeVariant};
 
 pub struct Scheme {
-    pub system: String,
+    pub system: SchemeSystem,
     pub name: String,
     pub slug: String,
     pub author: String,
     pub description: Option<String>,
-    pub variant: String,
+    pub variant: SchemeVariant,
     pub palette: HashMap<String, Color>,
 }
 

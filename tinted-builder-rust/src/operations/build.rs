@@ -3,17 +3,12 @@ use serde::Deserialize;
 use std::collections::HashMap;
 use std::fs::{self, create_dir_all, read_to_string};
 use std::path::{Path, PathBuf};
-use tinted_builder::Scheme;
 use tinted_builder::Template;
+use tinted_builder::{Scheme, SchemeSystem};
 
 use crate::utils::write_to_file;
 
 const REPO_NAME: &str = env!("CARGO_PKG_NAME");
-const DEFAULT_SYSTEM: &str = "base16";
-
-fn match_scheme_file_extension(extension: &str) -> bool {
-    extension == "yaml" || extension == "yml"
-}
 
 // Allow for the use of `.yaml` and `.yml` extensions
 fn get_theme_template_path(theme_template_path: &Path) -> Result<PathBuf> {
@@ -28,7 +23,7 @@ fn generate_theme(
     template: &Template,
     output_dir: &PathBuf,
     scheme_path: &PathBuf,
-    system: &str,
+    system: SchemeSystem,
     extension: &str,
 ) -> Result<()> {
     let scheme_file_extension: &str = scheme_path
@@ -37,7 +32,7 @@ fn generate_theme(
         .to_str()
         .unwrap_or_default();
 
-    if match_scheme_file_extension(scheme_file_extension) {
+    if scheme_file_extension == "yaml" || scheme_file_extension == "yml" {
         let slug = scheme_path
             .file_stem()
             .and_then(|s| s.to_str())
@@ -54,7 +49,8 @@ fn generate_theme(
             fs::create_dir_all(output_dir)?;
         }
 
-        let output = template.render(&scheme)?;
+        let scheme_type = scheme.clone();
+        let output = template.render(&scheme_type)?;
         write_to_file(&output_path, &output)?;
     }
 
@@ -66,7 +62,7 @@ struct TemplateConfig {
     extension: String,
     output: String,
     #[serde(rename = "supported-systems")]
-    supported_systems: Option<Vec<String>>,
+    supported_systems: Option<Vec<SchemeSystem>>,
 }
 
 /// Build theme template using provided schemes
@@ -104,7 +100,7 @@ pub fn build(theme_template_path: &Path, user_schemes_path: &Path, is_quiet: boo
         let supported_systems = &value
             .supported_systems
             .clone()
-            .unwrap_or(vec![DEFAULT_SYSTEM.to_string()]);
+            .unwrap_or(vec![SchemeSystem::default()]);
         let template = Template::new(template_content)?;
         let output_str = &value.output;
         let output_path = if output_str.is_empty() {
@@ -124,17 +120,17 @@ pub fn build(theme_template_path: &Path, user_schemes_path: &Path, is_quiet: boo
             create_dir_all(&output_path)?
         }
 
-        let mut scheme_path_vec: Vec<(&str, PathBuf)> = Vec::new();
+        let mut scheme_path_vec: Vec<(SchemeSystem, PathBuf)> = Vec::new();
 
         for system in supported_systems {
-            if user_schemes_path.join(system).is_dir() {
-                let path = user_schemes_path.join(system);
+            if user_schemes_path.join(system.as_str()).is_dir() {
+                let path = user_schemes_path.join(system.as_str());
 
-                scheme_path_vec.push((system, path));
+                scheme_path_vec.push((system.clone(), path));
             } else {
                 let path = user_schemes_path.to_path_buf();
 
-                scheme_path_vec.push((system, path));
+                scheme_path_vec.push((system.clone(), path));
             }
         }
 
@@ -147,7 +143,7 @@ pub fn build(theme_template_path: &Path, user_schemes_path: &Path, is_quiet: boo
                     &template,
                     &output_path,
                     &scheme_file_path,
-                    system,
+                    system.clone(),
                     extension,
                 )?;
             }
