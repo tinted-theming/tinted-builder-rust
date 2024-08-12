@@ -40,8 +40,8 @@ pub use crate::operations::build as operation_build;
 ///   base0D: "6a9eb5"
 ///   base0E: "78a38f"
 ///   base0F: "a3a079""#;
-/// let template = Template::new(template).unwrap();
 /// let scheme: Scheme = serde_yaml::from_str(&scheme_str).unwrap();
+/// let template = Template::new(template, scheme.system.clone());
 /// let output = template
 ///     .render(&scheme)
 ///     .unwrap();

@@ -103,9 +103,8 @@ use std::fs::read_to_string;
 
 let template_str = read_to_string("path/to/template.mustache").unwrap();
 let scheme_str = read_to_string("path/to/scheme.yml").unwrap();
-
-let template = Template::new(template_str).unwrap();
 let scheme: Scheme = serde_yaml::from_str(&scheme_str).unwrap();
+let template = Template::new(template_str, scheme.system.clone());
 
 template
     .render_to_file("path/to/rendered/template", &scheme)

@@ -22,7 +22,7 @@ cargo add tinted-builder
 ## Usage
 
 ```rust
-use tinted_builder::{Scheme, Template};
+use tinted_builder::{Scheme, SchemeType, Template};
 
 let template = String::from(r#"/* Some CSS file with {{scheme-name}} theme */
 .someCssSelector { background-color: #{{base00-hex}} }
@@ -48,10 +48,11 @@ palette:
   base0D: "6a9eb5"
   base0E: "78a38f"
   base0F: "a3a079""#;
-let template = Template::new(template).unwrap();
 let scheme: Scheme = serde_yaml::from_str(&scheme_str).unwrap();
+let template = Template::new(template, scheme.system.clone());
+let scheme_type = SchemeType::Yaml(scheme);
 let output = template
-  .render(&scheme)
+  .render(&scheme_type)
   .unwrap();
 
   assert_eq!(output, r#"/* Some CSS file with UwUnicorn theme */

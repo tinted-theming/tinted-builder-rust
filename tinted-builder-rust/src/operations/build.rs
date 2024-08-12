@@ -49,8 +49,7 @@ fn generate_theme(
             fs::create_dir_all(output_dir)?;
         }
 
-        let scheme_type = scheme.clone();
-        let output = template.render(&scheme_type)?;
+        let output = template.render(&scheme.clone())?;
         write_to_file(&output_path, &output)?;
     }
 
@@ -101,7 +100,6 @@ pub fn build(theme_template_path: &Path, user_schemes_path: &Path, is_quiet: boo
             .supported_systems
             .clone()
             .unwrap_or(vec![SchemeSystem::default()]);
-        let template = Template::new(template_content)?;
         let output_str = &value.output;
         let output_path = if output_str.is_empty() {
             PathBuf::from(theme_template_path)
@@ -135,6 +133,7 @@ pub fn build(theme_template_path: &Path, user_schemes_path: &Path, is_quiet: boo
         }
 
         for (system, schemes_path) in scheme_path_vec {
+            let template = Template::new(template_content.clone(), system.clone());
             for item_result in fs::read_dir(schemes_path)? {
                 let scheme_direntry = item_result?;
                 let scheme_file_path = scheme_direntry.path();

@@ -53,8 +53,8 @@ palette:
 #[test]
 fn render_without_content() -> Result<()> {
     let template_source = "Hello!".to_string();
-    let template = Template::new(template_source)?;
     let scheme: Scheme = serde_yaml::from_str(SCHEME_SILK_LIGHT)?;
+    let template = Template::new(template_source, scheme.system.clone());
 
     let output = template.render(&scheme)?;
 
@@ -66,8 +66,8 @@ fn render_without_content() -> Result<()> {
 fn comments() -> Result<()> {
     let template_source =
         r#"<div style="background-color: #{{base09-hex}};">{{ ! some # comment }}</div>"#;
-    let template = Template::new(template_source.to_string())?;
     let scheme: Scheme = serde_yaml::from_str(SCHEME_SILK_LIGHT)?;
+    let template = Template::new(template_source.to_string(), scheme.system.clone());
 
     let output = template.render(&scheme)?;
 
@@ -79,10 +79,10 @@ fn comments() -> Result<()> {
 fn escaped_and_unescaped_vars() -> Result<()> {
     let template_source = r#"Author: {{{scheme-author}}}
 Author escaped: {{scheme-author}}"#;
-    let template = Template::new(template_source.to_string())?;
-    let scheme: Scheme = serde_yaml::from_str(SCHEME_CRAZY)?;
     let expected = r#"Author: <a href="https://github.com/Misterio77">Gabriel Fontes</a>
 Author escaped: &lt;a href=&quot;https://github.com/Misterio77&quot;&gt;Gabriel Fontes&lt;/a&gt;"#;
+    let scheme: Scheme = serde_yaml::from_str(SCHEME_CRAZY)?;
+    let template = Template::new(template_source.to_string(), scheme.system.clone());
 
     let output = template.render(&scheme)?;
 
@@ -94,8 +94,8 @@ Author escaped: &lt;a href=&quot;https://github.com/Misterio77&quot;&gt;Gabriel 
 fn with_basic_sections() -> Result<()> {
     let template_source =
         "Does base17 var exist: {{#base17-hex}}Yes{{/base17-hex}}{{^base17-hex}}No{{/base17-hex}}";
-    let template = Template::new(template_source.to_string())?;
     let scheme: Scheme = serde_yaml::from_str(SCHEME_SILK_LIGHT)?;
+    let template = Template::new(template_source.to_string(), scheme.system.clone());
 
     let output = template.render(&scheme)?;
 
@@ -106,8 +106,8 @@ fn with_basic_sections() -> Result<()> {
 #[test]
 fn with_nested_sections() -> Result<()> {
     let template_source = "{{#scheme-author}}{{#scheme-slug}}{{#base0A-hex}}#{{.}}{{/base0A-hex}}{{/scheme-slug}}{{/scheme-author}}";
-    let template = Template::new(template_source.to_string())?;
     let scheme: Scheme = serde_yaml::from_str(SCHEME_SILK_LIGHT)?;
+    let template = Template::new(template_source.to_string(), scheme.system.clone());
 
     let output = template.render(&scheme)?;
 
