@@ -2,10 +2,22 @@
 
 ## Unreleased
 
+## Added
+
+- Add basic documentation for docs.rs
+
 ## Changed
 
+- Require schemes to be wrapped in `Scheme` enum when creating a
+  `Template` struct instance to easily extend builder to support
+  different scheme systems
 - Use `SchemeSystem` and `SchemeVariant` enums for scheme `system` and
   `variant` properties respectively instead of using string values
+
+## Removed
+
+- `anyhow` crate moved to dev-dependency for tests, but replaced with
+  `TintedBuilderError` enum with `thiserror` macros in API
 
 ## 0.5.1 - 2024-08-24
 

@@ -1,7 +1,9 @@
 #[doc = include_str!("../README.md")]
-mod constants;
+mod error;
 mod scheme;
 mod template;
+mod utils;
 
-pub use scheme::{Color, Scheme, SchemeSystem, SchemeVariant};
+pub use error::TintedBuilderError;
+pub use scheme::{Base16Scheme, Color, Scheme, SchemeSystem, SchemeVariant};
 pub use template::Template;

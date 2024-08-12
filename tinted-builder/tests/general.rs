@@ -1,5 +1,5 @@
 use anyhow::Result;
-use tinted_builder::{Scheme, Template};
+use tinted_builder::{Scheme, Template, TintedBuilderError};
 
 const SCHEME_SILK_LIGHT: &str = r##"
 system: "base16"
@@ -51,65 +51,65 @@ palette:
 "#;
 
 #[test]
-fn render_without_content() -> Result<()> {
+fn render_without_content() -> Result<(), TintedBuilderError> {
     let template_source = "Hello!".to_string();
-    let template = Template::new(template_source)?;
-    let scheme: Scheme = serde_yaml::from_str(SCHEME_SILK_LIGHT)?;
+    let scheme = Scheme::Base16(serde_yaml::from_str(SCHEME_SILK_LIGHT)?);
+    let template = Template::new(template_source, scheme);
 
-    let output = template.render(&scheme)?;
+    let output = template.render()?;
 
     assert_eq!(output, "Hello!");
     Ok(())
 }
 
 #[test]
-fn comments() -> Result<()> {
+fn comments() -> Result<(), TintedBuilderError> {
     let template_source =
         r#"<div style="background-color: #{{base09-hex}};">{{ ! some # comment }}</div>"#;
-    let template = Template::new(template_source.to_string())?;
-    let scheme: Scheme = serde_yaml::from_str(SCHEME_SILK_LIGHT)?;
+    let scheme = Scheme::Base16(serde_yaml::from_str(SCHEME_SILK_LIGHT)?);
+    let template = Template::new(template_source.to_string(), scheme);
 
-    let output = template.render(&scheme)?;
+    let output = template.render()?;
 
     assert_eq!(&output, r#"<div style="background-color: #d27f46;"></div>"#);
     Ok(())
 }
 
 #[test]
-fn escaped_and_unescaped_vars() -> Result<()> {
+fn escaped_and_unescaped_vars() -> Result<(), TintedBuilderError> {
     let template_source = r#"Author: {{{scheme-author}}}
 Author escaped: {{scheme-author}}"#;
-    let template = Template::new(template_source.to_string())?;
-    let scheme: Scheme = serde_yaml::from_str(SCHEME_CRAZY)?;
     let expected = r#"Author: <a href="https://github.com/Misterio77">Gabriel Fontes</a>
 Author escaped: &lt;a href=&quot;https://github.com/Misterio77&quot;&gt;Gabriel Fontes&lt;/a&gt;"#;
+    let scheme = Scheme::Base16(serde_yaml::from_str(SCHEME_CRAZY)?);
+    let template = Template::new(template_source.to_string(), scheme);
 
-    let output = template.render(&scheme)?;
+    let output = template.render()?;
 
     assert_eq!(output, expected);
     Ok(())
 }
 
 #[test]
-fn with_basic_sections() -> Result<()> {
+fn with_basic_sections() -> Result<(), TintedBuilderError> {
     let template_source =
         "Does base17 var exist: {{#base17-hex}}Yes{{/base17-hex}}{{^base17-hex}}No{{/base17-hex}}";
-    let template = Template::new(template_source.to_string())?;
-    let scheme: Scheme = serde_yaml::from_str(SCHEME_SILK_LIGHT)?;
+    let scheme = Scheme::Base16(serde_yaml::from_str(SCHEME_SILK_LIGHT)?);
+    let template = Template::new(template_source.to_string(), scheme);
 
-    let output = template.render(&scheme)?;
+    let output = template.render()?;
 
     assert_eq!(output, "Does base17 var exist: No");
     Ok(())
 }
 
 #[test]
-fn with_nested_sections() -> Result<()> {
+fn with_nested_sections() -> Result<(), TintedBuilderError> {
     let template_source = "{{#scheme-author}}{{#scheme-slug}}{{#base0A-hex}}#{{.}}{{/base0A-hex}}{{/scheme-slug}}{{/scheme-author}}";
-    let template = Template::new(template_source.to_string())?;
-    let scheme: Scheme = serde_yaml::from_str(SCHEME_SILK_LIGHT)?;
+    let scheme = Scheme::Base16(serde_yaml::from_str(SCHEME_SILK_LIGHT)?);
+    let template = Template::new(template_source.to_string(), scheme);
 
-    let output = template.render(&scheme)?;
+    let output = template.render()?;
 
     assert_eq!(output, "#cfad25");
     Ok(())
@@ -118,10 +118,10 @@ fn with_nested_sections() -> Result<()> {
 #[test]
 fn render_hex() -> Result<()> {
     let template_source = "{{base0A-hex}}";
-    let template = Template::new(template_source.to_string())?;
-    let scheme: Scheme = serde_yaml::from_str(SCHEME_SILK_LIGHT)?;
+    let scheme = Scheme::Base16(serde_yaml::from_str(SCHEME_SILK_LIGHT)?);
+    let template = Template::new(template_source.to_string(), scheme);
 
-    let output = template.render(&scheme)?;
+    let output = template.render()?;
 
     assert_eq!(output, "cfad25");
     Ok(())
@@ -130,10 +130,10 @@ fn render_hex() -> Result<()> {
 #[test]
 fn render_rgb() -> Result<()> {
     let template_source = "{{base0A-rgb-r}} {{base0A-rgb-g}} {{base0A-rgb-b}}";
-    let template = Template::new(template_source.to_string())?;
-    let scheme: Scheme = serde_yaml::from_str(SCHEME_SILK_LIGHT)?;
+    let scheme = Scheme::Base16(serde_yaml::from_str(SCHEME_SILK_LIGHT)?);
+    let template = Template::new(template_source.to_string(), scheme);
 
-    let output = template.render(&scheme)?;
+    let output = template.render()?;
 
     assert_eq!(output, "207 173 37");
     Ok(())
@@ -142,10 +142,10 @@ fn render_rgb() -> Result<()> {
 #[test]
 fn render_dec() -> Result<()> {
     let template_source = "{{base0A-dec-r}} {{base0A-dec-g}} {{base0A-dec-b}}";
-    let template = Template::new(template_source.to_string())?;
-    let scheme: Scheme = serde_yaml::from_str(SCHEME_SILK_LIGHT)?;
+    let scheme = Scheme::Base16(serde_yaml::from_str(SCHEME_SILK_LIGHT)?);
+    let template = Template::new(template_source.to_string(), scheme);
 
-    let output = template.render(&scheme)?;
+    let output = template.render()?;
 
     assert_eq!(output, "0.81176471 0.67843137 0.14509804");
     Ok(())

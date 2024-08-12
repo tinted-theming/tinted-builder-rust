@@ -42,7 +42,7 @@ Download the relevant binary from the [repository releases] page.
 
 ## Basic Usage
 
-```shell
+```sh
 tinted-builder-rust sync # To sync with latest schemes
 tinted-builder-rust build path/to/base16-template
 ```
