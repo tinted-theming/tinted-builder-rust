@@ -1,3 +1,4 @@
+pub mod tmtheme;
 mod yaml;
 
 use anyhow::{anyhow, Context, Result};
@@ -5,11 +6,12 @@ use std::fs::{remove_file, File};
 use std::io::Write;
 use std::path::Path;
 
+use crate::scheme::SchemeType;
 use crate::{Scheme, SchemeSystem};
 
 pub struct Template {
     content: String,
-    system: SchemeSystem,
+    scheme: SchemeType,
 }
 
 pub(crate) fn write_to_file(path: &Path, contents: &str) -> Result<()> {
@@ -26,8 +28,8 @@ pub(crate) fn write_to_file(path: &Path, contents: &str) -> Result<()> {
 }
 
 impl Template {
-    pub fn new(content: String, system: SchemeSystem) -> Template {
-        Template { content, system }
+    pub fn new(content: String, scheme: SchemeType) -> Template {
+        Template { content, scheme }
     }
 
     pub fn render(&self, scheme: &Scheme) -> Result<String> {
@@ -35,6 +37,12 @@ impl Template {
             SchemeSystem::Base16 | SchemeSystem::Base24 => {
                 let ctx = yaml::to_template_context(scheme);
                 let rendered = yaml::render(&self.content, &ctx)?;
+
+                Ok(rendered)
+            }
+            SchemeSystem::TmTheme => {
+                let ctx = tmtheme::to_template_context(scheme)?;
+                let rendered = tmtheme::render(content, &ctx)?;
 
                 Ok(rendered)
             }
@@ -57,6 +65,7 @@ impl Template {
 
                 Ok(self)
             }
+            // (TemplateContent::TmTheme(content), SchemeType::TmTheme(scheme)) => Ok(self),
             _ => Err(anyhow!("Mismatch between template type and scheme type")),
         }
     }
