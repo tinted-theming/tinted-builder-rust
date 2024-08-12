@@ -42,8 +42,14 @@ impl Template {
             "scheme-slug-underscored".to_string(),
             scheme.slug.replace('-', "_"),
         );
-        context.insert("scheme-system".to_string(), scheme.system.clone());
-        context.insert("scheme-variant".to_string(), scheme.variant.clone());
+        context.insert(
+            "scheme-system".to_string(),
+            scheme.system.as_str().to_string(),
+        );
+        context.insert(
+            "scheme-variant".to_string(),
+            scheme.variant.as_str().to_string(),
+        );
         context.insert(
             format!("scheme-is-{}-variant", scheme.variant),
             "true".to_string(),
