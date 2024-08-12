@@ -48,10 +48,10 @@ palette:
   base0D: "6a9eb5"
   base0E: "78a38f"
   base0F: "a3a079""#;
-let template = Template::new(template).unwrap();
-let scheme: Scheme = serde_yaml::from_str(&scheme_str).unwrap();
+let scheme = Scheme::Base16(serde_yaml::from_str(&scheme_str).unwrap());
+let template = Template::new(template, scheme);
 let output = template
-  .render(&scheme)
+  .render()
   .unwrap();
 
   assert_eq!(output, r#"/* Some CSS file with UwUnicorn theme */
@@ -59,36 +59,18 @@ let output = template
 .someOtherCssSelector { background-color: #a3a079 }"#);
 ```
 
-The Scheme struct is as follows:
-
-```rust
-use std::collections::HashMap;
-use tinted_builder::{SchemeSystem, SchemeVariant};
-
-pub struct Scheme {
-    pub system: SchemeSystem,
-    pub name: String,
-    pub slug: String,
-    pub author: String,
-    pub description: Option<String>,
-    pub variant: SchemeVariant,
-    pub palette: HashMap<String, Color>,
-}
-
-pub struct Color {
-    pub hex: (String, String, String),
-    pub rgb: (u8, u8, u8),
-    pub dec: (f32, f32, f32),
-}
-```
-
-`Template::new`
-The `Template` struct simply sets the content provided to it via
-`Template::new`.
-
-`template.render(&scheme)` takes the scheme, generates the variables
-defined in the `0.11.0` [builder specification] and returns a new
-string.
+1. Create a scheme (`Scheme`) enum variant while providing the
+   deserialized data into into the variant:
+   `Scheme::Base16(serde_yaml::from_str(&scheme_str).unwrap())` in this
+   case
+2. Create a template by passing the serialized mustache text and the
+   `Scheme` variant in step 1 into the `Template` struct:
+   `Template::new(mustache_text, scheme)`. The `template.render()`
+   method takes the scheme, generates the variables defined in the 
+   `0.11.0` [builder specification] and returns a new string.
+3. Render the template by running a method which returns a
+   `Result<String, TintedBuilderError>` type: 
+   `let output = template.render().unwrap();`
 
 ## Contributing
 

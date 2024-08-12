@@ -1,7 +1,7 @@
 use serde::{Deserialize, Serialize};
 use std::fmt;
 
-use anyhow::{anyhow, Context, Result};
+use crate::error::TintedBuilderError;
 
 #[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct Color {
@@ -11,16 +11,15 @@ pub struct Color {
 }
 
 impl Color {
-    pub fn new(hex_color: String) -> Result<Color> {
-        let hex_full = process_hex_input(&hex_color)
-            .ok_or_else(|| anyhow::anyhow!("Provided hex value is not formatted correctly"))?;
+    pub fn new(hex_color: String) -> Result<Color, TintedBuilderError> {
+        let hex_full =
+            process_hex_input(&hex_color).ok_or_else(|| TintedBuilderError::HexInputFormat)?;
         let hex: (String, String, String) = (
             hex_full[0..2].to_lowercase(),
             hex_full[2..4].to_lowercase(),
             hex_full[4..6].to_lowercase(),
         );
-        let rgb = hex_to_rgb(&hex)
-            .map_err(|_| anyhow!("Unable to convert hex value to rgb: {}", hex_full))?;
+        let rgb = hex_to_rgb(&hex)?;
         let dec: (f32, f32, f32) = (
             rgb.0 as f32 / 255.0,
             rgb.1 as f32 / 255.0,
@@ -41,13 +40,10 @@ impl fmt::Display for Color {
     }
 }
 
-fn hex_to_rgb(hex: &(String, String, String)) -> Result<(u8, u8, u8)> {
-    let r = u8::from_str_radix(hex.0.as_str(), 16)
-        .context("Invalid hex character for red component")?;
-    let g = u8::from_str_radix(hex.1.as_str(), 16)
-        .context("Invalid hex character for green component")?;
-    let b = u8::from_str_radix(hex.2.as_str(), 16)
-        .context("Invalid hex character for blue component")?;
+fn hex_to_rgb(hex: &(String, String, String)) -> Result<(u8, u8, u8), TintedBuilderError> {
+    let r = u8::from_str_radix(hex.0.as_str(), 16)?;
+    let g = u8::from_str_radix(hex.1.as_str(), 16)?;
+    let b = u8::from_str_radix(hex.2.as_str(), 16)?;
 
     Ok((r, g, b))
 }

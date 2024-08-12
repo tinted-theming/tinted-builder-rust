@@ -4,9 +4,15 @@
 
 ## Changed
 
+- Breaking change: `tinted-builder` library includes an API change and
+  `tinted-builder-rust` now exports the new `tinted-builder` API
 - Breaking change: Use `SchemeSystem` and `SchemeVariant` enums for
   scheme `system` and `variant` properties respectively instead of using
   string values
+
+## Removed
+
+- Remove deprecated `render_to_file` `Template` method
 
 ## [0.9.5] - 2024-08-24
 

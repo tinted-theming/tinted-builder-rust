@@ -406,3 +406,58 @@ fn test_operation_build_mixed() -> Result<()> {
 
     Ok(())
 }
+
+/// Tests error message when invalid scheme system is provided in config.yaml
+#[test]
+fn test_operation_build_invalid_system() -> Result<()> {
+    // -------
+    // Arrange
+    // -------
+    let system = "invalid-system";
+    let name = "operation_build_invalid_system";
+    let template_theme_path = PathBuf::from(format!("./template-{}", name));
+    let template_templates_path = template_theme_path.join("templates");
+    let template_config_path = template_templates_path.join("config.yaml");
+    let schemes_path = template_theme_path.join("schemes");
+    let base16_config_file_content = format!(
+        r#"
+invalid:
+  extension: .md
+  output: output-themes
+  supported-systems: [{}]"#,
+        system
+    );
+
+    if template_theme_path.is_dir() {
+        fs::remove_dir_all(&template_theme_path)?;
+    }
+    fs::create_dir(&template_theme_path)?;
+    fs::create_dir(&schemes_path)?;
+    fs::create_dir(&template_templates_path)?;
+    write_to_file(&template_config_path, &base16_config_file_content)?;
+
+    // ---
+    // Act
+    // ---
+    let (stdout, stderr) = utils::run_command(vec![
+        COMMAND_NAME.to_string(),
+        "build".to_string(),
+        template_theme_path.display().to_string(),
+        format!("--schemes-dir={}", schemes_path.display()),
+    ])
+    .unwrap();
+
+    // ------
+    // Assert
+    // ------
+    assert!(
+        stderr.contains(format!("unknown variant `{}`", system).as_str()),
+        "stderr does not contain the expected output"
+    );
+    assert!(
+        stdout.is_empty(),
+        "stdout does not contain the exptected output"
+    );
+
+    Ok(())
+}

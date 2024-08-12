@@ -3,8 +3,7 @@ use serde::Deserialize;
 use std::collections::HashMap;
 use std::fs::{self, create_dir_all, read_to_string};
 use std::path::{Path, PathBuf};
-use tinted_builder::Template;
-use tinted_builder::{Scheme, SchemeSystem};
+use tinted_builder::{Base16Scheme, Scheme, SchemeSystem, Template};
 
 use crate::utils::write_to_file;
 
@@ -20,7 +19,7 @@ fn get_theme_template_path(theme_template_path: &Path) -> Result<PathBuf> {
 }
 
 fn generate_theme(
-    template: &Template,
+    template_content: &str,
     output_dir: &PathBuf,
     scheme_path: &PathBuf,
     system: SchemeSystem,
@@ -38,7 +37,7 @@ fn generate_theme(
             .and_then(|s| s.to_str())
             .unwrap_or_default();
         let scheme_str = read_to_string(scheme_path)?;
-        let scheme: Scheme = serde_yaml::from_str(&scheme_str)?;
+        let scheme: Base16Scheme = serde_yaml::from_str(&scheme_str)?;
         let output_path = output_dir.join(format!("{}-{}.{}", &scheme.system, slug, extension));
 
         if scheme.system != system {
@@ -49,8 +48,19 @@ fn generate_theme(
             fs::create_dir_all(output_dir)?;
         }
 
-        let scheme_type = scheme.clone();
-        let output = template.render(&scheme_type)?;
+        let scheme = match system {
+            SchemeSystem::Base16 => Scheme::Base16(scheme.clone()),
+            SchemeSystem::Base24 => Scheme::Base24(scheme.clone()),
+            _ => {
+                // This error should be previously caught during deserialization
+                return Err(anyhow!(
+                    "Unknown `system` variant defined in `templates/config.yaml`"
+                ));
+            }
+        };
+        let template = Template::new(template_content.to_string(), scheme);
+        let output = template.render()?;
+
         write_to_file(&output_path, &output)?;
     }
 
@@ -101,7 +111,6 @@ pub fn build(theme_template_path: &Path, user_schemes_path: &Path, is_quiet: boo
             .supported_systems
             .clone()
             .unwrap_or(vec![SchemeSystem::default()]);
-        let template = Template::new(template_content)?;
         let output_str = &value.output;
         let output_path = if output_str.is_empty() {
             PathBuf::from(theme_template_path)
@@ -140,7 +149,7 @@ pub fn build(theme_template_path: &Path, user_schemes_path: &Path, is_quiet: boo
                 let scheme_file_path = scheme_direntry.path();
 
                 generate_theme(
-                    &template,
+                    &template_content,
                     &output_path,
                     &scheme_file_path,
                     system.clone(),
