@@ -1,6 +1,6 @@
 mod utils;
 
-use anyhow::Result;
+use anyhow::{Context, Result};
 use std::fs;
 use std::path::PathBuf;
 
@@ -23,10 +23,22 @@ fn setup(system: &str, scheme_name: &str) -> Result<(String, String, String, Str
     ));
 
     Ok((
-        fs::read_to_string(config_file_path)?,
-        fs::read_to_string(scheme_file_path)?,
-        fs::read_to_string(template_file_path)?,
-        fs::read_to_string(template_rendered_path_fixture)?,
+        fs::read_to_string(&config_file_path).context(format!(
+            "Unable to get contents of config: {}",
+            config_file_path.display()
+        ))?,
+        fs::read_to_string(&scheme_file_path).context(format!(
+            "Unable to get contents of scheme: {}",
+            scheme_file_path.display()
+        ))?,
+        fs::read_to_string(&template_file_path).context(format!(
+            "Unable to get contents of template: {}",
+            template_file_path.display()
+        ))?,
+        fs::read_to_string(&template_rendered_path_fixture).context(format!(
+            "Unable to get contents of rendered file: {}",
+            template_rendered_path_fixture.display()
+        ))?,
     ))
 }
 

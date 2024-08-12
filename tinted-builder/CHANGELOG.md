@@ -1,5 +1,12 @@
 # Changelog
 
+## Unreleased
+
+## Changed
+
+- Use `SchemeSystem` and `SchemeVariant` enums for scheme `system` and
+  `variant` properties respectively instead of using string values
+
 ## 0.5.1 - 2024-08-24
 
 ## Fixed
