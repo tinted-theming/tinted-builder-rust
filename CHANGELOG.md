@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.9.5] - 2024-08-24
+
+## Fixed
+
+- Bump tinted-builder version
+
 ## [0.9.4] - 2024-08-24
 
 ## Fixed
