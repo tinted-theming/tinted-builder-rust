@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.9.4] - 2024-08-24
+
+## Fixed
+
+- Use latest tinted-builder which fixes bug where `{{base0X-dec-r|g|b}}`
+  renders `0`
+
 ## [0.9.3] - 2024-07-12
 
 ### Updated
@@ -124,6 +131,8 @@
 - `sync` subcommand support to sync with latest Tinted Theming schemes
 - `build` subcommand to trigger theme template build
 
+[0.9.4]: https://github.com/tinted-theming/tinted-builder-rust/compare/v0.9.3...v0.9.4
+[0.9.3]: https://github.com/tinted-theming/tinted-builder-rust/compare/v0.9.2...v0.9.3
 [0.9.2]: https://github.com/tinted-theming/tinted-builder-rust/compare/v0.9.1...v0.9.2
 [0.9.1]: https://github.com/tinted-theming/tinted-builder-rust/compare/v0.9.0...v0.9.1
 [0.9.0]: https://github.com/tinted-theming/tinted-builder-rust/compare/v0.8.0...v0.9.0

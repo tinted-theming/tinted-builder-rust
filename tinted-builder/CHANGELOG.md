@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.5.1 - 2024-08-24
+
+## Fixed
+
+- Fix bug where `{{base0X-dec-r|g|b}}` renders `0`
+
 ## 0.5.0 - 2024-07-12
 
 ## Changed
