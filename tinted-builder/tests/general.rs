@@ -114,3 +114,39 @@ fn with_nested_sections() -> Result<()> {
     assert_eq!(output, "#cfad25");
     Ok(())
 }
+
+#[test]
+fn render_hex() -> Result<()> {
+    let template_source = "{{base0A-hex}}";
+    let template = Template::new(template_source.to_string())?;
+    let scheme: Scheme = serde_yaml::from_str(SCHEME_SILK_LIGHT)?;
+
+    let output = template.render(&scheme)?;
+
+    assert_eq!(output, "cfad25");
+    Ok(())
+}
+
+#[test]
+fn render_rgb() -> Result<()> {
+    let template_source = "{{base0A-rgb-r}} {{base0A-rgb-g}} {{base0A-rgb-b}}";
+    let template = Template::new(template_source.to_string())?;
+    let scheme: Scheme = serde_yaml::from_str(SCHEME_SILK_LIGHT)?;
+
+    let output = template.render(&scheme)?;
+
+    assert_eq!(output, "207 173 37");
+    Ok(())
+}
+
+#[test]
+fn render_dec() -> Result<()> {
+    let template_source = "{{base0A-dec-r}} {{base0A-dec-g}} {{base0A-dec-b}}";
+    let template = Template::new(template_source.to_string())?;
+    let scheme: Scheme = serde_yaml::from_str(SCHEME_SILK_LIGHT)?;
+
+    let output = template.render(&scheme)?;
+
+    assert_eq!(output, "0.81176471 0.67843137 0.14509804");
+    Ok(())
+}

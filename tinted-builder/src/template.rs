@@ -67,9 +67,18 @@ impl Template {
             context.insert(format!("{}-rgb-r", name), rgb.0.to_string());
             context.insert(format!("{}-rgb-g", name), rgb.1.to_string());
             context.insert(format!("{}-rgb-b", name), rgb.2.to_string());
-            context.insert(format!("{}-dec-r", name), (rgb.0 / 255).to_string());
-            context.insert(format!("{}-dec-g", name), (rgb.1 / 255).to_string());
-            context.insert(format!("{}-dec-b", name), (rgb.2 / 255).to_string());
+            context.insert(
+                format!("{}-dec-r", name),
+                format!("{:.8}", rgb.0 as f64 / 255.),
+            );
+            context.insert(
+                format!("{}-dec-g", name),
+                format!("{:.8}", rgb.1 as f64 / 255.),
+            );
+            context.insert(
+                format!("{}-dec-b", name),
+                format!("{:.8}", rgb.2 as f64 / 255.),
+            );
         }
 
         context
