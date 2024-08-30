@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## [0.10.0] - 2024-08-28
 
 ## Changed
 
@@ -161,6 +161,8 @@
 - `sync` subcommand support to sync with latest Tinted Theming schemes
 - `build` subcommand to trigger theme template build
 
+[0.10.0]: https://github.com/tinted-theming/tinted-builder-rust/compare/v0.9.5...v0.10.0
+[0.9.5]: https://github.com/tinted-theming/tinted-builder-rust/compare/v0.9.3...v0.9.5
 [0.9.4]: https://github.com/tinted-theming/tinted-builder-rust/compare/v0.9.3...v0.9.4
 [0.9.3]: https://github.com/tinted-theming/tinted-builder-rust/compare/v0.9.2...v0.9.3
 [0.9.2]: https://github.com/tinted-theming/tinted-builder-rust/compare/v0.9.1...v0.9.2
