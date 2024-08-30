@@ -50,4 +50,10 @@ pub enum TintedBuilderError {
     /// such as "dark" or "light".
     #[error("invalid scheme variant: {0}")]
     InvalidSchemeVariant(String),
+
+    /// Error indicating that an invalid scheme system was provided.
+    ///
+    /// This variant is used when an input string does not correspond to any valid scheme system
+    #[error("invalid scheme system: {0}")]
+    InvalidSchemeSystem(String),
 }

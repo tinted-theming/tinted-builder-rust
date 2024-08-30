@@ -9,6 +9,16 @@
 - Breaking change: Use `SchemeSystem` and `SchemeVariant` enums for
   scheme `system` and `variant` properties respectively instead of using
   string values
+- Schemes are not required to be in directories named after the scheme
+  `system`. Any `.yaml` or `.yml` scheme file will be collected into the
+  scheme system based on the `system` property defined in the scheme
+  file. Current supported systems are `base16` and `base24`
+
+## Added
+
+- Support for `0.11.1` Tinted Theming builder specification. Dotfile
+  (`.*.yaml` and `.*.yml`) will be ignored
+- Documentation for public operation functions
 
 ## Removed
 

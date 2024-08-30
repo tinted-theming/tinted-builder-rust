@@ -7,6 +7,70 @@ const REPO_NAME: &str = env!("CARGO_PKG_NAME");
 const SCHEMES_REPO_NAME: &str = "schemes";
 const SCHEMES_URL: &str = "https://github.com/tinted-theming/schemes";
 
+/// This function checks if the schemes repository exists at the specified path. If the repository
+/// exists and has no uncommitted changes, it performs a `git pull` to update the repository. If
+/// the repository contains uncommitted changes, it notifies the user and does not perform the
+/// update. If the repository does not exist, it clones the repository from the specified URL.
+///
+/// This function is typically used in the context of a CLI tool to ensure that the latest schemes
+/// are available before performing operations that depend on them.
+///
+/// # Arguments
+///
+/// * `schemes_path` - A reference to a `Path` representing the directory where the schemes
+/// repository is or should be located. * `is_quiet` - A boolean flag that, when set to `true`,
+/// suppresses most of the output, making the operation quieter.
+///
+/// # Returns
+///
+/// Returns a `Result<()>` indicating success (`Ok(())`) or an error (`Err`) if any issues occur
+/// during the synchronization process.
+///
+/// # Errors
+///
+/// This function can return an error in the following scenarios:
+///
+/// * If the target directory already exists when attempting to clone the repository. * If there is
+/// an issue executing the `git` commands (`clone`, `pull`, or `status`). * If the repository
+/// contains uncommitted changes, the function will not perform the update and will notify the
+/// user.
+///
+/// # Usage
+///
+/// This function is typically called from a CLI context, for example:
+///
+/// ```sh
+/// tinted-builder-rust sync
+/// ```
+///
+/// The function will ensure that the schemes repository is up-to-date, either by pulling the
+/// latest changes or by cloning the repository if it does not already exist.
+pub(crate) fn sync(schemes_path: &Path, is_quiet: bool) -> Result<()> {
+    if schemes_path.is_dir() {
+        let is_diff = git_diff(schemes_path)?;
+
+        if !is_diff {
+            git_pull(schemes_path, is_quiet).with_context(|| {
+                format!("Error pulling {} from {}", SCHEMES_REPO_NAME, SCHEMES_URL)
+            })?;
+
+            if !is_quiet {
+                println!("{} up to date", SCHEMES_REPO_NAME);
+            }
+        } else if !is_quiet {
+            println!("{} contains uncommitted changes, please commit or remove and then run `{} update` again.", SCHEMES_REPO_NAME, REPO_NAME);
+        }
+    } else {
+        git_clone(SCHEMES_URL, schemes_path, is_quiet)?;
+
+        if !is_quiet {
+            println!("{} installed", SCHEMES_REPO_NAME);
+        }
+    }
+
+    Ok(())
+}
+
 fn git_clone(repo_url: &str, target_dir: &Path, is_quiet: bool) -> Result<()> {
     if target_dir.exists() {
         return Err(anyhow!(
@@ -71,31 +135,4 @@ fn git_diff(target_dir: &Path) -> Result<bool> {
     } else {
         Ok(true)
     }
-}
-
-/// Sync schemes repo; Install if it does not exist, otherwise update
-pub(crate) fn sync(schemes_path: &Path, is_quiet: bool) -> Result<()> {
-    if schemes_path.is_dir() {
-        let is_diff = git_diff(schemes_path)?;
-
-        if !is_diff {
-            git_pull(schemes_path, is_quiet).with_context(|| {
-                format!("Error pulling {} from {}", SCHEMES_REPO_NAME, SCHEMES_URL)
-            })?;
-
-            if !is_quiet {
-                println!("{} up to date", SCHEMES_REPO_NAME);
-            }
-        } else if !is_quiet {
-            println!("{} contains uncommitted changes, please commit or remove and then run `{} update` again.", SCHEMES_REPO_NAME, REPO_NAME);
-        }
-    } else {
-        git_clone(SCHEMES_URL, schemes_path, is_quiet)?;
-
-        if !is_quiet {
-            println!("{} installed", SCHEMES_REPO_NAME);
-        }
-    }
-
-    Ok(())
 }
