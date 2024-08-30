@@ -4,8 +4,8 @@
 [![Crates.io](https://img.shields.io/crates/v/tinted-builder-rust.svg)](https://crates.io/crates/tinted-builder-rust)
 [![Tests](https://github.com/tinted-theming/tinted-builder-rust/actions/workflows/ci.yml/badge.svg)](https://github.com/tinted-theming/tinted-builder-rust/actions/workflows/ci.yml)
 
-A builder for [base16] and [base24] templates using the `0.11.0` [builder
-specification].
+A builder for [base16] and [base24] templates using the `0.11.1`
+[builder specification].
 
 This crate contains a command-line tool to build base16 and base24
 templates. It is also a library crate which you can use to directly
@@ -67,7 +67,7 @@ The following is a table of the available subcommands for the CLI tool (tinted-b
 
 ## Builder specification
 
-tinted-builder-rust implements the `0.11.0` [builder specification]. This
+tinted-builder-rust implements the `0.11.1` [builder specification]. This
 specification details the scheme yaml format or schema as well as the
 variables the builder should provide when rendering template mustache
 file. Have a look at the [builder specification] document for more

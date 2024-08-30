@@ -4,12 +4,12 @@
 [![Crates.io](https://img.shields.io/crates/v/tinted-builder-rust.svg)](https://crates.io/crates/tinted-builder-rust)
 [![Tests](https://github.com/tinted-theming/tinted-builder-rust/actions/workflows/ci.yml/badge.svg)](https://github.com/tinted-theming/tinted-builder-rust/actions/workflows/ci.yml)
 
-A Rust library to generate [base16] and [base24] templates using the `0.11.0` [builder
-specification].
+A Rust library to generate [base16] and [base24] templates using the
+`0.11.1` [builder specification].
 
-This library exposes a `Scheme` and `Template` struct which you can
-use to generate your own themes using [base16] and [base24] templates and
-`0.11.0` compliant base16 and base24 scheme files.
+This library exposes a `Scheme` and `Template` struct which you can use
+to generate your own themes using [base16] and [base24] templates and
+`0.11.1` compliant base16 and base24 scheme files.
 
 Internally tinted-builder uses [ribboncurls] to render the templates.
 
@@ -67,7 +67,7 @@ let output = template
    `Scheme` variant in step 1 into the `Template` struct:
    `Template::new(mustache_text, scheme)`. The `template.render()`
    method takes the scheme, generates the variables defined in the 
-   `0.11.0` [builder specification] and returns a new string.
+   `0.11.1` [builder specification] and returns a new string.
 3. Render the template by running a method which returns a
    `Result<String, TintedBuilderError>` type: 
    `let output = template.render().unwrap();`

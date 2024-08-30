@@ -3,9 +3,9 @@ mod utils;
 use anyhow::{Context, Result};
 use std::fs;
 use std::path::PathBuf;
+use utils::COMMAND_NAME;
 
-use crate::utils::{write_to_file, COMMAND_NAME};
-
+use crate::utils::write_to_file;
 fn setup(system: &str, scheme_name: &str) -> Result<(String, String, String, String)> {
     let config_file_path: PathBuf =
         PathBuf::from(format!("./tests/fixtures/templates/{}-config.yaml", system));
@@ -118,7 +118,6 @@ fn test_operation_build_with_sync() -> Result<()> {
     let name = "test_operation_sync_first_time";
     let expected_output = "schemes installed";
     let expected_schemes_path = PathBuf::from(format!("./{}/schemes", name));
-    println!("expect: {:?}", expected_schemes_path);
     let expected_data_path = PathBuf::from(name);
     let expected_git_clone_str = format!("Cloning into '{}/schemes'", name);
     if expected_data_path.exists() {
@@ -175,6 +174,16 @@ fn test_operation_build_base16() -> Result<()> {
     let scheme_file_path = schemes_path.join(format!("{}.yaml", &scheme_name));
     let themes_path = template_theme_path.join("output-themes");
     let rendered_theme_path = themes_path.join(format!("base16-{}.md", &scheme_name));
+    // Ensure dotfile yaml/yml files are ignored as scheme files
+    let hidden_yaml_path = schemes_path.join(".hidden.yaml");
+    // Ensure base24 scheme is not built
+    let base24_schemes_path = schemes_path.join("base24");
+    let base24_scheme_content = fs::read_to_string(PathBuf::from(
+        "./tests/fixtures/schemes/base24/dracula.yaml",
+    ))?;
+    let base24_scheme_file_path: PathBuf = schemes_path.join("base24/dracula.yaml");
+    let base24_theme_output_file = themes_path.join("base24-dracula.md");
+
     let (
         base16_config_file_content,
         base16_scheme_file_content,
@@ -191,7 +200,10 @@ fn test_operation_build_base16() -> Result<()> {
     fs::create_dir(&template_theme_path)?;
     fs::create_dir(&schemes_path)?;
     fs::create_dir(&template_templates_path)?;
+    fs::create_dir(base24_schemes_path)?;
     write_to_file(&scheme_file_path, &base16_scheme_file_content)?;
+    write_to_file(&base24_scheme_file_path, &base24_scheme_content)?;
+    write_to_file(&hidden_yaml_path, "content: invalid")?;
     write_to_file(&template_config_path, &base16_config_file_content)?;
     write_to_file(&template_mustache_path, &base16_template_file_content)?;
 
@@ -216,9 +228,19 @@ fn test_operation_build_base16() -> Result<()> {
         "stderr does not contain the expected output"
     );
     assert!(
+        !&base24_theme_output_file.is_file(),
+        "file should not exist: {}",
+        base24_theme_output_file.display()
+    );
+    assert!(
+        &hidden_yaml_path.is_file(),
+        "file does not exist: {}",
+        hidden_yaml_path.display()
+    );
+    assert!(
         stdout.contains(
             format!(
-                "base16 themes generated for \"base16-template\" at \"{}/base16-*.md\"",
+                "Successfully generated \"base16\" themes for \"base16-template\" at \"{}/*.md\"",
                 themes_path.display()
             )
             .as_str()
@@ -289,7 +311,7 @@ fn test_operation_build_base24() -> Result<()> {
     assert!(
         stdout.contains(
             format!(
-                "base24 themes generated for \"base24-template\" at \"{}/base24-*.md\"",
+                "Successfully generated \"base24\" themes for \"base24-template\" at \"{}/*.md\"",
                 themes_path.display()
             )
             .as_str()
@@ -386,17 +408,7 @@ fn test_operation_build_mixed() -> Result<()> {
     assert!(
         stdout.contains(
             format!(
-                "base16 themes generated for \"mixed-template\" at \"{}/base16-*.md\"",
-                themes_path.display()
-            )
-            .as_str()
-        ),
-        "stdout does not contain the exptected output"
-    );
-    assert!(
-        stdout.contains(
-            format!(
-                "base24 themes generated for \"mixed-template\" at \"{}/base24-*.md\"",
+                "Successfully generated \"base16, base24\" themes for \"mixed-template\" at \"{}/*.md\"",
                 themes_path.display()
             )
             .as_str()
@@ -452,6 +464,164 @@ invalid:
     // ------
     assert!(
         stderr.contains(format!("unknown variant `{}`", system).as_str()),
+        "stderr does not contain the expected output"
+    );
+    assert!(
+        stdout.is_empty(),
+        "stdout does not contain the exptected output"
+    );
+
+    Ok(())
+}
+
+/// Tests a base16 scheme with a missing palette.base00 property
+#[test]
+fn test_operation_build_base16_missing_base00() -> Result<()> {
+    // -------
+    // Arrange
+    // -------
+    let scheme_name = "invalid";
+    let system = "base16";
+    let name = "operation_build_base16_missing_base00";
+    let template_theme_path = PathBuf::from(format!("./template-{}", name));
+    let template_templates_path = template_theme_path.join("templates");
+    let template_config_path = template_templates_path.join("config.yaml");
+    let template_mustache_path = template_templates_path.join("base16-template.mustache");
+    let schemes_path = template_theme_path.join("schemes");
+    let scheme_file_path = schemes_path.join(format!("{}.yaml", &scheme_name));
+    let themes_path = template_theme_path.join("output-themes");
+    let scheme_file_content = r#"
+system: "base16"
+name: "UwUnicorn"
+author: "Fernando Marques (https://github.com/RakkiUwU) and Gabriel Fontes (https://github.com/Misterio77)"
+variant: "dark"
+palette:
+  base01: "2f2a3f"
+  base02: "46354a"
+  base03: "6c3cb2"
+  base04: "7e5f83"
+  base05: "eed5d9"
+  base06: "d9c2c6"
+  base07: "e4ccd0"
+  base08: "877bb6"
+  base09: "de5b44"
+  base0A: "a84a73"
+  base0B: "c965bf"
+  base0C: "9c5fce"
+  base0D: "6a9eb5"
+  base0E: "78a38f"
+  base0F: "a3a079"
+"#;
+
+    if themes_path.is_dir() {
+        fs::remove_dir_all(&themes_path)?;
+    }
+    if template_theme_path.is_dir() {
+        fs::remove_dir_all(&template_theme_path)?;
+    }
+    fs::create_dir(&template_theme_path)?;
+    fs::create_dir(&schemes_path)?;
+    fs::create_dir(&template_templates_path)?;
+    write_to_file(&scheme_file_path, scheme_file_content)?;
+
+    let base16_config_file_content = fs::read_to_string(PathBuf::from(format!(
+        "./tests/fixtures/templates/{}-config.yaml",
+        system
+    )))?;
+    let base16_template_file_content = fs::read_to_string(PathBuf::from(format!(
+        "./tests/fixtures/templates/{}-template.mustache",
+        system
+    )))?;
+    write_to_file(&template_config_path, &base16_config_file_content)?;
+    write_to_file(&template_mustache_path, &base16_template_file_content)?;
+
+    // ---
+    // Act
+    // ---
+    let (stdout, stderr) = utils::run_command(vec![
+        COMMAND_NAME.to_string(),
+        "build".to_string(),
+        template_theme_path.display().to_string(),
+        format!("--schemes-dir={}", schemes_path.display()),
+    ])
+    .unwrap();
+
+    // ------
+    // Assert
+    // ------
+    assert!(
+        stderr.contains("base16 scheme does not contain the required palette properties"),
+        "stderr does not contain the expected output"
+    );
+    assert!(
+        stdout.is_empty(),
+        "stdout does not contain the exptected output"
+    );
+
+    Ok(())
+}
+
+/// Tests schemes/invalid.yaml prints error to stderr
+#[test]
+fn test_operation_build_invalid_base16() -> Result<()> {
+    // -------
+    // Arrange
+    // -------
+    let scheme_name = "invalid";
+    let system = "base16";
+    let name = "operation_build_invalid_base16";
+    let template_theme_path = PathBuf::from(format!("./template-{}", name));
+    let template_templates_path = template_theme_path.join("templates");
+    let template_config_path = template_templates_path.join("config.yaml");
+    let template_mustache_path = template_templates_path.join("base16-template.mustache");
+    let schemes_path = template_theme_path.join("schemes");
+    let scheme_file_path = schemes_path.join(format!("{}.yaml", &scheme_name));
+    let themes_path = template_theme_path.join("output-themes");
+
+    if themes_path.is_dir() {
+        fs::remove_dir_all(&themes_path)?;
+    }
+    if template_theme_path.is_dir() {
+        fs::remove_dir_all(&template_theme_path)?;
+    }
+    fs::create_dir(&template_theme_path)?;
+    fs::create_dir(&schemes_path)?;
+    fs::create_dir(&template_templates_path)?;
+    write_to_file(&scheme_file_path, "content: invalid")?;
+
+    let base16_config_file_content = fs::read_to_string(PathBuf::from(format!(
+        "./tests/fixtures/templates/{}-config.yaml",
+        system
+    )))?;
+    let base16_template_file_content = fs::read_to_string(PathBuf::from(format!(
+        "./tests/fixtures/templates/{}-template.mustache",
+        system
+    )))?;
+    write_to_file(&template_config_path, &base16_config_file_content)?;
+    write_to_file(&template_mustache_path, &base16_template_file_content)?;
+
+    // ---
+    // Act
+    // ---
+    let (stdout, stderr) = utils::run_command(vec![
+        COMMAND_NAME.to_string(),
+        "build".to_string(),
+        template_theme_path.display().to_string(),
+        format!("--schemes-dir={}", schemes_path.display()),
+    ])
+    .unwrap();
+
+    // ------
+    // Assert
+    // ------
+    assert!(
+        stderr.contains(
+            format!(
+                r#"Error: Unable to deserialize scheme "{}": missing field `system`"#,
+                scheme_file_path.display()
+            )
+            .as_str()
+        ),
         "stderr does not contain the expected output"
     );
     assert!(
