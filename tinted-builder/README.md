@@ -1,7 +1,7 @@
 # tinted-builder
 
 [![Matrix Chat](https://img.shields.io/matrix/tinted-theming:matrix.org)](https://matrix.to/#/#tinted-theming:matrix.org)
-[![Crates.io](https://img.shields.io/crates/v/tinted-builder-rust.svg)](https://crates.io/crates/tinted-builder-rust)
+[![Crates.io](https://img.shields.io/crates/v/tinted-builder.svg)](https://crates.io/crates/tinted-builder)
 [![Tests](https://github.com/tinted-theming/tinted-builder-rust/actions/workflows/ci.yml/badge.svg)](https://github.com/tinted-theming/tinted-builder-rust/actions/workflows/ci.yml)
 
 A Rust library to generate [base16] and [base24] templates using the
