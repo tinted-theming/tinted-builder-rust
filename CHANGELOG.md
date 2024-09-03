@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.10.1] - 2024-09-03
+
+## Fixed
+
+- Fix bug where `templates/config.yaml` extension property is always
+  prepended by a period `.`. The property is now considered the full
+  extension.
+
 ## [0.10.0] - 2024-08-28
 
 ## Changed
@@ -161,6 +169,7 @@
 - `sync` subcommand support to sync with latest Tinted Theming schemes
 - `build` subcommand to trigger theme template build
 
+[0.10.1]: https://github.com/tinted-theming/tinted-builder-rust/compare/v0.10.0...v0.10.1
 [0.10.0]: https://github.com/tinted-theming/tinted-builder-rust/compare/v0.9.5...v0.10.0
 [0.9.5]: https://github.com/tinted-theming/tinted-builder-rust/compare/v0.9.3...v0.9.5
 [0.9.4]: https://github.com/tinted-theming/tinted-builder-rust/compare/v0.9.3...v0.9.4

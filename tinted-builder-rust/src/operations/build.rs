@@ -188,7 +188,8 @@ fn get_theme_template_path(theme_template_path: &Path) -> Result<PathBuf> {
 /// * `output_dir` - A reference to a `PathBuf` representing the directory where the output file will be written.
 /// * `scheme_path` - A reference to a `Path` representing the file path to the scheme file.
 /// * `system` - The `SchemeSystem` that the scheme file should match.
-/// * `extension` - A string slice representing the file extension for the generated theme file.
+/// * `explicit_extension` - A string slice representing the file extension for the generated theme
+///   file. The parameter is named "explict" extension because it includes the "dot" or lack thereof
 ///
 /// # Returns
 ///
@@ -216,7 +217,7 @@ fn generate_theme(
     output_dir: &PathBuf,
     scheme_path: &Path,
     system: SchemeSystem,
-    extension: &str,
+    explicit_extension: &str,
 ) -> Result<()> {
     let scheme_file_type = SchemeFileType::new(scheme_path)?;
     let scheme_path = scheme_file_type
@@ -247,10 +248,10 @@ fn generate_theme(
             let template = Template::new(template_content.to_string(), scheme.clone());
             let output = template.render()?;
             let output_path = output_dir.join(format!(
-                "{}-{}.{}",
+                "{}-{}{}",
                 &scheme_inner.system,
                 scheme_file_type.get_file_stem().unwrap_or_default(),
-                extension
+                explicit_extension
             ));
 
             if !output_path.exists() {
@@ -274,11 +275,9 @@ fn generate_themes_for_config(
     schemes_filetypes: &[SchemeFileType],
     is_quiet: bool,
 ) -> Result<()> {
-    let extension = config_value
-        .extension
-        .as_str()
-        .strip_prefix('.')
-        .unwrap_or(config_value.extension.as_str());
+    // "explicit" extension because it contains the entire extension including (or excluding) the
+    // period
+    let explicit_extension = config_value.extension.as_str();
     let template_path = theme_template_path.join(format!("templates/{}.mustache", config_name));
     let template_content = read_to_string(&template_path).context(format!(
         "Mustache template missing: {}",
@@ -349,13 +348,13 @@ fn generate_themes_for_config(
             &output_path,
             &scheme_path,
             scheme_system,
-            extension,
+            explicit_extension,
         )?;
     }
 
     if !is_quiet {
         println!(
-            "Successfully generated \"{}\" themes for \"{}\" at \"{}/*.{}\"",
+            "Successfully generated \"{}\" themes for \"{}\" at \"{}/*{}\"",
             supported_systems
                 .iter()
                 .map(|item| item.as_str().to_string())
@@ -363,7 +362,7 @@ fn generate_themes_for_config(
                 .join(", "),
             config_name,
             output_path.display(),
-            extension,
+            explicit_extension,
         );
     }
 

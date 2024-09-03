@@ -267,7 +267,9 @@ fn test_operation_build_base24() -> Result<()> {
     let schemes_path = template_theme_path.join("schemes");
     let scheme_file_path = schemes_path.join(format!("{}.yaml", &scheme_name));
     let themes_path = template_theme_path.join("output-themes");
-    let rendered_theme_path = themes_path.join(format!("base24-{}.md", &scheme_name));
+    let output_extension = "-custom-extension";
+    let rendered_theme_path =
+        themes_path.join(format!("base24-{}{}", &scheme_name, &output_extension));
     let (
         base24_config_file_content,
         base24_scheme_file_content,
@@ -311,8 +313,9 @@ fn test_operation_build_base24() -> Result<()> {
     assert!(
         stdout.contains(
             format!(
-                "Successfully generated \"base24\" themes for \"base24-template\" at \"{}/*.md\"",
-                themes_path.display()
+                "Successfully generated \"base24\" themes for \"base24-template\" at \"{}/*{}\"",
+                themes_path.display(),
+                output_extension
             )
             .as_str()
         ),
