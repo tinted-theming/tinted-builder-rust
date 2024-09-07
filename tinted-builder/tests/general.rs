@@ -140,6 +140,18 @@ fn render_rgb() -> Result<()> {
 }
 
 #[test]
+fn render_rgb16() -> Result<()> {
+    let template_source = "{{base0A-rgb16-r}} {{base0A-rgb16-g}} {{base0A-rgb16-b}}";
+    let scheme = Scheme::Base16(serde_yaml::from_str(SCHEME_SILK_LIGHT)?);
+    let template = Template::new(template_source.to_string(), scheme);
+
+    let output = template.render()?;
+
+    assert_eq!(output, "53199 44461 9509");
+    Ok(())
+}
+
+#[test]
 fn render_dec() -> Result<()> {
     let template_source = "{{base0A-dec-r}} {{base0A-dec-g}} {{base0A-dec-b}}";
     let scheme = Scheme::Base16(serde_yaml::from_str(SCHEME_SILK_LIGHT)?);
