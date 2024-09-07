@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.7.0 - 2024-09-07
+
+## Added
+
+- Add support for proposed 0.12.0 builder spec by adding 16bit rgb
+  colour variables to the mustache context
+
 ## 0.6.0 - 2024-08-28
 
 ## Added

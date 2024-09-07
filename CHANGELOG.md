@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.11.0] - 2024-09-07
+
+## Added
+
+- Add support for proposed 0.12.0 builder spec by adding 16bit rgb
+  colour variables to the mustache context
+
 ## [0.10.1] - 2024-09-03
 
 ## Fixed
@@ -169,6 +176,7 @@
 - `sync` subcommand support to sync with latest Tinted Theming schemes
 - `build` subcommand to trigger theme template build
 
+[0.11.0]: https://github.com/tinted-theming/tinted-builder-rust/compare/v0.10.1...v0.11.0
 [0.10.1]: https://github.com/tinted-theming/tinted-builder-rust/compare/v0.10.0...v0.10.1
 [0.10.0]: https://github.com/tinted-theming/tinted-builder-rust/compare/v0.9.5...v0.10.0
 [0.9.5]: https://github.com/tinted-theming/tinted-builder-rust/compare/v0.9.3...v0.9.5

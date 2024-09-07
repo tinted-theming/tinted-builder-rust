@@ -55,6 +55,18 @@ pub(crate) fn to_template_context(scheme: &Base16Scheme) -> HashMap<String, Stri
         context.insert(format!("{}-rgb-g", name), rgb.1.to_string());
         context.insert(format!("{}-rgb-b", name), rgb.2.to_string());
         context.insert(
+            format!("{}-rgb16-r", name),
+            (rgb.0 as u16 * 257_u16).to_string(),
+        );
+        context.insert(
+            format!("{}-rgb16-g", name),
+            (rgb.1 as u16 * 257_u16).to_string(),
+        );
+        context.insert(
+            format!("{}-rgb16-b", name),
+            (rgb.2 as u16 * 257_u16).to_string(),
+        );
+        context.insert(
             format!("{}-dec-r", name),
             format!("{:.8}", rgb.0 as f64 / 255.),
         );
