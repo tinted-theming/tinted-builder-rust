@@ -18,8 +18,8 @@ const SCHEMES_URL: &str = "https://github.com/tinted-theming/schemes";
 /// # Arguments
 ///
 /// * `schemes_path` - A reference to a `Path` representing the directory where the schemes
-/// repository is or should be located. * `is_quiet` - A boolean flag that, when set to `true`,
-/// suppresses most of the output, making the operation quieter.
+///   repository is or should be located. * `is_quiet` - A boolean flag that, when set to `true`,
+///   suppresses most of the output, making the operation quieter.
 ///
 /// # Returns
 ///
@@ -31,9 +31,9 @@ const SCHEMES_URL: &str = "https://github.com/tinted-theming/schemes";
 /// This function can return an error in the following scenarios:
 ///
 /// * If the target directory already exists when attempting to clone the repository. * If there is
-/// an issue executing the `git` commands (`clone`, `pull`, or `status`). * If the repository
-/// contains uncommitted changes, the function will not perform the update and will notify the
-/// user.
+///   an issue executing the `git` commands (`clone`, `pull`, or `status`). * If the repository
+///   contains uncommitted changes, the function will not perform the update and will notify the
+///   user.
 ///
 /// # Usage
 ///

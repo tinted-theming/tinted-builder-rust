@@ -20,9 +20,9 @@ const REPO_NAME: &str = env!("CARGO_PKG_NAME");
 /// # Arguments
 ///
 /// * `theme_template_path` - A reference to a `Path` representing the path to the theme template
-/// directory or file. * `user_schemes_path` - A reference to a `Path` representing the directory
-/// where user schemes are stored. * `is_quiet` - A boolean flag that, when set to `true`,
-/// suppresses most of the output, making the build process quieter.
+///   directory or file. * `user_schemes_path` - A reference to a `Path` representing the directory
+///   where user schemes are stored. * `is_quiet` - A boolean flag that, when set to `true`,
+///   suppresses most of the output, making the build process quieter.
 ///
 /// # Returns
 ///
@@ -34,9 +34,9 @@ const REPO_NAME: &str = env!("CARGO_PKG_NAME");
 /// This function can return an error in several scenarios:
 ///
 /// * If the user schemes directory does not exist locally, it suggests running the `sync` command
-/// first. * If the theme template configuration file is missing or invalid (e.g., not a valid YAML
-/// file). * If there are issues reading the template configuration or parsing it as a YAML file. *
-/// If there are errors during the theme generation process for any configuration.
+///   first. * If the theme template configuration file is missing or invalid (e.g., not a valid YAML
+///   file). * If there are issues reading the template configuration or parsing it as a YAML file. *
+///   If there are errors during the theme generation process for any configuration.
 ///
 /// # Usage
 ///
