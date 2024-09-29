@@ -113,17 +113,18 @@ fn test_operation_build_with_sync() -> Result<()> {
     // -------
     // Arrange
     // -------
-    let name = "test_operation_build_with_sync";
+    let name = "operation_build_with_sync";
     let template_theme_path = PathBuf::from(format!("./template-{}", name));
-    let name = "test_operation_sync_first_time";
     let expected_output = "schemes installed";
-    let expected_schemes_path = PathBuf::from(format!("./{}/schemes", name));
-    let expected_data_path = PathBuf::from(name);
-    let expected_git_clone_str = format!("Cloning into '{}/schemes'", name);
+    let expected_schemes_path =
+        PathBuf::from(format!("./{}/schemes", template_theme_path.display()));
+    let expected_data_path = PathBuf::from(&template_theme_path);
+    let expected_git_clone_str =
+        format!("Cloning into '{}/schemes'", template_theme_path.display());
     if expected_data_path.exists() {
         fs::remove_dir_all(&expected_data_path)?;
-        fs::create_dir(expected_data_path)?;
     }
+    fs::create_dir(expected_data_path)?;
 
     // ---
     // Act
@@ -131,7 +132,7 @@ fn test_operation_build_with_sync() -> Result<()> {
     // Build act
     let (stdout, stderr) = utils::run_command(vec![
         COMMAND_NAME.to_string(),
-        format!("--data-dir={}", name),
+        format!("--data-dir={}", template_theme_path.display()),
         "build".to_string(),
         template_theme_path.display().to_string(),
         "--sync".to_string(),
