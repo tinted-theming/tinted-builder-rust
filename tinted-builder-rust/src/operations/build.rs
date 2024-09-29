@@ -67,15 +67,48 @@ pub fn build(theme_template_path: &Path, user_schemes_path: &Path, is_quiet: boo
     let template_config_content = read_to_string(template_config_path)?;
     let template_config: HashMap<String, TemplateConfig> =
         serde_yaml::from_str(&template_config_content)?;
-    let schemes_filetypes = get_recursive_scheme_paths_from_dir(user_schemes_path)?;
+
+    let scheme_files: Vec<(PathBuf, Result<Scheme>)> =
+        get_recursive_scheme_paths_from_dir(user_schemes_path)?
+            .iter()
+            .map(|item| (item.get_path().unwrap_or_default(), item.get_scheme()))
+            .collect();
+
+    let all_scheme_files: Vec<(PathBuf, Scheme)> = scheme_files
+        .iter()
+        .map(|(path, scheme)| match scheme {
+            Ok(scheme) => Ok((path.clone(), scheme.clone())),
+            Err(err_message) => Err(anyhow!(
+                "Unable to deserialize scheme \"{}\": {}",
+                path.display(),
+                err_message
+            )),
+        })
+        .collect::<Result<Vec<(PathBuf, Scheme)>>>()?;
 
     // For each template definition in the templates/config.yaml file
     for (config_name, config_value) in template_config.iter() {
+        let scheme_files: Vec<(PathBuf, Scheme)> = all_scheme_files
+            .iter()
+            .filter_map(|(path, scheme)| {
+                if config_value
+                    .supported_systems
+                    .clone()
+                    .unwrap_or(vec![SchemeSystem::default()])
+                    .contains(&scheme.get_scheme_system())
+                {
+                    Some((path.clone(), scheme.clone()))
+                } else {
+                    None
+                }
+            })
+            .collect();
+
         generate_themes_for_config(
             config_name,
             config_value,
             theme_template_path,
-            &schemes_filetypes,
+            &scheme_files,
             is_quiet,
         )?;
     }
@@ -84,12 +117,12 @@ pub fn build(theme_template_path: &Path, user_schemes_path: &Path, is_quiet: boo
 }
 
 #[derive(Debug, Clone)]
-enum SchemeFileType {
+enum SchemeFile {
     Yaml(PathBuf),
     Yml(PathBuf),
 }
 
-impl SchemeFileType {
+impl SchemeFile {
     pub fn new(path: &Path) -> Result<Self> {
         let extension = path
             .extension()
@@ -130,7 +163,7 @@ impl SchemeFileType {
                         }
                     }
                 } else {
-                    Err(anyhow!("Unable to get scheme from SchemeFileType"))
+                    Err(anyhow!("Unable to get scheme from SchemeFile"))
                 }
             }
         }
@@ -219,7 +252,7 @@ fn generate_theme(
     system: SchemeSystem,
     explicit_extension: &str,
 ) -> Result<()> {
-    let scheme_file_type = SchemeFileType::new(scheme_path)?;
+    let scheme_file_type = SchemeFile::new(scheme_path)?;
     let scheme_path = scheme_file_type
         .get_path()
         .ok_or(anyhow!("Unable to get path from FileType"))?;
@@ -272,11 +305,9 @@ fn generate_themes_for_config(
     config_name: &str,
     config_value: &TemplateConfig,
     theme_template_path: &Path,
-    schemes_filetypes: &[SchemeFileType],
+    scheme_files: &Vec<(PathBuf, Scheme)>,
     is_quiet: bool,
 ) -> Result<()> {
-    // "explicit" extension because it contains the entire extension including (or excluding) the
-    // period
     let explicit_extension = config_value.extension.as_str();
     let template_path = theme_template_path.join(format!("templates/{}.mustache", config_name));
     let template_content = read_to_string(&template_path).context(format!(
@@ -305,48 +336,13 @@ fn generate_themes_for_config(
         create_dir_all(&output_path)?
     }
 
-    let schemes_result_vec: Vec<(PathBuf, Result<Scheme>)> = schemes_filetypes
-        .iter()
-        .map(|item| (item.get_path().unwrap_or_default(), item.get_scheme()))
-        .collect();
-    let scheme_err_path_option = schemes_result_vec.iter().find_map(|(path, scheme)| {
-        if let Err(err_message) = scheme {
-            Some((path, err_message))
-        } else {
-            None
-        }
-    });
-
-    if let Some((path, err_message)) = scheme_err_path_option {
-        return Err(anyhow!(
-            "Unable to deserialize scheme \"{}\": {}",
-            path.display(),
-            err_message
-        ));
-    }
-
-    let schemes_vec = schemes_result_vec
-        .into_iter()
-        .filter_map(|(path, scheme_result)| match &scheme_result {
-            Ok(Scheme::Base16(scheme)) | Ok(Scheme::Base24(scheme)) => {
-                if supported_systems.contains(&scheme.system) {
-                    // This should always unwrap since `Err` variant checking happens in the step
-                    // before this
-                    Some((path, scheme_result.unwrap()))
-                } else {
-                    None
-                }
-            }
-            _ => None,
-        });
-
-    for (scheme_path, scheme) in schemes_vec {
+    for (scheme_path, scheme) in scheme_files {
         let scheme_system = scheme.get_scheme_system();
 
         generate_theme(
             &template_content,
             &output_path,
-            &scheme_path,
+            scheme_path,
             scheme_system,
             explicit_extension,
         )?;
@@ -388,7 +384,7 @@ struct TemplateConfig {
 ///
 /// # Returns
 ///
-/// Returns a `Result` containing a `Vec<SchemeFileType>` if successful, where `SchemeFileType`
+/// Returns a `Result` containing a `Vec<SchemeFile>` if successful, where `SchemeFile`
 /// represents a valid scheme file. If any error occurs during directory traversal or file handling,
 /// an `Err` with the relevant error information is returned.
 ///
@@ -398,9 +394,9 @@ struct TemplateConfig {
 ///
 /// * If the directory cannot be read.
 /// * If there is an issue accessing the contents of the directory.
-/// * If there is an issue creating a `SchemeFileType` from a file path.
-fn get_recursive_scheme_paths_from_dir(dirpath: &Path) -> Result<Vec<SchemeFileType>> {
-    let mut scheme_paths: Vec<SchemeFileType> = vec![];
+/// * If there is an issue creating a `SchemeFile` from a file path.
+fn get_recursive_scheme_paths_from_dir(dirpath: &Path) -> Result<Vec<SchemeFile>> {
+    let mut scheme_paths: Vec<SchemeFile> = vec![];
 
     for item in dirpath.read_dir()? {
         let file_path = item?.path();
@@ -425,7 +421,7 @@ fn get_recursive_scheme_paths_from_dir(dirpath: &Path) -> Result<Vec<SchemeFileT
             continue;
         }
 
-        let scheme_file_type_result = SchemeFileType::new(&file_path);
+        let scheme_file_type_result = SchemeFile::new(&file_path);
 
         match scheme_file_type_result {
             Ok(scheme_file_type) => {
