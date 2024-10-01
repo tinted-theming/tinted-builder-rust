@@ -134,7 +134,7 @@ fn test_operation_build_with_sync() -> Result<()> {
         COMMAND_NAME.to_string(),
         format!("--data-dir={}", template_theme_path.display()),
         "build".to_string(),
-        template_theme_path.display().to_string(),
+        name.to_string(),
         "--sync".to_string(),
     ])
     .unwrap();
@@ -241,10 +241,11 @@ fn test_operation_build_base16() -> Result<()> {
     assert!(
         stdout.contains(
             format!(
-                "Successfully generated \"base16\" themes for \"base16-template\" at \"{}/*.md\"",
-                themes_path.display()
-            )
-            .as_str()
+                "Successfully generated \"base16\" themes for \"base16-template\" with filename \"{}\"",
+                themes_path
+                    .join("{{ scheme-system }}-{{ scheme-slug }}.md")
+                    .display()
+            ).as_str()
         ),
         "stdout does not contain the exptected output"
     );
@@ -314,11 +315,11 @@ fn test_operation_build_base24() -> Result<()> {
     assert!(
         stdout.contains(
             format!(
-                "Successfully generated \"base24\" themes for \"base24-template\" at \"{}/*{}\"",
-                themes_path.display(),
-                output_extension
-            )
-            .as_str()
+                "Successfully generated \"base24\" themes for \"base24-template\" with filename \"{}\"",
+                themes_path
+                    .join(format!("{{{{ scheme-system }}}}-{{{{ scheme-slug }}}}{}", output_extension))
+                    .display()
+            ).as_str()
         ),
         "stdout does not contain the exptected output"
     );
@@ -412,10 +413,11 @@ fn test_operation_build_mixed() -> Result<()> {
     assert!(
         stdout.contains(
             format!(
-                "Successfully generated \"base16, base24\" themes for \"mixed-template\" at \"{}/*.md\"",
-                themes_path.display()
-            )
-            .as_str()
+                "Successfully generated \"base16, base24\" themes for \"mixed-template\" with filename \"{}\"",
+                themes_path
+                    .join("{{ scheme-system }}-{{ scheme-slug }}.md")
+                    .display()
+            ).as_str()
         ),
         "stdout does not contain the exptected output"
     );
@@ -438,8 +440,7 @@ fn test_operation_build_invalid_system() -> Result<()> {
     let base16_config_file_content = format!(
         r#"
 invalid:
-  extension: .md
-  output: output-themes
+  filename: output-themes/{{ scheme-system }}-{{ scheme-slug }}.md
   supported-systems: [{}]"#,
         system
     );
@@ -630,6 +631,76 @@ fn test_operation_build_invalid_base16() -> Result<()> {
     );
     assert!(
         stdout.is_empty(),
+        "stdout does not contain the exptected output"
+    );
+
+    Ok(())
+}
+
+/// Tests deprecated error messages when "output" or "extension" config properties are used
+#[test]
+fn test_operation_build_with_deprecated_config_properties() -> Result<()> {
+    // -------
+    // Arrange
+    // -------
+    let system = "base16";
+    let scheme_name = "silk-light";
+    let name = "operation_build_with_deprecated_config_properties";
+    let template_theme_path = PathBuf::from(format!("./template-{}", name));
+    let template_templates_path = template_theme_path.join("templates");
+    let template_config_path = template_templates_path.join("config.yaml");
+    let schemes_path = template_theme_path.join("schemes");
+    let scheme_file_path = schemes_path.join(format!("{}.yaml", &scheme_name));
+    let template_mustache_path = template_templates_path.join("base16-template.mustache");
+    let themes_path = template_theme_path.join("output-themes");
+    let rendered_theme_path = themes_path.join(format!("{}-{}.md", &system, &scheme_name));
+    let base16_config_file_content = r#"
+base16-template:
+  output: output-themes
+  extension: .md"#;
+    let (_, scheme_file_content, template_file_content, base16_template_rendered_content_fixture) =
+        setup(system, scheme_name)?;
+
+    if template_theme_path.is_dir() {
+        fs::remove_dir_all(&template_theme_path)?;
+    }
+    fs::create_dir(&template_theme_path)?;
+    fs::create_dir(&schemes_path)?;
+    fs::create_dir(&template_templates_path)?;
+    write_to_file(&template_config_path, base16_config_file_content)?;
+    write_to_file(&template_mustache_path, &template_file_content)?;
+    write_to_file(&scheme_file_path, &scheme_file_content)?;
+
+    // ---
+    // Act
+    // ---
+    let (stdout, stderr) = utils::run_command(vec![
+        COMMAND_NAME.to_string(),
+        "build".to_string(),
+        template_theme_path.display().to_string(),
+        format!("--schemes-dir={}", schemes_path.display()),
+    ])
+    .unwrap();
+    let rendered_content = fs::read_to_string(rendered_theme_path)?;
+    assert_eq!(rendered_content, base16_template_rendered_content_fixture);
+
+    // ------
+    // Assert
+    // ------
+    assert!(
+        stderr.is_empty(),
+        "stderr does not contain the expected output"
+    );
+    assert!(
+        stdout.contains(
+            "Warning: \"output\" is a deprecated config property, use \"filename\" instead."
+        ),
+        "stdout does not contain the exptected output"
+    );
+    assert!(
+        stdout.contains(
+            "Warning: \"extension\" is a deprecated config property, use \"filename\" instead."
+        ),
         "stdout does not contain the exptected output"
     );
 

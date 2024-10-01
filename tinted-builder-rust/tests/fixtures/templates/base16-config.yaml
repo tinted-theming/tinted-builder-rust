@@ -1,3 +1,2 @@
 base16-template: 
-  extension: .md
-  output: output-themes
+  filename: output-themes/{{ scheme-system }}-{{ scheme-slug }}.md

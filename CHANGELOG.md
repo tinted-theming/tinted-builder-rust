@@ -1,5 +1,11 @@
 # Changelog
 
+## Unchanged
+
+## Fixed
+
+- Add missing support for `filename` config.yaml property
+
 ## [0.11.0] - 2024-09-07
 
 ## Added
