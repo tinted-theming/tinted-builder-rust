@@ -1,4 +1,3 @@
 base24-template: 
-  extension: -custom-extension
-  output: output-themes
+  filename: output-themes/{{ scheme-system }}-{{ scheme-slug }}-custom-extension
   supported-systems: [base24]
