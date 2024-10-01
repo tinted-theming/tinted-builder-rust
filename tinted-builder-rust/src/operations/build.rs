@@ -1,4 +1,5 @@
 use anyhow::{anyhow, Context, Result};
+use regex::Regex;
 use serde::Deserialize;
 use std::collections::HashMap;
 use std::fs::{self, create_dir_all, read_to_string};
@@ -87,11 +88,11 @@ pub fn build(theme_template_path: &Path, user_schemes_path: &Path, is_quiet: boo
         .collect::<Result<Vec<(PathBuf, Scheme)>>>()?;
 
     // For each template definition in the templates/config.yaml file
-    for (config_name, config_value) in template_config.iter() {
-        let scheme_files: Vec<(PathBuf, Scheme)> = all_scheme_files
+    for (template_item_config_name, template_item_config_value) in template_config.iter() {
+        let template_item_scheme_files: Vec<(PathBuf, Scheme)> = all_scheme_files
             .iter()
             .filter_map(|(path, scheme)| {
-                if config_value
+                if template_item_config_value
                     .supported_systems
                     .clone()
                     .unwrap_or(vec![SchemeSystem::default()])
@@ -105,15 +106,62 @@ pub fn build(theme_template_path: &Path, user_schemes_path: &Path, is_quiet: boo
             .collect();
 
         generate_themes_for_config(
-            config_name,
-            config_value,
+            template_item_config_name,
+            template_item_config_value,
             theme_template_path,
-            &scheme_files,
+            &template_item_scheme_files,
             is_quiet,
         )?;
     }
 
     Ok(())
+}
+
+#[derive(Debug)]
+struct ParsedFilename {
+    directory: PathBuf,
+    filestem: String,
+    file_extension: Option<String>,
+}
+
+impl ParsedFilename {
+    pub fn get_path(&self) -> PathBuf {
+        let directory = &self.directory;
+        let filestem = &self.filestem;
+        let file_extension = &self
+            .file_extension
+            .as_ref()
+            .map(|ext| format!(".{}", ext))
+            .unwrap_or_default();
+
+        directory.join(format!("{}{}", filestem, file_extension))
+    }
+}
+
+fn parse_filename(template_path: &Path, filepath: &str) -> Result<ParsedFilename> {
+    let re = Regex::new(r"^(?P<directory>.*/)?(?P<filestem>[^/\.]+)(?:\.(?P<extension>[^/]+))?$")
+        .unwrap();
+
+    if let Some(captures) = re.captures(filename) {
+        // Extract the directory (if present), or use "." if there's no directory
+        let directory = captures
+            .name("directory")
+            .map(|d| PathBuf::from(d.as_str()))
+            .unwrap_or_else(|| template_path.to_path_buf());
+        let filestem = captures.name("filestem").unwrap().as_str().to_string();
+        let file_extension = captures
+            .name("extension")
+            .map(|ext| ext.as_str().to_string());
+
+        // Return the parsed path
+        Ok(ParsedFilename {
+            directory,
+            filestem,
+            file_extension,
+        })
+    } else {
+        Err(anyhow!("Unable to parse template filename: {}", &filename))
+    }
 }
 
 #[derive(Debug, Clone)]
@@ -174,27 +222,6 @@ impl SchemeFile {
             Self::Yaml(path) | Self::Yml(path) => Some(path.to_path_buf()),
         }
     }
-
-    pub fn get_file_stem(&self) -> Result<String> {
-        match self {
-            Self::Yaml(path) | Self::Yml(path) => {
-                let file_stem = path
-                    .file_stem()
-                    .unwrap_or_default()
-                    .to_str()
-                    .unwrap_or_default();
-
-                if file_stem.is_empty() {
-                    Err(anyhow!(
-                        "Unable to extract file_stem from path: {}",
-                        path.display()
-                    ))
-                } else {
-                    Ok(file_stem.to_string())
-                }
-            }
-        }
-    }
 }
 
 // Allow for the use of `.yaml` and `.yml` extensions
@@ -247,10 +274,9 @@ fn get_theme_template_path(theme_template_path: &Path) -> Result<PathBuf> {
 /// Note: This function skips processing hidden files (files whose names start with a `.`).
 fn generate_theme(
     template_content: &str,
-    output_dir: &PathBuf,
+    parsed_filename: ParsedFilename,
     scheme_path: &Path,
     system: SchemeSystem,
-    explicit_extension: &str,
 ) -> Result<()> {
     let scheme_file_type = SchemeFile::new(scheme_path)?;
     let scheme_path = scheme_file_type
@@ -280,15 +306,10 @@ fn generate_theme(
 
             let template = Template::new(template_content.to_string(), scheme.clone());
             let output = template.render()?;
-            let output_path = output_dir.join(format!(
-                "{}-{}{}",
-                &scheme_inner.system,
-                scheme_file_type.get_file_stem().unwrap_or_default(),
-                explicit_extension
-            ));
+            let output_path = parsed_filename.get_path();
 
             if !output_path.exists() {
-                fs::create_dir_all(output_dir)?;
+                fs::create_dir_all(parsed_filename.directory)?;
             }
 
             write_to_file(&output_path, &output)?;
@@ -308,7 +329,7 @@ fn generate_themes_for_config(
     scheme_files: &Vec<(PathBuf, Scheme)>,
     is_quiet: bool,
 ) -> Result<()> {
-    let explicit_extension = config_value.extension.as_str();
+    let extension_including_prefix = config_value.extension.as_str();
     let template_path = theme_template_path.join(format!("templates/{}.mustache", config_name));
     let template_content = read_to_string(&template_path).context(format!(
         "Mustache template missing: {}",
@@ -336,15 +357,36 @@ fn generate_themes_for_config(
         create_dir_all(&output_path)?
     }
 
+    // Create `filename` property from deprecated `output` and `extension` properties
+    let template_filename = format!(
+        "{}/{{{{ scheme-system }}}}-{{{{ scheme-slug }}}}{}",
+        output_path.display(),
+        extension_including_prefix
+    );
+
     for (scheme_path, scheme) in scheme_files {
-        let scheme_system = scheme.get_scheme_system();
+        let (scheme_slug, scheme_system) = match scheme {
+            Scheme::Base16(scheme) => Ok((&scheme.slug, &scheme.system)),
+            Scheme::Base24(scheme) => Ok((&scheme.slug, &scheme.system)),
+            scheme => Err(anyhow!(
+                "Unsupported scheme system: {}",
+                scheme.get_scheme_system()
+            )),
+        }?;
+        // Replace string variables. Use lazy replace instead of running through mustache template
+        // rendering engine for performace
+        let filepath = template_filename
+            .replacen("{{ scheme-slug }}", &scheme_slug.to_string(), 1)
+            .replacen("{{scheme-slug}}", &scheme_slug.to_string(), 1)
+            .replacen("{{ scheme-system }}", &scheme_system.to_string(), 1)
+            .replacen("{{scheme-system}}", &scheme_system.to_string(), 1);
+        let parsed_filename = parse_filename(&template_path, &filepath)?;
 
         generate_theme(
             &template_content,
-            &output_path,
+            parsed_filename,
             scheme_path,
-            scheme_system,
-            explicit_extension,
+            scheme_system.clone(),
         )?;
     }
 
@@ -358,7 +400,7 @@ fn generate_themes_for_config(
                 .join(", "),
             config_name,
             output_path.display(),
-            explicit_extension,
+            extension_including_prefix,
         );
     }
 
