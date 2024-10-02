@@ -1,10 +1,11 @@
 # Changelog
 
-## Unchanged
+## [0.11.1] - 2024-10-02
 
 ## Fixed
 
-- Add missing support for `filename` config.yaml property
+- Add missing support for `filename` config.yaml property as per 0.11.2
+  builder specification
 
 ## [0.11.0] - 2024-09-07
 
@@ -182,6 +183,7 @@
 - `sync` subcommand support to sync with latest Tinted Theming schemes
 - `build` subcommand to trigger theme template build
 
+[0.11.1]: https://github.com/tinted-theming/tinted-builder-rust/compare/v0.11.0...v0.11.1
 [0.11.0]: https://github.com/tinted-theming/tinted-builder-rust/compare/v0.10.1...v0.11.0
 [0.10.1]: https://github.com/tinted-theming/tinted-builder-rust/compare/v0.10.0...v0.10.1
 [0.10.0]: https://github.com/tinted-theming/tinted-builder-rust/compare/v0.9.5...v0.10.0

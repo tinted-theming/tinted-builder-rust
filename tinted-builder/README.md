@@ -81,7 +81,7 @@ information.
 
 Ribboncurls is dual-licensed under the [Apache 2.0] and [MIT] licenses.
 For more information about the licenses of the projects used by
-Ribboncurls, have a look at [THIRD_PARTY_LICENSES.md].
+Ribboncurls, have a look at [LICENSES-THIRD-PARTY.md].
 
 [latest schemes repository]: https://github.com/tinted-theming/schemes
 [home repository]: https://github.com/tinted-theming/home
@@ -91,6 +91,6 @@ Ribboncurls, have a look at [THIRD_PARTY_LICENSES.md].
 [ribboncurls]: https://github.com/tinted-theming/ribboncurls
 [builder specification]: https://github.com/tinted-theming/home/blob/main/builder.md
 [LICENSE]: LICENSE
-[THIRD_PARTY_LICENSES.md]: THIRD_PARTY_LICENSES.md
+[LICENSES-THIRD-PARTY.md]: LICENSES-THIRD-PARTY.md
 [CONTRIBUTING.md]: CONTRIBUTING.md
 [repository releases]: https://github.com/tinted-theming/tinted-builder-rust/releases/latest

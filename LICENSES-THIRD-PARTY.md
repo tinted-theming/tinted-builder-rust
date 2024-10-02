@@ -1468,9 +1468,9 @@ END OF TERMS AND CONDITIONS
 - [equivalent 1.0.1](https://github.com/cuviper/equivalent)
 - [hashbrown 0.14.5](https://github.com/rust-lang/hashbrown)
 - [indexmap 2.2.6](https://github.com/indexmap-rs/indexmap)
-- [regex-automata 0.4.7](https://github.com/rust-lang/regex/tree/master/regex-automata)
-- [regex-syntax 0.8.4](https://github.com/rust-lang/regex/tree/master/regex-syntax)
-- [regex 1.10.5](https://github.com/rust-lang/regex)
+- [regex-automata 0.4.8](https://github.com/rust-lang/regex/tree/master/regex-automata)
+- [regex-syntax 0.8.5](https://github.com/rust-lang/regex/tree/master/regex-syntax)
+- [regex 1.11.0](https://github.com/rust-lang/regex)
 - [strip-ansi-escapes 0.2.0](https://github.com/luser/strip-ansi-escapes)
 - [unicode-normalization 0.1.23](https://github.com/unicode-rs/unicode-normalization)
 
@@ -1684,7 +1684,7 @@ limitations under the License.
 #### Used by
 
 - [tinted-builder 0.7.0](https://github.com/tinted-theming/tinted-builder-rust)
-- [tinted-builder-rust 0.11.0](https://github.com/tinted-theming/tinted-builder-rust)
+- [tinted-builder-rust 0.11.1](https://github.com/tinted-theming/tinted-builder-rust)
 - [ribboncurls 0.2.1](https://github.com/tinted-theming/ribboncurls)
 
 ```
