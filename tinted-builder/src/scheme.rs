@@ -22,10 +22,48 @@ pub enum Scheme {
 }
 
 impl Scheme {
+    pub fn get_scheme_author(&self) -> String {
+        match self {
+            Scheme::Base16(scheme) => scheme.author.to_string(),
+            Scheme::Base24(scheme) => scheme.author.to_string(),
+        }
+    }
+    pub fn get_scheme_description(&self) -> String {
+        match self {
+            Scheme::Base16(scheme) => scheme
+                .description
+                .clone()
+                .map(|s| s.to_string())
+                .unwrap_or_default(),
+            Scheme::Base24(scheme) => scheme
+                .description
+                .clone()
+                .map(|s| s.to_string())
+                .unwrap_or_default(),
+        }
+    }
+    pub fn get_scheme_name(&self) -> String {
+        match self {
+            Scheme::Base16(scheme) => scheme.name.to_string(),
+            Scheme::Base24(scheme) => scheme.name.to_string(),
+        }
+    }
+    pub fn get_scheme_slug(&self) -> String {
+        match self {
+            Scheme::Base16(scheme) => scheme.slug.to_string(),
+            Scheme::Base24(scheme) => scheme.slug.to_string(),
+        }
+    }
     pub fn get_scheme_system(&self) -> SchemeSystem {
         match self {
             Scheme::Base16(_) => SchemeSystem::Base16,
             Scheme::Base24(_) => SchemeSystem::Base24,
+        }
+    }
+    pub fn get_scheme_variant(&self) -> SchemeVariant {
+        match self {
+            Scheme::Base16(scheme) => scheme.variant.clone(),
+            Scheme::Base24(scheme) => scheme.variant.clone(),
         }
     }
 }
@@ -50,6 +88,10 @@ impl SchemeSystem {
             SchemeSystem::Base16 => "base16",
             SchemeSystem::Base24 => "base24",
         }
+    }
+    pub fn variants() -> &'static [SchemeSystem] {
+        static VARIANTS: &[SchemeSystem] = &[SchemeSystem::Base16, SchemeSystem::Base24];
+        VARIANTS
     }
 }
 
@@ -85,7 +127,7 @@ impl FromStr for SchemeSystem {
 /// non-exhaustive, meaning additional variants may be added in future versions without it being
 /// considered a breaking change.
 #[non_exhaustive]
-#[derive(Debug, Clone, Default, Deserialize, Serialize)]
+#[derive(Debug, Clone, Default, Deserialize, PartialEq, Serialize)]
 #[serde(rename_all = "lowercase")]
 pub enum SchemeVariant {
     /// Dark variant of the color scheme, the default.

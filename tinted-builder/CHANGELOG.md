@@ -1,5 +1,18 @@
 # Changelog
 
+## Unreleased
+
+## Added
+
+- Add `variants` method to `SchemeSystem` to retrieve a
+  `&'static [SchemeSystem]`
+- Add `Scheme` `get_scheme_author` method
+- Add `Scheme` `get_scheme_description` method
+- Add `Scheme` `get_scheme_name` method
+- Add `Scheme` `get_scheme_slug` method
+- Add `Scheme` `get_scheme_variant` method
+- Add `PartialEq` derive macro to `SchemeVariant`
+
 ## 0.7.0 - 2024-09-07
 
 ## Added
