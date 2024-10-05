@@ -1,5 +1,12 @@
 # Changelog
 
+## Unreleased
+
+## Changed
+
+- BREAKING: Remove `tinted_builder` exports since they should be
+  imported from `tinted_builder` crate itself
+
 ## [0.11.1] - 2024-10-02
 
 ## Fixed
