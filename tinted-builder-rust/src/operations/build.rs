@@ -1,12 +1,13 @@
+pub mod utils;
+
 use anyhow::{anyhow, Context, Result};
-use regex::Regex;
-use serde::Deserialize;
 use std::collections::HashMap;
 use std::fs::{self, create_dir_all, read_to_string};
 use std::path::{Path, PathBuf};
 use tinted_builder::{Scheme, SchemeSystem, Template};
+use utils::{get_scheme_files, parse_filename, ParsedFilename, SchemeFile, TemplateConfig};
 
-use crate::utils::write_to_file;
+use crate::helpers::write_to_file;
 
 const REPO_NAME: &str = env!("CARGO_PKG_NAME");
 
@@ -75,11 +76,10 @@ pub fn build(theme_template_path: &Path, user_schemes_path: &Path, is_quiet: boo
     let template_config: HashMap<String, TemplateConfig> =
         serde_yaml::from_str(&template_config_content)?;
 
-    let scheme_files: Vec<(PathBuf, Result<Scheme>)> =
-        get_recursive_scheme_paths_from_dir(user_schemes_path)?
-            .iter()
-            .map(|item| (item.get_path().unwrap_or_default(), item.get_scheme()))
-            .collect();
+    let scheme_files: Vec<(PathBuf, Result<Scheme>)> = get_scheme_files(user_schemes_path, true)?
+        .iter()
+        .map(|item| (item.get_path().unwrap_or_default(), item.get_scheme()))
+        .collect();
 
     let all_scheme_files: Vec<(PathBuf, Scheme)> = scheme_files
         .iter()
@@ -118,190 +118,6 @@ pub fn build(theme_template_path: &Path, user_schemes_path: &Path, is_quiet: boo
             &template_item_scheme_files,
             is_quiet,
         )?;
-    }
-
-    Ok(())
-}
-
-#[derive(Debug, Clone)]
-enum SchemeFile {
-    Yaml(PathBuf),
-    Yml(PathBuf),
-}
-
-#[derive(Debug, Deserialize)]
-struct TemplateConfig {
-    filename: Option<String>,
-
-    #[serde(rename = "supported-systems")]
-    supported_systems: Option<Vec<SchemeSystem>>,
-
-    #[deprecated]
-    extension: Option<String>,
-
-    #[deprecated]
-    output: Option<String>,
-}
-
-#[derive(Debug)]
-struct ParsedFilename {
-    directory: PathBuf,
-    filestem: String,
-    file_extension: Option<String>,
-}
-
-impl ParsedFilename {
-    pub fn get_path(&self) -> PathBuf {
-        let directory = &self.directory;
-        let filestem = &self.filestem;
-        let file_extension = &self
-            .file_extension
-            .as_ref()
-            .map(|ext| format!(".{}", ext))
-            .unwrap_or_default();
-
-        directory.join(format!("{}{}", filestem, file_extension))
-    }
-}
-
-impl SchemeFile {
-    pub fn new(path: &Path) -> Result<Self> {
-        let extension = path
-            .extension()
-            .unwrap_or_default()
-            .to_str()
-            .unwrap_or_default();
-
-        match extension {
-            "yaml" => Ok(Self::Yaml(path.to_path_buf())),
-            "yml" => Ok(Self::Yml(path.to_path_buf())),
-            _ => Err(anyhow!("Invalid file extension: {}", extension.to_string())),
-        }
-    }
-
-    pub fn get_scheme(&self) -> Result<Scheme> {
-        match self {
-            Self::Yaml(path) | Self::Yml(path) => {
-                let scheme_str = read_to_string(path)?;
-                let scheme: serde_yaml::Value = serde_yaml::from_str(&scheme_str)?;
-
-                if let serde_yaml::Value::Mapping(map) = scheme {
-                    match map.get("system") {
-                        Some(serde_yaml::Value::String(system_str))
-                            if system_str == &SchemeSystem::Base24.to_string() =>
-                        {
-                            let scheme_inner =
-                                serde_yaml::from_value(serde_yaml::Value::Mapping(map))?;
-                            let scheme = Scheme::Base24(scheme_inner);
-
-                            Ok(scheme)
-                        }
-                        None | Some(_) => {
-                            let scheme_inner =
-                                serde_yaml::from_value(serde_yaml::Value::Mapping(map))?;
-                            let scheme = Scheme::Base16(scheme_inner);
-
-                            Ok(scheme)
-                        }
-                    }
-                } else {
-                    Err(anyhow!("Unable to get scheme from SchemeFile"))
-                }
-            }
-        }
-    }
-
-    pub fn get_path(&self) -> Option<PathBuf> {
-        match self {
-            Self::Yaml(path) | Self::Yml(path) => Some(path.to_path_buf()),
-        }
-    }
-}
-
-/// Generates a theme file based on a given template and scheme.
-///
-/// This function processes a scheme file and generates a themed output file
-/// in the specified directory. It reads the scheme data, applies it to the template,
-/// and writes the output to a file with the appropriate extension.
-///
-/// The function also filters out hidden files (those whose names start with a `.`)
-/// and ensures that the scheme system matches the provided `SchemeSystem`.
-///
-/// # Arguments
-///
-/// * `template_content` - A reference to a string slice containing the template's content.
-/// * `output_dir` - A reference to a `PathBuf` representing the directory where the output file will be written.
-/// * `scheme_path` - A reference to a `Path` representing the file path to the scheme file.
-/// * `system` - The `SchemeSystem` that the scheme file should match.
-/// * `explicit_extension` - A string slice representing the file extension for the generated theme
-///   file. The parameter is named "explict" extension because it includes the "dot" or lack thereof
-///
-/// # Returns
-///
-/// Returns `Result<()>` indicating success (`Ok(())`) or an error (`Err`) if any of the following conditions are met:
-///
-/// * The scheme file cannot be read or parsed.
-/// * The output directory cannot be created.
-/// * There is an issue with writing the output file.
-/// * The scheme file's system does not match the provided `SchemeSystem`.
-///
-/// # Errors
-///
-/// This function can return an error in several scenarios:
-///
-/// * If the scheme file cannot be read from the specified path.
-/// * If the scheme file content cannot be parsed into a `Base16Scheme`.
-/// * If the output directory cannot be created.
-/// * If the template cannot be rendered with the provided scheme.
-/// * If there is an issue writing the generated output to the file.
-/// * If the scheme file's system does not match the provided `SchemeSystem`.
-///
-/// Note: This function skips processing hidden files (files whose names start with a `.`).
-fn generate_theme(
-    template_content: &str,
-    parsed_filename: ParsedFilename,
-    scheme_path: &Path,
-    system: SchemeSystem,
-) -> Result<()> {
-    let scheme_file_type = SchemeFile::new(scheme_path)?;
-    let scheme_path = scheme_file_type
-        .get_path()
-        .ok_or(anyhow!("Unable to get path from FileType"))?;
-    let scheme_file_stem = scheme_path
-        .file_stem()
-        .unwrap_or_default()
-        .to_str()
-        .unwrap_or_default();
-
-    // Ignore hidden files
-    if scheme_file_stem.starts_with('.') {
-        return Ok(());
-    }
-
-    let scheme = scheme_file_type.get_scheme()?;
-
-    match &scheme {
-        Scheme::Base16(scheme_inner) | Scheme::Base24(scheme_inner) => {
-            if scheme_inner.system != system {
-                return Err(anyhow!(
-                    "Scheme enum variant is mismatched with the provided scheme (\"{}\")",
-                    system
-                ));
-            }
-
-            let template = Template::new(template_content.to_string(), scheme.clone());
-            let output = template.render()?;
-            let output_path = parsed_filename.get_path();
-
-            if !parsed_filename.directory.exists() {
-                fs::create_dir_all(parsed_filename.directory)?;
-            }
-
-            write_to_file(&output_path, &output)?;
-        }
-        _ => {
-            return Err(anyhow!("Unknown Scheme enum variant"));
-        }
     }
 
     Ok(())
@@ -399,164 +215,91 @@ fn generate_themes_for_config(
     Ok(())
 }
 
-/// Recursively retrieves scheme file paths from a directory.
+/// Generates a theme file based on a given template and scheme.
 ///
-/// This function traverses the given directory recursively, gathering all valid scheme files.
-/// It skips hidden files and directories (those whose names start with a `.`).
+/// This function processes a scheme file and generates a themed output file
+/// in the specified directory. It reads the scheme data, applies it to the template,
+/// and writes the output to a file with the appropriate extension.
+///
+/// The function also filters out hidden files (those whose names start with a `.`)
+/// and ensures that the scheme system matches the provided `SchemeSystem`.
 ///
 /// # Arguments
 ///
-/// * `dirpath` - A reference to a `Path` representing the directory to start the search from.
+/// * `template_content` - A reference to a string slice containing the template's content.
+/// * `output_dir` - A reference to a `PathBuf` representing the directory where the output file will be written.
+/// * `scheme_path` - A reference to a `Path` representing the file path to the scheme file.
+/// * `system` - The `SchemeSystem` that the scheme file should match.
+/// * `explicit_extension` - A string slice representing the file extension for the generated theme
+///   file. The parameter is named "explict" extension because it includes the "dot" or lack thereof
 ///
 /// # Returns
 ///
-/// Returns a `Result` containing a `Vec<SchemeFile>` if successful, where `SchemeFile`
-/// represents a valid scheme file. If any error occurs during directory traversal or file handling,
-/// an `Err` with the relevant error information is returned.
+/// Returns `Result<()>` indicating success (`Ok(())`) or an error (`Err`) if any of the following conditions are met:
+///
+/// * The scheme file cannot be read or parsed.
+/// * The output directory cannot be created.
+/// * There is an issue with writing the output file.
+/// * The scheme file's system does not match the provided `SchemeSystem`.
 ///
 /// # Errors
 ///
-/// This function can return an error in the following scenarios:
+/// This function can return an error in several scenarios:
 ///
-/// * If the directory cannot be read.
-/// * If there is an issue accessing the contents of the directory.
-/// * If there is an issue creating a `SchemeFile` from a file path.
-fn get_recursive_scheme_paths_from_dir(dirpath: &Path) -> Result<Vec<SchemeFile>> {
-    let mut scheme_paths: Vec<SchemeFile> = vec![];
+/// * If the scheme file cannot be read from the specified path.
+/// * If the scheme file content cannot be parsed into a `Base16Scheme`.
+/// * If the output directory cannot be created.
+/// * If the template cannot be rendered with the provided scheme.
+/// * If there is an issue writing the generated output to the file.
+/// * If the scheme file's system does not match the provided `SchemeSystem`.
+///
+/// Note: This function skips processing hidden files (files whose names start with a `.`).
+fn generate_theme(
+    template_content: &str,
+    parsed_filename: ParsedFilename,
+    scheme_path: &Path,
+    system: SchemeSystem,
+) -> Result<()> {
+    let scheme_file_type = SchemeFile::new(scheme_path)?;
+    let scheme_path = scheme_file_type
+        .get_path()
+        .ok_or(anyhow!("Unable to get path from FileType"))?;
+    let scheme_file_stem = scheme_path
+        .file_stem()
+        .unwrap_or_default()
+        .to_str()
+        .unwrap_or_default();
 
-    for item in dirpath.read_dir()? {
-        let file_path = item?.path();
-        let file_stem = file_path
-            .file_stem()
-            .unwrap_or_default()
-            .to_str()
-            .unwrap_or_default();
+    // Ignore hidden files
+    if scheme_file_stem.starts_with('.') {
+        return Ok(());
+    }
 
-        // Skip hidden files and directories
-        if file_stem.starts_with('.') {
-            continue;
-        }
+    let scheme = scheme_file_type.get_scheme()?;
 
-        if file_path.is_dir() {
-            let inner_scheme_paths_result = get_recursive_scheme_paths_from_dir(&file_path);
-
-            if let Ok(inner_scheme_paths) = inner_scheme_paths_result {
-                scheme_paths.extend(inner_scheme_paths);
+    match &scheme {
+        Scheme::Base16(scheme_inner) | Scheme::Base24(scheme_inner) => {
+            if scheme_inner.system != system {
+                return Err(anyhow!(
+                    "Scheme enum variant is mismatched with the provided scheme (\"{}\")",
+                    system
+                ));
             }
 
-            continue;
-        }
+            let template = Template::new(template_content.to_string(), scheme.clone());
+            let output = template.render()?;
+            let output_path = parsed_filename.get_path();
 
-        let scheme_file_type_result = SchemeFile::new(&file_path);
-
-        match scheme_file_type_result {
-            Ok(scheme_file_type) => {
-                scheme_paths.push(scheme_file_type);
+            if !parsed_filename.directory.exists() {
+                fs::create_dir_all(parsed_filename.directory)?;
             }
-            Err(_) => continue,
+
+            write_to_file(&output_path, &output)?;
+        }
+        _ => {
+            return Err(anyhow!("Unknown Scheme enum variant"));
         }
     }
 
-    Ok(scheme_paths)
-}
-
-/// Parses a given file path into its directory, filestem, and optional extension.
-///
-/// This function takes a `template_path` (which is used as the base path for relative directories)
-/// and a `filepath` (the path to parse). It returns a `ParsedFilename` struct, which contains:
-/// - `directory`: the directory of the file (relative to `template_path` or `.` if not present)
-/// - `filestem`: the filename without the extension
-/// - `file_extension`: the optional file extension
-fn parse_filename(template_path: &Path, filepath: &str) -> Result<ParsedFilename> {
-    let re = Regex::new(r"^(?P<directory>.*/)?(?P<filestem>[^/\.]+)(?:\.(?P<extension>[^/]+))?$")
-        .unwrap();
-
-    if let Some(captures) = re.captures(filepath) {
-        // Extract the directory (if present), or use "." if there's no directory
-        let directory = captures
-            .name("directory")
-            .map(|d| template_path.join(d.as_str()))
-            .unwrap_or_else(|| template_path.to_path_buf());
-        let filestem = captures.name("filestem").unwrap().as_str().to_string();
-        let file_extension = captures
-            .name("extension")
-            .map(|ext| ext.as_str().to_string());
-
-        if filestem.is_empty() {
-            Err(anyhow!(
-                "Config property \"filename\" requires a filestem: {}",
-                &filepath
-            ))
-        } else {
-            // Return the parsed path
-            Ok(ParsedFilename {
-                directory,
-                filestem,
-                file_extension,
-            })
-        }
-    } else {
-        Err(anyhow!("Unable to parse template: {}", &filepath))
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-    use std::path::Path;
-
-    #[test]
-    fn test_parse_filename_with_directory_and_extension() {
-        let template_path = Path::new("/home/user/templates");
-        let result = parse_filename(template_path, "some-directory/name/file.txt").unwrap();
-
-        assert_eq!(result.directory, template_path.join("some-directory/name"));
-        assert_eq!(result.filestem, "file");
-        assert_eq!(result.file_extension, Some("txt".to_string()));
-    }
-
-    #[test]
-    fn test_parse_filename_with_filename_and_extension() {
-        let template_path = Path::new("/home/user/templates");
-        let result = parse_filename(template_path, "filename.ext").unwrap();
-
-        assert_eq!(result.directory, template_path);
-        assert_eq!(result.filestem, "filename");
-        assert_eq!(result.file_extension, Some("ext".to_string()));
-    }
-
-    #[test]
-    fn test_parse_filename_with_only_filename() {
-        let template_path = Path::new("/home/user/templates");
-        let result = parse_filename(template_path, "file").unwrap();
-
-        assert_eq!(result.directory, template_path);
-        assert_eq!(result.filestem, "file");
-        assert_eq!(result.file_extension, None);
-    }
-
-    #[test]
-    fn test_parse_filename_with_directory_and_no_extension() {
-        let template_path = Path::new("/home/user/templates");
-        let result = parse_filename(template_path, "some-directory/file").unwrap();
-
-        assert_eq!(result.directory, template_path.join("some-directory"));
-        assert_eq!(result.filestem, "file");
-        assert_eq!(result.file_extension, None);
-    }
-
-    #[test]
-    fn test_parse_filename_invalid_filestem() {
-        let template_path = Path::new("/home/user/templates");
-        let filename = "/invalid/path/";
-        let err_message = parse_filename(template_path, filename)
-            .unwrap_err()
-            .to_string();
-
-        assert!(
-            err_message.contains(format!("Unable to parse template: {}", &filename).as_str()),
-            "Unexpected error message: {}",
-            err_message
-        );
-    }
+    Ok(())
 }

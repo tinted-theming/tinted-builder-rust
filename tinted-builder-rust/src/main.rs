@@ -3,7 +3,7 @@ mod operations {
     pub(crate) mod build;
     pub(crate) mod sync;
 }
-mod utils;
+mod helpers;
 
 use anyhow::{anyhow, Result};
 use std::path::PathBuf;

@@ -1,11 +1,10 @@
-mod utils;
+mod test_utils;
 
 use anyhow::{Context, Result};
 use std::fs;
 use std::path::PathBuf;
-use utils::COMMAND_NAME;
+use test_utils::{run_command, write_to_file};
 
-use crate::utils::write_to_file;
 fn setup(system: &str, scheme_name: &str) -> Result<(String, String, String, String)> {
     let config_file_path: PathBuf =
         PathBuf::from(format!("./tests/fixtures/templates/{}-config.yaml", system));
@@ -82,8 +81,7 @@ fn test_operation_build_quiet_flag() -> Result<()> {
     // ---
     // Act
     // ---
-    let (stdout, stderr) = utils::run_command(vec![
-        COMMAND_NAME.to_string(),
+    let (stdout, stderr) = run_command(vec![
         format!("--schemes-dir={}", schemes_path.display()),
         "build".to_string(),
         template_theme_path.display().to_string(),
@@ -130,8 +128,7 @@ fn test_operation_build_with_sync() -> Result<()> {
     // Act
     // ---
     // Build act
-    let (stdout, stderr) = utils::run_command(vec![
-        COMMAND_NAME.to_string(),
+    let (stdout, stderr) = run_command(vec![
         format!("--data-dir={}", template_theme_path.display()),
         "build".to_string(),
         name.to_string(),
@@ -211,8 +208,7 @@ fn test_operation_build_base16() -> Result<()> {
     // ---
     // Act
     // ---
-    let (stdout, stderr) = utils::run_command(vec![
-        COMMAND_NAME.to_string(),
+    let (stdout, stderr) = run_command(vec![
         "build".to_string(),
         template_theme_path.display().to_string(),
         format!("--schemes-dir={}", schemes_path.display()),
@@ -295,8 +291,7 @@ fn test_operation_build_base24() -> Result<()> {
     // ---
     // Act
     // ---
-    let (stdout, stderr) = utils::run_command(vec![
-        COMMAND_NAME.to_string(),
+    let (stdout, stderr) = run_command(vec![
         "build".to_string(),
         template_theme_path.display().to_string(),
         format!("--schemes-dir={}", schemes_path.display()),
@@ -385,8 +380,7 @@ fn test_operation_build_mixed() -> Result<()> {
     // ---
     // Act
     // ---
-    let (stdout, stderr) = utils::run_command(vec![
-        COMMAND_NAME.to_string(),
+    let (stdout, stderr) = run_command(vec![
         "build".to_string(),
         template_theme_path.display().to_string(),
         format!("--schemes-dir={}", schemes_path.display()),
@@ -456,8 +450,7 @@ invalid:
     // ---
     // Act
     // ---
-    let (stdout, stderr) = utils::run_command(vec![
-        COMMAND_NAME.to_string(),
+    let (stdout, stderr) = run_command(vec![
         "build".to_string(),
         template_theme_path.display().to_string(),
         format!("--schemes-dir={}", schemes_path.display()),
@@ -543,8 +536,7 @@ palette:
     // ---
     // Act
     // ---
-    let (stdout, stderr) = utils::run_command(vec![
-        COMMAND_NAME.to_string(),
+    let (stdout, stderr) = run_command(vec![
         "build".to_string(),
         template_theme_path.display().to_string(),
         format!("--schemes-dir={}", schemes_path.display()),
@@ -608,8 +600,7 @@ fn test_operation_build_invalid_base16() -> Result<()> {
     // ---
     // Act
     // ---
-    let (stdout, stderr) = utils::run_command(vec![
-        COMMAND_NAME.to_string(),
+    let (stdout, stderr) = run_command(vec![
         "build".to_string(),
         template_theme_path.display().to_string(),
         format!("--schemes-dir={}", schemes_path.display()),
@@ -674,8 +665,7 @@ base16-template:
     // ---
     // Act
     // ---
-    let (stdout, stderr) = utils::run_command(vec![
-        COMMAND_NAME.to_string(),
+    let (stdout, stderr) = run_command(vec![
         "build".to_string(),
         template_theme_path.display().to_string(),
         format!("--schemes-dir={}", schemes_path.display()),

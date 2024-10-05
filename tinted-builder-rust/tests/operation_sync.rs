@@ -1,8 +1,8 @@
-mod utils;
+mod test_utils;
 
-use crate::utils::COMMAND_NAME;
 use anyhow::Result;
 use std::{fs, path::PathBuf};
+use test_utils::run_command;
 
 /// Install - First time sync
 #[test]
@@ -23,12 +23,8 @@ fn operation_sync_first_time() -> Result<()> {
     // ---
     // Act
     // ---
-    let (stdout, stderr) = utils::run_command(vec![
-        COMMAND_NAME.to_string(),
-        format!("--data-dir={}", name),
-        "sync".to_string(),
-    ])
-    .unwrap();
+    let (stdout, stderr) =
+        run_command(vec![format!("--data-dir={}", name), "sync".to_string()]).unwrap();
     let is_schemes_dir_empty = fs::read_dir(&expected_schemes_path)?.next().is_none();
 
     // ------
@@ -63,8 +59,7 @@ fn operation_sync_first_time_with_quiet_flag() -> Result<()> {
     // ---
     // Act
     // ---
-    let (stdout, stderr) = utils::run_command(vec![
-        COMMAND_NAME.to_string(),
+    let (stdout, stderr) = run_command(vec![
         format!("--data-dir={}", name),
         "sync".to_string(),
         "--quiet".to_string(),
@@ -97,17 +92,13 @@ fn operation_sync_update() -> Result<()> {
     let name = "test_operation_sync_update";
     let expected_output = "schemes up to date";
     let expected_schemes_path = PathBuf::from(format!("./{}/schemes", name));
-    let command_vec = vec![
-        COMMAND_NAME.to_string(),
-        format!("--data-dir={}", name),
-        "sync".to_string(),
-    ];
+    let command_vec = vec![format!("--data-dir={}", name), "sync".to_string()];
 
     // ---
     // Act
     // ---
-    utils::run_command(command_vec.clone()).unwrap();
-    let (stdout, stderr) = utils::run_command(command_vec).unwrap();
+    run_command(command_vec.clone()).unwrap();
+    let (stdout, stderr) = run_command(command_vec).unwrap();
     let is_schemes_dir_empty = fs::read_dir(&expected_schemes_path)?.next().is_none();
 
     // ------
