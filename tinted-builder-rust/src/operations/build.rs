@@ -140,17 +140,33 @@ fn generate_themes_for_config(
         (Some(filename), _, _) => Ok(filename.to_string()),
         (None, Some(extension), Some(output)) => {
             if !is_quiet {
-                if !extension.is_empty() {
-                    println!("Warning: \"extension\" is a deprecated config property, use \"filename\" instead.");
-                }
-                if !output.is_empty() {
-                    println!("Warning: \"output\" is a deprecated config property, use \"filename\" instead.");
-                }
+                println!("Warning: \"extension\" is a deprecated config property, use \"filename\" instead.");
+                println!("Warning: \"output\" is a deprecated config property, use \"filename\" instead.");
             }
 
             Ok(format!(
                 "{}/{{{{ scheme-system }}}}-{{{{ scheme-slug }}}}{}",
                 output, extension
+            ))
+        }
+        (None, None, Some(output)) => {
+            if !is_quiet {
+                println!("Warning: \"output\" is a deprecated config property, use \"filename\" instead.");
+            }
+
+            Ok(format!(
+                "{}/{{{{ scheme-system }}}}-{{{{ scheme-slug }}}}",
+                output
+            ))
+        }
+        (None, Some(extension), None) => {
+            if !is_quiet {
+                println!("Warning: \"extension\" is a deprecated config property, use \"filename\" instead.");
+            }
+
+            Ok(format!(
+                "{{{{ scheme-system }}}}-{{{{ scheme-slug }}}}{}",
+                extension
             ))
         }
         _ => Err(anyhow!(

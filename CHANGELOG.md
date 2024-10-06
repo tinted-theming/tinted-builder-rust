@@ -1,5 +1,19 @@
 # Changelog
 
+## Unreleased
+
+### Fixed
+
+- Fix bug where CLI gives an error if `output` or `extension`
+  `template/config.yaml` properties are empty
+
+## Changed
+
+- BREAKING: Remove `tinted_builder` exports since they should be
+  imported from `tinted_builder` crate itself
+- Export `get_scheme_files` to allow Rust users to get a
+  `&'static [SchemeFile]` from a directory
+
 ## [0.12.0] - 2024-10-05
 
 ## Changed
