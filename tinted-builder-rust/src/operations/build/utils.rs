@@ -12,16 +12,17 @@ pub enum SchemeFile {
 }
 
 impl SchemeFile {
-    pub fn new(path: &Path) -> Result<Self> {
+    pub fn new(path: impl AsRef<Path>) -> Result<Self> {
         let extension = path
+            .as_ref()
             .extension()
             .unwrap_or_default()
             .to_str()
             .unwrap_or_default();
 
         match extension {
-            "yaml" => Ok(Self::Yaml(path.to_path_buf())),
-            "yml" => Ok(Self::Yml(path.to_path_buf())),
+            "yaml" => Ok(Self::Yaml(path.as_ref().to_path_buf())),
+            "yml" => Ok(Self::Yml(path.as_ref().to_path_buf())),
             _ => Err(anyhow!("Invalid file extension: {}", extension.to_string())),
         }
     }
@@ -122,10 +123,10 @@ impl ParsedFilename {
 /// * If the directory cannot be read.
 /// * If there is an issue accessing the contents of the directory.
 /// * If there is an issue creating a `SchemeFile` from a file path.
-pub fn get_scheme_files(dirpath: &Path, is_recursive: bool) -> Result<Vec<SchemeFile>> {
+pub fn get_scheme_files(dirpath: impl AsRef<Path>, is_recursive: bool) -> Result<Vec<SchemeFile>> {
     let mut scheme_paths: Vec<SchemeFile> = vec![];
 
-    for item in dirpath.read_dir()? {
+    for item in dirpath.as_ref().read_dir()? {
         let file_path = item?.path();
         let file_stem = file_path
             .file_stem()
@@ -170,7 +171,10 @@ pub fn get_scheme_files(dirpath: &Path, is_recursive: bool) -> Result<Vec<Scheme
 /// - `directory`: the directory of the file (relative to `template_path` or `.` if not present)
 /// - `filestem`: the filename without the extension
 /// - `file_extension`: the optional file extension
-pub(crate) fn parse_filename(template_path: &Path, filepath: &str) -> Result<ParsedFilename> {
+pub(crate) fn parse_filename(
+    template_path: impl AsRef<Path>,
+    filepath: &str,
+) -> Result<ParsedFilename> {
     let re = Regex::new(r"^(?P<directory>.*/)?(?P<filestem>[^/\.]+)(?:\.(?P<extension>[^/]+))?$")
         .unwrap();
 
@@ -178,8 +182,8 @@ pub(crate) fn parse_filename(template_path: &Path, filepath: &str) -> Result<Par
         // Extract the directory (if present), or use "." if there's no directory
         let directory = captures
             .name("directory")
-            .map(|d| template_path.join(d.as_str()))
-            .unwrap_or_else(|| template_path.to_path_buf());
+            .map(|d| template_path.as_ref().join(d.as_str()))
+            .unwrap_or_else(|| template_path.as_ref().to_path_buf());
         let filestem = captures.name("filestem").unwrap().as_str().to_string();
         let file_extension = captures
             .name("extension")

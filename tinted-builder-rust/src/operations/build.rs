@@ -21,10 +21,12 @@ const REPO_NAME: &str = env!("CARGO_PKG_NAME");
 ///
 /// # Arguments
 ///
-/// * `theme_template_path` - A reference to a `Path` representing the path to the theme template
-///   directory or file. * `user_schemes_path` - A reference to a `Path` representing the directory
-///   where user schemes are stored. * `is_quiet` - A boolean flag that, when set to `true`,
-///   suppresses most of the output, making the build process quieter.
+/// * `theme_template_path` - A `impl AsRef<Path>` representing the path to the theme template
+///   directory or file.
+/// * `user_schemes_path` - A `impl AsRef<Path>` representing the directory where user schemes are
+///   stored.
+/// * `is_quiet` - A boolean flag that, when set to `true`, suppresses most of the output,
+///   making the build process quieter.
 ///
 /// # Returns
 ///
@@ -50,8 +52,12 @@ const REPO_NAME: &str = env!("CARGO_PKG_NAME");
 ///
 /// The function will read the configuration from the specified paths and generate the
 /// corresponding themes.
-pub fn build(theme_template_path: &Path, user_schemes_path: &Path, is_quiet: bool) -> Result<()> {
-    if !user_schemes_path.exists() {
+pub fn build(
+    theme_template_path: impl AsRef<Path>,
+    user_schemes_path: impl AsRef<Path>,
+    is_quiet: bool,
+) -> Result<()> {
+    if !user_schemes_path.as_ref().exists() {
         return Err(anyhow!(
             "Schemes don't exist locally. First run `{} sync` and try again",
             REPO_NAME
@@ -59,10 +65,14 @@ pub fn build(theme_template_path: &Path, user_schemes_path: &Path, is_quiet: boo
     }
 
     let template_config_path = {
-        if theme_template_path.join("templates/config.yml").is_file() {
-            theme_template_path.join("templates/config.yml")
+        if theme_template_path
+            .as_ref()
+            .join("templates/config.yml")
+            .is_file()
+        {
+            theme_template_path.as_ref().join("templates/config.yml")
         } else {
-            theme_template_path.join("templates/config.yaml")
+            theme_template_path.as_ref().join("templates/config.yaml")
         }
     };
     if !template_config_path.exists() || !template_config_path.is_file() {
@@ -114,7 +124,7 @@ pub fn build(theme_template_path: &Path, user_schemes_path: &Path, is_quiet: boo
         generate_themes_for_config(
             template_item_config_name,
             template_item_config_value,
-            theme_template_path,
+            &theme_template_path,
             &template_item_scheme_files,
             is_quiet,
         )?;
@@ -126,7 +136,7 @@ pub fn build(theme_template_path: &Path, user_schemes_path: &Path, is_quiet: boo
 fn generate_themes_for_config(
     config_name: &str,
     config_value: &TemplateConfig,
-    theme_template_path: &Path,
+    theme_template_path: impl AsRef<Path>,
     scheme_files: &Vec<(PathBuf, Scheme)>,
     is_quiet: bool,
 ) -> Result<()> {
@@ -173,8 +183,9 @@ fn generate_themes_for_config(
             "Config file is missing \"filepath\" or \"extension\" and \"output\" properties"
         )),
     }?;
-    let mustache_template_path =
-        theme_template_path.join(format!("templates/{}.mustache", config_name));
+    let mustache_template_path = theme_template_path
+        .as_ref()
+        .join(format!("templates/{}.mustache", config_name));
     let supported_systems = &config_value
         .supported_systems
         .clone()
@@ -202,7 +213,7 @@ fn generate_themes_for_config(
             .replace("{{ scheme-system }}", &scheme_system.to_string())
             .replace("{{scheme-system}}", &scheme_system.to_string());
 
-        let parsed_filename = parse_filename(theme_template_path, &filepath)?;
+        let parsed_filename = parse_filename(&theme_template_path, &filepath)?;
         if !parsed_filename.directory.exists() {
             create_dir_all(&parsed_filename.directory)?
         }
@@ -224,7 +235,7 @@ fn generate_themes_for_config(
                 .collect::<Vec<String>>()
                 .join(", "),
             config_name,
-            theme_template_path.join(filename).display(),
+            theme_template_path.as_ref().join(filename).display(),
         );
     }
 
@@ -244,7 +255,7 @@ fn generate_themes_for_config(
 ///
 /// * `template_content` - A reference to a string slice containing the template's content.
 /// * `output_dir` - A reference to a `PathBuf` representing the directory where the output file will be written.
-/// * `scheme_path` - A reference to a `Path` representing the file path to the scheme file.
+/// * `scheme_path` - A `impl AsRef<Path>` representing the file path to the scheme file.
 /// * `system` - The `SchemeSystem` that the scheme file should match.
 /// * `explicit_extension` - A string slice representing the file extension for the generated theme
 ///   file. The parameter is named "explict" extension because it includes the "dot" or lack thereof
@@ -273,7 +284,7 @@ fn generate_themes_for_config(
 fn generate_theme(
     template_content: &str,
     parsed_filename: ParsedFilename,
-    scheme_path: &Path,
+    scheme_path: impl AsRef<Path>,
     system: SchemeSystem,
 ) -> Result<()> {
     let scheme_file_type = SchemeFile::new(scheme_path)?;

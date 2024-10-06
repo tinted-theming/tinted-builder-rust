@@ -31,13 +31,14 @@ pub fn run_command(command_vec: Vec<String>) -> Result<(String, String), Box<dyn
 }
 
 #[allow(dead_code)]
-pub fn write_to_file(path: &Path, contents: &str) -> Result<()> {
-    if path.exists() {
-        remove_file(path).with_context(|| format!("Unable to remove file: {}", path.display()))?;
+pub fn write_to_file(path: impl AsRef<Path>, contents: &str) -> Result<()> {
+    if path.as_ref().exists() {
+        remove_file(&path)
+            .with_context(|| format!("Unable to remove file: {}", path.as_ref().display()))?;
     }
 
-    let mut file =
-        File::create(path).with_context(|| format!("Unable to create file: {}", path.display()))?;
+    let mut file = File::create(&path)
+        .with_context(|| format!("Unable to create file: {}", path.as_ref().display()))?;
 
     file.write_all(contents.as_bytes())?;
 

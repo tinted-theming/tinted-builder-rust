@@ -17,8 +17,9 @@ const SCHEMES_URL: &str = "https://github.com/tinted-theming/schemes";
 ///
 /// # Arguments
 ///
-/// * `schemes_path` - A reference to a `Path` representing the directory where the schemes
-///   repository is or should be located. * `is_quiet` - A boolean flag that, when set to `true`,
+/// * `schemes_path` - A `impl AsRef<Path>` representing the directory where the schemes
+///   repository is or should be located.
+/// * `is_quiet` - A boolean flag that, when set to `true`,
 ///   suppresses most of the output, making the operation quieter.
 ///
 /// # Returns
@@ -45,9 +46,9 @@ const SCHEMES_URL: &str = "https://github.com/tinted-theming/schemes";
 ///
 /// The function will ensure that the schemes repository is up-to-date, either by pulling the
 /// latest changes or by cloning the repository if it does not already exist.
-pub(crate) fn sync(schemes_path: &Path, is_quiet: bool) -> Result<()> {
-    if schemes_path.is_dir() {
-        let is_diff = git_diff(schemes_path)?;
+pub(crate) fn sync(schemes_path: impl AsRef<Path>, is_quiet: bool) -> Result<()> {
+    if schemes_path.as_ref().is_dir() {
+        let is_diff = git_diff(&schemes_path)?;
 
         if !is_diff {
             git_pull(schemes_path, is_quiet).with_context(|| {
@@ -71,18 +72,18 @@ pub(crate) fn sync(schemes_path: &Path, is_quiet: bool) -> Result<()> {
     Ok(())
 }
 
-fn git_clone(repo_url: &str, target_dir: &Path, is_quiet: bool) -> Result<()> {
-    if target_dir.exists() {
+fn git_clone(repo_url: &str, target_dir: impl AsRef<Path>, is_quiet: bool) -> Result<()> {
+    if target_dir.as_ref().exists() {
         return Err(anyhow!(
             "Error cloning {}. Target directory '{}' already exists",
             repo_url,
-            target_dir.display()
+            target_dir.as_ref().display()
         ));
     }
 
     let mut cmd = Command::new("git");
 
-    cmd.arg("clone").arg(repo_url).arg(target_dir);
+    cmd.arg("clone").arg(repo_url).arg(target_dir.as_ref());
 
     if is_quiet {
         cmd.stdout(Stdio::null()).stderr(Stdio::null());
@@ -94,40 +95,51 @@ fn git_clone(repo_url: &str, target_dir: &Path, is_quiet: bool) -> Result<()> {
     Ok(())
 }
 
-fn git_pull(repo_path: &Path, is_quiet: bool) -> Result<()> {
-    if !repo_path.is_dir() {
+fn git_pull(repo_path: impl AsRef<Path>, is_quiet: bool) -> Result<()> {
+    if !repo_path.as_ref().is_dir() {
         return Err(anyhow!(
             "Error with git pull. {} is not a directory",
-            repo_path.display()
+            repo_path.as_ref().display()
         ));
     }
 
     let mut cmd = Command::new("git");
 
-    cmd.arg("pull").current_dir(repo_path);
+    cmd.arg("pull").current_dir(&repo_path);
 
     if is_quiet {
         cmd.stdout(Stdio::null()).stderr(Stdio::null());
     }
 
-    let status = cmd
-        .status()
-        .with_context(|| format!("Failed to execute process in {}", repo_path.display()))?;
+    let status = cmd.status().with_context(|| {
+        format!(
+            "Failed to execute process in {}",
+            repo_path.as_ref().display()
+        )
+    })?;
 
     if status.success() {
         Ok(())
     } else {
-        Err(anyhow!("Error wth git pull in {}", repo_path.display()))
+        Err(anyhow!(
+            "Error wth git pull in {}",
+            repo_path.as_ref().display()
+        ))
     }
 }
 
-fn git_diff(target_dir: &Path) -> Result<bool> {
+fn git_diff(target_dir: impl AsRef<Path>) -> Result<bool> {
     let output = Command::new("git")
         .arg("status")
         .arg("--porcelain")
-        .current_dir(target_dir)
+        .current_dir(&target_dir)
         .output()
-        .with_context(|| format!("Failed to execute process in {}", target_dir.display()))?;
+        .with_context(|| {
+            format!(
+                "Failed to execute process in {}",
+                target_dir.as_ref().display()
+            )
+        })?;
     let stdout = str::from_utf8(&output.stdout).expect("Not valid UTF-8");
 
     if stdout.is_empty() {
