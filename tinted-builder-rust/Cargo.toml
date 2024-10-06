@@ -1,6 +1,6 @@
 [package]
 name = "tinted-builder-rust"
-version = "0.12.0"
+version = "0.12.1"
 edition = "2021"
 authors = ["Jamy Golden <code@jamygolden.com>", "Tinted Theming <tintedtheming@proton.me>"]
 license = "MIT OR Apache-2.0"

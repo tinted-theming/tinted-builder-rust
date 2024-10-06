@@ -1684,7 +1684,7 @@ limitations under the License.
 #### Used by
 
 - [tinted-builder 0.8.0](https://github.com/tinted-theming/tinted-builder-rust)
-- [tinted-builder-rust 0.12.0](https://github.com/tinted-theming/tinted-builder-rust)
+- [tinted-builder-rust 0.12.1](https://github.com/tinted-theming/tinted-builder-rust)
 - [ribboncurls 0.2.1](https://github.com/tinted-theming/ribboncurls)
 
 ```
