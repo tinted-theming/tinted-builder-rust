@@ -4,7 +4,7 @@ use anyhow::{anyhow, Context, Result};
 use std::collections::HashMap;
 use std::fs::{self, create_dir_all, read_to_string};
 use std::path::{Path, PathBuf};
-use tinted_builder::{Scheme, SchemeSystem, Template};
+use tinted_builder::{Base16Scheme, Scheme, SchemeSystem, Template};
 use utils::{get_scheme_files, parse_filename, ParsedFilename, SchemeFile, TemplateConfig};
 
 use crate::helpers::write_to_file;
@@ -82,7 +82,7 @@ pub fn build(
         ));
     }
 
-    let template_config_content = read_to_string(template_config_path)?;
+    let template_config_content = read_to_string(&template_config_path)?;
     let template_config: HashMap<String, TemplateConfig> =
         serde_yaml::from_str(&template_config_content)?;
 
@@ -105,42 +105,118 @@ pub fn build(
 
     // For each template definition in the templates/config.yaml file
     for (template_item_config_name, template_item_config_value) in template_config.iter() {
-        let template_item_scheme_files: Vec<(PathBuf, Scheme)> = all_scheme_files
-            .iter()
-            .filter_map(|(path, scheme)| {
-                if template_item_config_value
-                    .supported_systems
-                    .clone()
-                    .unwrap_or(vec![SchemeSystem::default()])
-                    .contains(&scheme.get_scheme_system())
-                {
-                    Some((path.clone(), scheme.clone()))
-                } else {
-                    None
-                }
-            })
-            .collect();
+        let supported_systems = template_item_config_value
+            .supported_systems
+            .clone()
+            .unwrap_or(vec![SchemeSystem::default()]);
 
-        generate_themes_for_config(
-            template_item_config_name,
-            template_item_config_value,
-            &theme_template_path,
-            &template_item_scheme_files,
-            is_quiet,
-        )?;
+        if supported_systems.contains(&SchemeSystem::List) {
+            render_list(
+                &theme_template_path,
+                (template_item_config_name, template_item_config_value),
+                all_scheme_files.clone(),
+                is_quiet,
+            )?;
+        } else {
+            let template_item_scheme_files: Vec<(PathBuf, Scheme)> = all_scheme_files
+                .iter()
+                .filter_map(|(path, scheme)| {
+                    if supported_systems.contains(&scheme.get_scheme_system()) {
+                        Some((path.clone(), scheme.clone()))
+                    } else {
+                        None
+                    }
+                })
+                .collect();
+
+            generate_themes_for_config(
+                template_item_config_name,
+                template_item_config_value,
+                &theme_template_path,
+                &template_item_scheme_files,
+                is_quiet,
+            )?;
+        }
     }
 
     Ok(())
 }
 
-fn generate_themes_for_config(
-    config_name: &str,
-    config_value: &TemplateConfig,
-    theme_template_path: impl AsRef<Path>,
-    scheme_files: &Vec<(PathBuf, Scheme)>,
+fn render_list(
+    template_path: impl AsRef<Path>,
+    (config_name, config_value): (&str, &TemplateConfig),
+    all_scheme_files: Vec<(PathBuf, Scheme)>,
     is_quiet: bool,
 ) -> Result<()> {
-    let filename = match (
+    let supported_systems = config_value
+        .supported_systems
+        .clone()
+        .unwrap_or(vec![SchemeSystem::default()]);
+    let filename = get_filename(config_value, is_quiet)?;
+    let mustache_template_path = template_path
+        .as_ref()
+        .join(format!("templates/{}.mustache", config_name));
+    let template_content = read_to_string(&mustache_template_path).context(format!(
+        "Mustache template missing: {}",
+        mustache_template_path.display()
+    ))?;
+    let mut data: HashMap<&str, Vec<Base16Scheme>> = HashMap::new();
+    data.insert(
+        "schemes",
+        all_scheme_files
+            .clone()
+            .into_iter()
+            .filter_map(|(_, scheme)| match scheme {
+                Scheme::Base16(scheme) => {
+                    if supported_systems.contains(&SchemeSystem::Base16) {
+                        Some(scheme)
+                    } else {
+                        None
+                    }
+                }
+                Scheme::Base24(scheme) => {
+                    if supported_systems.contains(&SchemeSystem::Base24) {
+                        Some(scheme)
+                    } else {
+                        None
+                    }
+                }
+                _ => None,
+            })
+            .collect::<Vec<Base16Scheme>>(),
+    );
+    let data = serde_yaml::to_string(&data).unwrap_or_default();
+    let output = ribboncurls::render(&template_content, &data, None)?;
+    let parsed_filename = parse_filename(&template_path, &filename)?;
+    let output_path = parsed_filename.get_path();
+
+    if !parsed_filename.directory.exists() {
+        create_dir_all(&parsed_filename.directory)?
+    }
+
+    write_to_file(&output_path, &output)?;
+
+    if !is_quiet {
+        println!(
+            "Successfully generated \"{}\" list with filename \"{}\"",
+            supported_systems
+                .iter()
+                .filter_map(|item| if *item == SchemeSystem::List {
+                    None
+                } else {
+                    Some(item.as_str().to_string())
+                })
+                .collect::<Vec<String>>()
+                .join(", "),
+            template_path.as_ref().join(filename).display(),
+        );
+    }
+
+    Ok(())
+}
+
+fn get_filename(config_value: &TemplateConfig, is_quiet: bool) -> Result<String> {
+    match (
         &config_value.filename,
         #[allow(deprecated)]
         &config_value.extension,
@@ -182,7 +258,17 @@ fn generate_themes_for_config(
         _ => Err(anyhow!(
             "Config file is missing \"filepath\" or \"extension\" and \"output\" properties"
         )),
-    }?;
+    }
+}
+
+fn generate_themes_for_config(
+    config_name: &str,
+    config_value: &TemplateConfig,
+    theme_template_path: impl AsRef<Path>,
+    scheme_files: &Vec<(PathBuf, Scheme)>,
+    is_quiet: bool,
+) -> Result<()> {
+    let filename = get_filename(config_value, is_quiet)?;
     let mustache_template_path = theme_template_path
         .as_ref()
         .join(format!("templates/{}.mustache", config_name));
