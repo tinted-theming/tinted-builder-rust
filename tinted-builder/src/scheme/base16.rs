@@ -60,7 +60,7 @@ impl fmt::Display for Base16Scheme {
         palette_vec.sort_by_key(|k| k.0.clone());
 
         for (key, value) in palette_vec {
-            writeln!(f, "  {}: \"{}\"", key, value)?;
+            writeln!(f, "  {}: \"#{}\"", key, value)?;
         }
         Ok(())
     }
@@ -136,7 +136,9 @@ impl Serialize for Base16Scheme {
         state.serialize_field("name", &self.name)?;
         state.serialize_field("slug", &self.slug)?;
         state.serialize_field("author", &self.author)?;
-        state.serialize_field("description", &self.description)?;
+        if let Some(description) = &self.description {
+            state.serialize_field("description", description)?;
+        }
         state.serialize_field("variant", &self.variant)?;
 
         // Collect and sort the palette by key
@@ -160,7 +162,7 @@ impl<'a> Serialize for SortedPalette<'a> {
     {
         let mut map = serializer.serialize_map(Some(self.0.len()))?;
         for (key, value) in &self.0 {
-            map.serialize_entry(key, &value.to_hex())?;
+            map.serialize_entry(key, format!("#{}", &value.to_hex()).as_str())?;
         }
         map.end()
     }

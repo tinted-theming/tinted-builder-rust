@@ -1,5 +1,13 @@
 # Changelog
 
+## Unreleased
+
+### Changed
+
+- `Base16Scheme` palette hex values are now prepended with a hash `#` to
+  allow text editors to optionally highlight the color. This is optional
+  under the `0.11.2` builder specification
+
 ## 0.8.0 - 2024-10-05
 
 ## Added
