@@ -1,10 +1,6 @@
+use std::fs::{self, remove_file, File};
 use std::io::Write;
-use std::{
-    error::Error,
-    fs::{remove_file, File},
-    path::Path,
-    process::Command,
-};
+use std::{error::Error, path::Path, process::Command};
 
 use anyhow::{Context, Result};
 
@@ -42,5 +38,23 @@ pub fn write_to_file(path: impl AsRef<Path>, contents: &str) -> Result<()> {
 
     file.write_all(contents.as_bytes())?;
 
+    Ok(())
+}
+
+#[allow(dead_code)]
+pub fn copy_dir_all(src: impl AsRef<Path>, dst: impl AsRef<Path>) -> Result<()> {
+    fs::create_dir_all(&dst)?;
+
+    for entry in fs::read_dir(src)? {
+        let entry = entry?;
+        let file_type = entry.file_type()?;
+        let dest_path = dst.as_ref().join(entry.file_name());
+
+        if file_type.is_dir() {
+            copy_dir_all(entry.path(), &dest_path)?;
+        } else {
+            fs::copy(entry.path(), &dest_path)?;
+        }
+    }
     Ok(())
 }

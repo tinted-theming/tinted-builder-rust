@@ -3,7 +3,7 @@ mod test_utils;
 use anyhow::{Context, Result};
 use std::fs;
 use std::path::PathBuf;
-use test_utils::{run_command, write_to_file};
+use test_utils::{copy_dir_all, run_command, write_to_file};
 
 fn setup(system: &str, scheme_name: &str) -> Result<(String, String, String, String)> {
     let config_file_path: PathBuf =
@@ -275,9 +275,6 @@ fn test_operation_build_base24() -> Result<()> {
         base24_template_rendered_content_fixture,
     ) = setup(system, scheme_name)?;
 
-    if themes_path.is_dir() {
-        fs::remove_dir_all(&themes_path)?;
-    }
     if template_theme_path.is_dir() {
         fs::remove_dir_all(&template_theme_path)?;
     }
@@ -355,9 +352,6 @@ fn test_operation_build_mixed() -> Result<()> {
         base24_template_rendered_content_fixture,
     ) = setup("base24", base24_scheme_name)?;
 
-    if themes_path.is_dir() {
-        fs::remove_dir_all(&themes_path)?;
-    }
     if template_theme_path.is_dir() {
         fs::remove_dir_all(&template_theme_path)?;
     }
@@ -414,6 +408,62 @@ fn test_operation_build_mixed() -> Result<()> {
             ).as_str()
         ),
         "stdout does not contain the exptected output"
+    );
+
+    Ok(())
+}
+
+#[test]
+fn test_operation_build_list() -> Result<()> {
+    // -------
+    // Arrange
+    // -------
+    let name = "operation_build_list";
+    let template_theme_path = PathBuf::from(format!("./template-{}", name));
+    let template_templates_path = template_theme_path.join("templates");
+    let schemes_path = template_theme_path.join("schemes");
+    let rendered_theme_path = template_theme_path.join("list.md");
+
+    if template_theme_path.is_dir() {
+        fs::remove_dir_all(&template_theme_path)?;
+    }
+    fs::create_dir_all(&template_templates_path)?;
+    fs::copy(
+        "./tests/fixtures/templates/list-config.yaml",
+        template_theme_path.join("templates/config.yaml"),
+    )?;
+    fs::copy(
+        "./tests/fixtures/templates/list-template.mustache",
+        template_theme_path.join("templates/list.mustache"),
+    )?;
+    copy_dir_all("./tests/fixtures/schemes", &schemes_path)?;
+
+    // ---
+    // Act
+    // ---
+    let (stdout, stderr) = run_command(vec![
+        "build".to_string(),
+        template_theme_path.display().to_string(),
+        format!("--schemes-dir={}", schemes_path.display()),
+    ])
+    .unwrap();
+    let rendered_content = fs::read_to_string(rendered_theme_path)?;
+    let expected_content = fs::read_to_string("./tests/fixtures/rendered/list.md")?;
+
+    // ------
+    // Assert
+    // ------
+    assert_eq!(rendered_content, expected_content);
+    assert!(
+        stderr.is_empty(),
+        "stderr does not contain the expected output"
+    );
+    assert_eq!(
+        stdout,
+        format!(
+            "Successfully generated \"base16\" list with filename \"{}\"\n",
+            template_theme_path.join("list.md").display()
+        )
     );
 
     Ok(())

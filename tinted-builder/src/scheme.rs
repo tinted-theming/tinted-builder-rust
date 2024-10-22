@@ -79,6 +79,7 @@ pub enum SchemeSystem {
     Base16,
     /// Base24 scheme system.
     Base24,
+    List,
 }
 
 impl SchemeSystem {
@@ -87,6 +88,7 @@ impl SchemeSystem {
         match self {
             SchemeSystem::Base16 => "base16",
             SchemeSystem::Base24 => "base24",
+            SchemeSystem::List => "list",
         }
     }
     pub fn variants() -> &'static [SchemeSystem] {

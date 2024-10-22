@@ -2,8 +2,8 @@ mod test_utils;
 
 use anyhow::Result;
 use std::fs;
-use std::path::{Path, PathBuf};
-use test_utils::write_to_file;
+use std::path::PathBuf;
+use test_utils::{copy_dir_all, write_to_file};
 use tinted_builder::{SchemeSystem, SchemeVariant};
 use tinted_builder_rust::utils::get_scheme_files;
 
@@ -157,22 +157,5 @@ palette:
     assert_eq!(scheme_container.get_scheme_variant(), scheme_variant);
     assert_eq!(scheme_container.get_scheme_slug(), scheme_slug);
 
-    Ok(())
-}
-
-fn copy_dir_all(src: impl AsRef<Path>, dst: impl AsRef<Path>) -> Result<()> {
-    fs::create_dir_all(&dst)?;
-
-    for entry in fs::read_dir(src)? {
-        let entry = entry?;
-        let file_type = entry.file_type()?;
-        let dest_path = dst.as_ref().join(entry.file_name());
-
-        if file_type.is_dir() {
-            copy_dir_all(entry.path(), &dest_path)?;
-        } else {
-            fs::copy(entry.path(), &dest_path)?;
-        }
-    }
     Ok(())
 }
