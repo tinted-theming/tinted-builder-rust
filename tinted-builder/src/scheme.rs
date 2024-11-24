@@ -80,6 +80,8 @@ pub enum SchemeSystem {
     /// Base24 scheme system.
     Base24,
     List,
+    ListBase16,
+    ListBase24,
 }
 
 impl SchemeSystem {
@@ -89,6 +91,8 @@ impl SchemeSystem {
             SchemeSystem::Base16 => "base16",
             SchemeSystem::Base24 => "base24",
             SchemeSystem::List => "list",
+            SchemeSystem::ListBase16 => "listbase16",
+            SchemeSystem::ListBase24 => "listbase24",
         }
     }
     pub fn variants() -> &'static [SchemeSystem] {

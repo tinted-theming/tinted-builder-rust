@@ -102,7 +102,7 @@ impl<'de> Deserialize<'de> for Base16Scheme {
                     )));
                 }
             }
-            SchemeSystem::List => {
+            _ => {
                 return Err(serde::de::Error::custom(format!(
                     "{} is not a valid Scheme system for a specific scheme",
                     wrapper.system

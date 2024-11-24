@@ -110,14 +110,28 @@ pub fn build(
             .clone()
             .unwrap_or(vec![SchemeSystem::default()]);
 
-        if supported_systems.contains(&SchemeSystem::List) {
+        let list_systems: Vec<&SchemeSystem> = supported_systems
+            .iter()
+            .filter(|system| {
+                matches!(
+                    system,
+                    SchemeSystem::List | SchemeSystem::ListBase16 | SchemeSystem::ListBase24
+                )
+            })
+            .collect();
+
+        for system in &list_systems {
             render_list(
                 &theme_template_path,
+                system,
                 (template_item_config_name, template_item_config_value),
                 all_scheme_files.clone(),
                 is_quiet,
             )?;
-        } else {
+        }
+
+        // Render list, otherwise generate
+        if list_systems.is_empty() {
             let template_item_scheme_files: Vec<(PathBuf, Scheme)> = all_scheme_files
                 .iter()
                 .filter_map(|(path, scheme)| {
@@ -144,14 +158,11 @@ pub fn build(
 
 fn render_list(
     template_path: impl AsRef<Path>,
+    scheme_system: &SchemeSystem,
     (config_name, config_value): (&str, &TemplateConfig),
     all_scheme_files: Vec<(PathBuf, Scheme)>,
     is_quiet: bool,
 ) -> Result<()> {
-    let supported_systems = config_value
-        .supported_systems
-        .clone()
-        .unwrap_or(vec![SchemeSystem::default()]);
     let filename = get_filename(config_value, is_quiet)?;
     let mustache_template_path = template_path
         .as_ref()
@@ -168,14 +179,18 @@ fn render_list(
             .into_iter()
             .filter_map(|(_, scheme)| match scheme {
                 Scheme::Base16(scheme) => {
-                    if supported_systems.contains(&SchemeSystem::Base16) {
+                    if *scheme_system == SchemeSystem::List
+                        || *scheme_system == SchemeSystem::ListBase16
+                    {
                         Some(scheme)
                     } else {
                         None
                     }
                 }
                 Scheme::Base24(scheme) => {
-                    if supported_systems.contains(&SchemeSystem::Base24) {
+                    if *scheme_system == SchemeSystem::List
+                        || *scheme_system == SchemeSystem::ListBase24
+                    {
                         Some(scheme)
                     } else {
                         None
@@ -187,7 +202,11 @@ fn render_list(
     );
     let data = serde_yaml::to_string(&data).unwrap_or_default();
     let output = ribboncurls::render(&template_content, &data, None)?;
-    let parsed_filename = parse_filename(&template_path, &filename)?;
+    let filepath = filename
+        .replace("{{ scheme-system }}", &scheme_system.to_string())
+        .replace("{{scheme-system}}", &scheme_system.to_string());
+
+    let parsed_filename = parse_filename(&template_path, &filepath)?;
     let output_path = parsed_filename.get_path();
 
     if !parsed_filename.directory.exists() {
@@ -199,15 +218,7 @@ fn render_list(
     if !is_quiet {
         println!(
             "Successfully generated \"{}\" list with filename \"{}\"",
-            supported_systems
-                .iter()
-                .filter_map(|item| if *item == SchemeSystem::List {
-                    None
-                } else {
-                    Some(item.as_str().to_string())
-                })
-                .collect::<Vec<String>>()
-                .join(", "),
+            scheme_system,
             template_path.as_ref().join(filename).display(),
         );
     }

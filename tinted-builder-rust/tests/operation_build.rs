@@ -414,7 +414,7 @@ fn test_operation_build_mixed() -> Result<()> {
 }
 
 #[test]
-fn test_operation_build_list() -> Result<()> {
+fn test_operation_build_listbase16() -> Result<()> {
     // -------
     // Arrange
     // -------
@@ -422,7 +422,9 @@ fn test_operation_build_list() -> Result<()> {
     let template_theme_path = PathBuf::from(format!("./template-{}", name));
     let template_templates_path = template_theme_path.join("templates");
     let schemes_path = template_theme_path.join("schemes");
-    let rendered_theme_path = template_theme_path.join("list.md");
+    let rendered_list_theme_path = template_theme_path.join("list-list.md");
+    let rendered_listbase16_theme_path = template_theme_path.join("listbase16-list.md");
+    let rendered_listbase24_theme_path = template_theme_path.join("listbase24-list.md");
 
     if template_theme_path.is_dir() {
         fs::remove_dir_all(&template_theme_path)?;
@@ -447,24 +449,34 @@ fn test_operation_build_list() -> Result<()> {
         format!("--schemes-dir={}", schemes_path.display()),
     ])
     .unwrap();
-    let rendered_content = fs::read_to_string(rendered_theme_path)?;
-    let expected_content = fs::read_to_string("./tests/fixtures/rendered/list.md")?;
+    let rendered_list_content = fs::read_to_string(rendered_list_theme_path)?;
+    let rendered_listbase16_content = fs::read_to_string(rendered_listbase16_theme_path)?;
+    let rendered_listbase24_content = fs::read_to_string(rendered_listbase24_theme_path)?;
+    let expected_list_content = fs::read_to_string("./tests/fixtures/rendered/list.md")?;
+    let expected_listbase16_content =
+        fs::read_to_string("./tests/fixtures/rendered/listbase16.md")?;
+    let expected_listbase24_content =
+        fs::read_to_string("./tests/fixtures/rendered/listbase24.md")?;
 
     // ------
     // Assert
     // ------
-    assert_eq!(rendered_content, expected_content);
+    assert_eq!(rendered_list_content, expected_list_content);
+    assert_eq!(rendered_listbase16_content, expected_listbase16_content);
+    assert_eq!(rendered_listbase24_content, expected_listbase24_content);
     assert!(
         stderr.is_empty(),
         "stderr does not contain the expected output"
     );
-    assert_eq!(
-        stdout,
-        format!(
-            "Successfully generated \"base16\" list with filename \"{}\"\n",
-            template_theme_path.join("list.md").display()
-        )
+    let expected_output = format!(
+        r#"Successfully generated "list" list with filename "{0}/{{{{ scheme-system }}}}-list.md"
+Successfully generated "listbase16" list with filename "{0}/{{{{ scheme-system }}}}-list.md"
+Successfully generated "listbase24" list with filename "{0}/{{{{ scheme-system }}}}-list.md"
+"#,
+        template_theme_path.display(),
     );
+
+    assert_eq!(stdout, expected_output);
 
     Ok(())
 }

@@ -1,3 +1,3 @@
-list: 
-  filename: list.md
-  supported-systems: [list, base16]
+list:
+  filename: "{{ scheme-system }}-list.md"
+  supported-systems: [list, listbase16, listbase24]
