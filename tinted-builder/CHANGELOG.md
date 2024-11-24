@@ -2,11 +2,17 @@
 
 ## Unreleased
 
+### Added
+
+- Add `Scheme` struct support for `list`, `listbase16` and `listbase24`
+  scheme systems
+
 ### Changed
 
 - `Base16Scheme` palette hex values are now prepended with a hash `#` to
   allow text editors to optionally highlight the color. This is optional
   under the `0.11.2` builder specification
+- Update Ribboncurls crate
 
 ## 0.8.0 - 2024-10-05
 
