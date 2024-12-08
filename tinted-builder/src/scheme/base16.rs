@@ -102,6 +102,12 @@ impl<'de> Deserialize<'de> for Base16Scheme {
                     )));
                 }
             }
+            SchemeSystem::List | SchemeSystem::ListBase16 | SchemeSystem::ListBase24 => {
+                return Err(serde::de::Error::custom(format!(
+                    "{} is not a valid Scheme system for a specific scheme",
+                    wrapper.system
+                )));
+            }
         }
 
         let palette_result: Result<HashMap<String, Color>, _> = wrapper

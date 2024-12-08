@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+### Added
+
+- Add support for `list`, `listbase16` and `listbase24` scheme systems
+  for use in the `templates/config.yaml` file to add a `schemes` list to
+  mustache context to be able to list scheme information in a single
+  file.
+
 ### Changed
 
 - Change `get_scheme_files` and `SchemeFile::new` type arguments from

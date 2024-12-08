@@ -65,6 +65,40 @@ The following is a table of the available subcommands for the CLI tool (tinted-b
 | `--help` `-h`     | Displays help information for the subcommand. | All | - | `tinted-builder-rust --help`, `tinted-builder-rust build --help`, etc |
 | `--version` `-V`  | Shows the version of tinted-builder-rust. | All | - | `tinted-builder-rust --version` |
 
+## List usage
+
+`tinted-builder-rust` supports `list`, `listbase16` and `listbase24`
+scheme systems. This allows for listing scheme information in a single
+file, eg:
+
+`template-repo/templates/config.yaml`:
+
+```yaml
+some-base16-list:
+    filename: "base16-list.md"
+    supported-systems: [listbase16]
+
+some-base24-list:
+    filename: "base24-list.md"
+    supported-systems: [listbase24]
+
+list-all:
+    filename: "list-all.md"
+    supported-systems: [list]
+```
+
+With an example template being `templates/some-base16-list.mustache`:
+
+```
+{{#schemes}}
+  {{system}}-{{slug}} (variant: {{variant}}
+{{/schemes}
+```
+
+Note: These are unofficial scheme-systems, meaning it's not
+part of the Tinted Theming scheme specification.
+
+
 ## Builder specification
 
 tinted-builder-rust implements the `0.11.1` [builder specification]. This
