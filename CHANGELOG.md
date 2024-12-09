@@ -14,6 +14,12 @@
 - Change `get_scheme_files` and `SchemeFile::new` type arguments from
   `&Path` to `impl AsRef<Path>` to allow for more flexibility
 
+### Fixed
+
+- In tests, use `CARGO_BIN_EXE_tinted-builder-rust` env var for the
+  binary path instead of assuming it exists in `./target/release`
+  directory
+
 ## [0.12.1] - 2024-10-06
 
 ### Fixed
