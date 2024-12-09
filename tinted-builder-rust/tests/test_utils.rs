@@ -4,11 +4,9 @@ use std::{error::Error, path::Path, process::Command};
 
 use anyhow::{Context, Result};
 
-const COMMAND_NAME: &str = "../target/release/tinted-builder-rust";
-
 #[allow(dead_code)]
 pub fn run_command(command_vec: Vec<String>) -> Result<(String, String), Box<dyn Error>> {
-    let output = Command::new(COMMAND_NAME)
+    let output = Command::new(env!("CARGO_BIN_EXE_tinted-builder-rust"))
         .args(&command_vec)
         .output()
         .expect("Failed to execute command");
