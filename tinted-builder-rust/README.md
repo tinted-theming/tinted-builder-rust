@@ -92,7 +92,7 @@ With an example template being `templates/some-base16-list.mustache`:
 ```
 {{#schemes}}
   {{system}}-{{slug}} (variant: {{variant}}
-{{/schemes}
+{{/schemes}}
 ```
 
 Note: These are unofficial scheme-systems, meaning it's not
