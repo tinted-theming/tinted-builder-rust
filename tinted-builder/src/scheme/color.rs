@@ -12,8 +12,7 @@ pub struct Color {
 
 impl Color {
     pub fn new(hex_color: String) -> Result<Color, TintedBuilderError> {
-        let hex_full =
-            process_hex_input(&hex_color).ok_or_else(|| TintedBuilderError::HexInputFormat)?;
+        let hex_full = process_hex_input(&hex_color).ok_or(TintedBuilderError::HexInputFormat)?;
         let hex: (String, String, String) = (
             hex_full[0..2].to_lowercase(),
             hex_full[2..4].to_lowercase(),
@@ -36,7 +35,7 @@ impl Color {
 
 impl fmt::Display for Color {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{}", &self.to_hex())
+        write!(f, "#{}", &self.to_hex())
     }
 }
 

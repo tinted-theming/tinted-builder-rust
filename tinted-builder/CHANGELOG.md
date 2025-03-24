@@ -9,9 +9,10 @@
 
 ### Changed
 
-- `Base16Scheme` palette hex values are now prepended with a hash `#` to
-  allow text editors to optionally highlight the color. This is optional
-  under the `0.11.2` builder specification
+- BREAKING: Changed `Color` structs `Display` implementation to prefix with a
+- `Base16Scheme` palette hex values are now prepended with a hash `#` to allow
+  text editors to optionally highlight the color. This is optional under the
+  `0.11.2` builder specification
 - Update Ribboncurls crate
 
 ## 0.8.0 - 2024-10-05

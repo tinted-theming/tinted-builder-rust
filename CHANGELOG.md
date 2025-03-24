@@ -11,8 +11,8 @@
 
 ### Changed
 
-- Change `get_scheme_files` and `SchemeFile::new` type arguments from
-  `&Path` to `impl AsRef<Path>` to allow for more flexibility
+- Change `get_scheme_files` and `SchemeFile::new` type arguments from `&Path` to
+  `impl AsRef<Path>` to allow for more flexibility
 
 ### Fixed
 
