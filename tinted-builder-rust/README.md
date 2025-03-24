@@ -89,9 +89,9 @@ list-all:
 
 With an example template being `templates/some-base16-list.mustache`:
 
-```
+```text
 {{#schemes}}
-  {{system}}-{{slug}} (variant: {{variant}}
+  {{system}}-{{slug}} (variant: {{variant}})
 {{/schemes}}
 ```
 
