@@ -382,7 +382,7 @@ dependencies = [
 
 [[package]]
 name = "tinted-builder"
-version = "0.9.0"
+version = "0.9.1"
 dependencies = [
  "anyhow",
  "clap",
@@ -399,7 +399,7 @@ dependencies = [
 
 [[package]]
 name = "tinted-builder-rust"
-version = "0.13.0"
+version = "0.13.1"
 dependencies = [
  "anyhow",
  "clap",

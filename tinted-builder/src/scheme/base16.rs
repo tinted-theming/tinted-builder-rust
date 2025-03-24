@@ -60,7 +60,7 @@ impl fmt::Display for Base16Scheme {
         palette_vec.sort_by_key(|k| k.0.clone());
 
         for (key, value) in palette_vec {
-            writeln!(f, "  {}: \"#{}\"", key, value)?;
+            writeln!(f, "  {}: \"{}\"", key, value)?;
         }
         Ok(())
     }

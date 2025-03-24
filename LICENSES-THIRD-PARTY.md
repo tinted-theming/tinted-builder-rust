@@ -1683,8 +1683,8 @@ limitations under the License.
 
 #### Used by
 
-- [tinted-builder 0.9.0](https://github.com/tinted-theming/tinted-builder-rust)
-- [tinted-builder-rust 0.13.0](https://github.com/tinted-theming/tinted-builder-rust)
+- [tinted-builder 0.9.1](https://github.com/tinted-theming/tinted-builder-rust)
+- [tinted-builder-rust 0.13.1](https://github.com/tinted-theming/tinted-builder-rust)
 
 ```
 Apache License
