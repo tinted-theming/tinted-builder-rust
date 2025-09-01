@@ -15,6 +15,7 @@ your own Rust application.
 ## Table of Contents
 
 - [CLI](#cli)
+  - [Requirements](#requirements)
   - [Installation](#installation)
   - [Basic usage](#basic-usage)
   - [Commands](#commands)
@@ -28,8 +29,12 @@ your own Rust application.
 
 ## CLI
 
-### Installation
+### Requirements
 
+`git` is required to be installed if using the `tinted-builder-rust sync`
+subcommand.
+
+### Installation
 
 **Cargo**
 
@@ -160,7 +165,6 @@ Ribboncurls, have a look at [LICENSES-THIRD-PARTY.md].
 [base16]: https://github.com/tinted-theming/home/blob/main/styling.md
 [base24]: https://github.com/tinted-theming/base24/blob/master/styling.md
 [ribboncurls]: https://github.com/tinted-theming/ribboncurls
-[builder specification]: https://github.com/tinted-theming/home/blob/main/builder.md
 [LICENSE]: LICENSE
 [LICENSES-THIRD-PARTY.md]: LICENSES-THIRD-PARTY.md
 [CONTRIBUTING.md]: CONTRIBUTING.md
