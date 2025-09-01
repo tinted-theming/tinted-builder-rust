@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Fixed
+
+- Fix a bug where `sync` subcommand fails if `git` isn't present on `PATH`
+
 ## [0.13.1] - 2025-03-24
 
 ### Fixed

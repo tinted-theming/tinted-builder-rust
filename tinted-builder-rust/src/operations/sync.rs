@@ -2,6 +2,7 @@ use anyhow::{anyhow, Context, Result};
 use std::path::Path;
 use std::process::{Command, Stdio};
 use std::str;
+use which::which;
 
 const REPO_NAME: &str = env!("CARGO_PKG_NAME");
 const SCHEMES_REPO_NAME: &str = "schemes";
@@ -47,6 +48,13 @@ const SCHEMES_URL: &str = "https://github.com/tinted-theming/schemes";
 /// The function will ensure that the schemes repository is up-to-date, either by pulling the
 /// latest changes or by cloning the repository if it does not already exist.
 pub(crate) fn sync(schemes_path: impl AsRef<Path>, is_quiet: bool) -> Result<()> {
+    // Ensure git is installed
+    let binary = "git";
+    let binary_result = which(binary);
+    if binary_result.is_err() {
+        return Err(anyhow!("`{binary}` is required for pulling repositories from GitHub. Either install `{binary}` or manually provide the Schemes directory with `--schemes-dir` flag."));
+    }
+
     if schemes_path.as_ref().is_dir() {
         let is_diff = git_diff(&schemes_path)?;
 
