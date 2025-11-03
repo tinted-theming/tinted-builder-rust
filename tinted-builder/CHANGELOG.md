@@ -1,26 +1,8 @@
 # Changelog
 
-## [0.13.1] - 2025-03-24
+## Unreleased
 
-### Fixed
-
-- Fix bug where double hash is printed for hex values with `Base16Scheme`
-  `fmt::Display`
-
-## [0.13.0] - 2025-03-24
-
-### Added
-
-- Add `Scheme` struct support for `list`, `listbase16` and `listbase24`
-  scheme systems
-
-### Changed
-
-- BREAKING: Changed `Color` structs `Display` implementation to prefix with a
-- `Base16Scheme` palette hex values are now prepended with a hash `#` to allow
-  text editors to optionally highlight the color. This is optional under the
-  `0.11.2` builder specification
-- Update Ribboncurls crate
+- Update dependencies
 
 ## 0.8.0 - 2024-10-05
 
