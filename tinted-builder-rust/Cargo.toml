@@ -32,3 +32,8 @@ version = "0.9.0"
 [[bin]]
 name = "tinted-builder-rust"
 path = "src/main.rs"
+
+[lints.clippy]
+pedantic    = { level = "deny", priority = -1 }
+nursery     = { level = "deny", priority = -1 }
+unwrap_used = "deny"

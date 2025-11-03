@@ -141,7 +141,10 @@ palette:
     // Act
     // ---
     let scheme_files = get_scheme_files(&data_path, false)?;
-    let scheme_container = scheme_files.first().unwrap().get_scheme()?;
+    let scheme_container = scheme_files
+        .first()
+        .expect("Unable to extract scheme_file")
+        .get_scheme()?;
 
     // ------
     // Assert

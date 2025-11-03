@@ -1,7 +1,7 @@
 use regex::Regex;
 use std::collections::HashMap;
 
-pub(crate) fn slugify(input: &str) -> String {
+pub fn slugify(input: &str) -> String {
     let char_map: HashMap<char, &str> = [
         ('á', "a"),
         ('à', "a"),
@@ -47,7 +47,7 @@ pub(crate) fn slugify(input: &str) -> String {
         ('ħ', "h"),
     ]
     .iter()
-    .cloned()
+    .copied()
     .collect();
 
     let mut slug = String::new();

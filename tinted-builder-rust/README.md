@@ -51,19 +51,19 @@ tinted-builder-rust build path/to/base16-template
 
 The following is a table of the available subcommands for the CLI tool (tinted-builder-rust), including the descriptions and any notable arguments.
 
-| Subcommand | Description                          | Arguments            | Example Usage                              | Flags |
-|------------|--------------------------------------|----------------------|--------------------------------------------|-------|
+| Subcommand | Description | Arguments | Example Usage | Flags |
+|------------|-------------|-----------|---------------|-------|
 | `sync`  | Installs and or updates latest schemes. | - | `tinted-builder-rust sync` | `--quiet` (silence stderr and stdout) |
 | `build` | Builds the themes of a template. | `template_path`: Path to template directory. | `tinted-builder-rust build ./path/to/base16-template` | `--quiet` (silence stderr and stdout), `--sync` (equivalent of running `tinted-builder-rust sync` before `tinted-builder-rust build`) |
 
 ## Flags
 
-| Flag/Option       | Description                             | Applicable Subcommands | Default Value | Example Usage                             |
-|-------------------|-----------------------------------------|------------------------|---------------|-------------------------------------------|
-| `--schemes-dir` `-s`   | Path to a custom local schemes directory to use when building. Only necessary if the [latest schemes repository] is not desired. | `build` | `tinted-builder-rust build . --schemes-dir=/path/to/schemes/dir` |
-| `--data-dir` `-d`   | Specifies a custom path for the data directory. | All | Linux: `$XDG_DATA_HOME/tinted-theming/tinted-builder-rust` or `~/.local/share`. MacOS: `~/Library/Application\ Support/tinted-theming/tinted-builder-rust` | `tinted-builder-rust sync --data-dir /path/to/custom/data-dir` |
-| `--help` `-h`     | Displays help information for the subcommand. | All | - | `tinted-builder-rust --help`, `tinted-builder-rust build --help`, etc |
-| `--version` `-V`  | Shows the version of tinted-builder-rust. | All | - | `tinted-builder-rust --version` |
+| Flag/Option | Description | Applicable Subcommands | Default Value | Example Usage |
+|-------------|-------------|------------------------|---------------|---------------|
+| `--schemes-dir` `-s` | Path to a custom local schemes directory to use when building. Only necessary if the [latest schemes repository] is not desired. | `build` | `tinted-builder-rust build . --schemes-dir=/path/to/schemes/dir` |
+| `--data-dir` `-d` | Specifies a custom path for the data directory. | All | Linux: `$XDG_DATA_HOME/tinted-theming/tinted-builder-rust`. macOS: `~/Library/Application\ Support/tinted-theming/tinted-builder-rust` | `tinted-builder-rust sync --data-dir /path/to/custom/data-dir` |
+| `--help` `-h` | Displays help information for the subcommand. | All | - | `tinted-builder-rust --help`, `tinted-builder-rust build --help`, etc |
+| `--version` `-V` | Shows the version of tinted-builder-rust. | All | - | `tinted-builder-rust --version` |
 
 ## List usage
 
@@ -123,7 +123,6 @@ Ribboncurls, have a look at [LICENSES-THIRD-PARTY.md].
 [builder specification]: https://github.com/tinted-theming/home/blob/main/builder.md
 [base16]: https://github.com/tinted-theming/home/blob/main/styling.md
 [base24]: https://github.com/tinted-theming/base24/blob/master/styling.md
-[builder specification]: https://github.com/tinted-theming/home/blob/main/builder.md
 [LICENSE]: LICENSE
 [LICENSES-THIRD-PARTY.md]: LICENSES-THIRD-PARTY.md
 [CONTRIBUTING.md]: CONTRIBUTING.md

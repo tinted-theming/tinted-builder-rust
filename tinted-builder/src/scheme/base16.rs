@@ -6,12 +6,12 @@ pub use crate::scheme::color::Color;
 
 use crate::{utils::slugify, SchemeSystem, SchemeVariant};
 
-pub(crate) const REQUIRED_BASE16_PALETTE_KEYS: [&str; 16] = [
+pub const REQUIRED_BASE16_PALETTE_KEYS: [&str; 16] = [
     "base00", "base01", "base02", "base03", "base04", "base05", "base06", "base07", "base08",
     "base09", "base0A", "base0B", "base0C", "base0D", "base0E", "base0F",
 ];
 
-pub(crate) const REQUIRED_BASE24_PALETTE_KEYS: [&str; 24] = [
+pub const REQUIRED_BASE24_PALETTE_KEYS: [&str; 24] = [
     "base00", "base01", "base02", "base03", "base04", "base05", "base06", "base07", "base08",
     "base09", "base0A", "base0B", "base0C", "base0D", "base0E", "base0F", "base10", "base11",
     "base12", "base13", "base14", "base15", "base16", "base17",
@@ -43,7 +43,7 @@ impl fmt::Display for Base16Scheme {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         writeln!(f, "author: \"{}\"", self.author)?;
         if let Some(ref desc) = self.description {
-            writeln!(f, "description: \"{}\"", desc)?;
+            writeln!(f, "description: \"{desc}\"")?;
         }
         writeln!(f, "name: \"{}\"", self.name)?;
         writeln!(f, "slug: \"{}\"", self.slug)?;
@@ -55,12 +55,12 @@ impl fmt::Display for Base16Scheme {
             .palette
             .clone()
             .iter()
-            .map(|(k, v)| (k.to_string(), v.clone()))
+            .map(|(k, v)| (k.clone(), v.clone()))
             .collect();
         palette_vec.sort_by_key(|k| k.0.clone());
 
         for (key, value) in palette_vec {
-            writeln!(f, "  {}: \"{}\"", key, value)?;
+            writeln!(f, "  {key}: \"{value}\"")?;
         }
         Ok(())
     }
@@ -74,7 +74,7 @@ impl<'de> Deserialize<'de> for Base16Scheme {
         let wrapper = SchemeWrapper::deserialize(deserializer)?;
         let slug = wrapper
             .slug
-            .map_or(slugify(&wrapper.name), |slug| slugify(&slug));
+            .map_or_else(|| slugify(&wrapper.name), |slug| slugify(&slug));
         let variant = wrapper.variant.unwrap_or(SchemeVariant::Dark);
 
         match wrapper.system {
@@ -114,13 +114,13 @@ impl<'de> Deserialize<'de> for Base16Scheme {
             .palette
             .into_iter()
             .map(|(key, value)| {
-                Color::new(value)
+                Color::new(&value)
                     .map(|color| (key, color))
                     .map_err(|e| serde::de::Error::custom(e.to_string()))
             })
             .collect();
 
-        Ok(Base16Scheme {
+        Ok(Self {
             name: wrapper.name,
             slug,
             system: wrapper.system,
@@ -161,6 +161,7 @@ impl Serialize for Base16Scheme {
 // Helper struct for serializing sorted palette
 struct SortedPalette<'a>(Vec<(&'a String, &'a Color)>);
 
+#[allow(clippy::elidable_lifetime_names)]
 impl<'a> Serialize for SortedPalette<'a> {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where

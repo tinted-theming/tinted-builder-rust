@@ -14,56 +14,51 @@ use crate::TintedBuilderError;
 #[non_exhaustive]
 #[derive(Debug, Clone)]
 pub enum Scheme {
-    /// Base16 variant with Base16Scheme deserialized content.
+    /// Base16 variant with `Base16Scheme` deserialized content.
     Base16(Base16Scheme),
-    /// Base24 variant with Base16Scheme deserialized content. Base16Scheme is built to support
+    /// Base24 variant with `Base16Scheme` deserialized content. `Base16Scheme` is built to support
     /// basic supersets of Base16 schemes.
     Base24(Base16Scheme),
 }
 
 impl Scheme {
+    #[must_use]
     pub fn get_scheme_author(&self) -> String {
         match self {
-            Scheme::Base16(scheme) => scheme.author.to_string(),
-            Scheme::Base24(scheme) => scheme.author.to_string(),
+            Self::Base16(scheme) | Self::Base24(scheme) => scheme.author.clone(),
         }
     }
+    #[must_use]
     pub fn get_scheme_description(&self) -> String {
         match self {
-            Scheme::Base16(scheme) => scheme
-                .description
-                .clone()
-                .map(|s| s.to_string())
-                .unwrap_or_default(),
-            Scheme::Base24(scheme) => scheme
-                .description
-                .clone()
-                .map(|s| s.to_string())
-                .unwrap_or_default(),
+            Self::Base16(scheme) | Self::Base24(scheme) => {
+                scheme.description.clone().unwrap_or_default()
+            }
         }
     }
+    #[must_use]
     pub fn get_scheme_name(&self) -> String {
         match self {
-            Scheme::Base16(scheme) => scheme.name.to_string(),
-            Scheme::Base24(scheme) => scheme.name.to_string(),
+            Self::Base16(scheme) | Self::Base24(scheme) => scheme.name.clone(),
         }
     }
+    #[must_use]
     pub fn get_scheme_slug(&self) -> String {
         match self {
-            Scheme::Base16(scheme) => scheme.slug.to_string(),
-            Scheme::Base24(scheme) => scheme.slug.to_string(),
+            Self::Base16(scheme) | Self::Base24(scheme) => scheme.slug.clone(),
         }
     }
-    pub fn get_scheme_system(&self) -> SchemeSystem {
+    #[must_use]
+    pub const fn get_scheme_system(&self) -> SchemeSystem {
         match self {
-            Scheme::Base16(_) => SchemeSystem::Base16,
-            Scheme::Base24(_) => SchemeSystem::Base24,
+            Self::Base16(_) => SchemeSystem::Base16,
+            Self::Base24(_) => SchemeSystem::Base24,
         }
     }
+    #[must_use]
     pub fn get_scheme_variant(&self) -> SchemeVariant {
         match self {
-            Scheme::Base16(scheme) => scheme.variant.clone(),
-            Scheme::Base24(scheme) => scheme.variant.clone(),
+            Self::Base16(scheme) | Self::Base24(scheme) => scheme.variant.clone(),
         }
     }
 }
@@ -86,17 +81,19 @@ pub enum SchemeSystem {
 
 impl SchemeSystem {
     /// Returns the string representation of the `SchemeSystem`.
-    pub fn as_str(&self) -> &str {
+    #[must_use]
+    pub const fn as_str(&self) -> &str {
         match self {
-            SchemeSystem::Base16 => "base16",
-            SchemeSystem::Base24 => "base24",
-            SchemeSystem::List => "list",
-            SchemeSystem::ListBase16 => "listbase16",
-            SchemeSystem::ListBase24 => "listbase24",
+            Self::Base16 => "base16",
+            Self::Base24 => "base24",
+            Self::List => "list",
+            Self::ListBase16 => "listbase16",
+            Self::ListBase24 => "listbase24",
         }
     }
-    pub fn variants() -> &'static [SchemeSystem] {
-        static VARIANTS: &[SchemeSystem] = &[SchemeSystem::Base16, SchemeSystem::Base24];
+    #[must_use]
+    pub const fn variants() -> &'static [Self] {
+        const VARIANTS: &[SchemeSystem] = &[SchemeSystem::Base16, SchemeSystem::Base24];
         VARIANTS
     }
 }
@@ -129,9 +126,9 @@ impl FromStr for SchemeSystem {
     }
 }
 
-/// Enum representing variants of a color scheme, such as Dark or Light. This enum is
-/// non-exhaustive, meaning additional variants may be added in future versions without it being
-/// considered a breaking change.
+/// Enum representing variants of a color scheme (Dark or Light). This enum is non-exhaustive,
+/// meaning additional variants may be added in future versions without it being considered a
+/// breaking change.
 #[non_exhaustive]
 #[derive(Debug, Clone, Default, Deserialize, PartialEq, Serialize)]
 #[serde(rename_all = "lowercase")]
@@ -165,10 +162,11 @@ impl FromStr for SchemeVariant {
 
 impl SchemeVariant {
     /// Returns the string representation of the `SchemeVariant`.
-    pub fn as_str(&self) -> &str {
+    #[must_use]
+    pub const fn as_str(&self) -> &str {
         match self {
-            SchemeVariant::Dark => "dark",
-            SchemeVariant::Light => "light",
+            Self::Dark => "dark",
+            Self::Light => "light",
         }
     }
 }

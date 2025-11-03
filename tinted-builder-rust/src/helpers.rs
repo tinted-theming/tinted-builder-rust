@@ -4,7 +4,7 @@ use std::io::Write;
 use std::path::Path;
 
 #[allow(dead_code)]
-pub(crate) fn write_to_file(path: impl AsRef<Path>, contents: &str) -> Result<()> {
+pub fn write_to_file(path: impl AsRef<Path>, contents: &str) -> Result<()> {
     if path.as_ref().exists() {
         remove_file(path.as_ref())
             .with_context(|| format!("Unable to remove file: {}", path.as_ref().display()))?;

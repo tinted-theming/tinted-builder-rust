@@ -47,7 +47,7 @@ const SCHEMES_URL: &str = "https://github.com/tinted-theming/schemes";
 ///
 /// The function will ensure that the schemes repository is up-to-date, either by pulling the
 /// latest changes or by cloning the repository if it does not already exist.
-pub(crate) fn sync(schemes_path: impl AsRef<Path>, is_quiet: bool) -> Result<()> {
+pub fn sync(schemes_path: impl AsRef<Path>, is_quiet: bool) -> Result<()> {
     // Ensure git is installed
     let binary = "git";
     let binary_result = which(binary);
@@ -59,21 +59,20 @@ pub(crate) fn sync(schemes_path: impl AsRef<Path>, is_quiet: bool) -> Result<()>
         let is_diff = git_diff(&schemes_path)?;
 
         if !is_diff {
-            git_pull(schemes_path, is_quiet).with_context(|| {
-                format!("Error pulling {} from {}", SCHEMES_REPO_NAME, SCHEMES_URL)
-            })?;
+            git_pull(schemes_path, is_quiet)
+                .with_context(|| format!("Error pulling {SCHEMES_REPO_NAME} from {SCHEMES_URL}"))?;
 
             if !is_quiet {
-                println!("{} up to date", SCHEMES_REPO_NAME);
+                println!("{SCHEMES_REPO_NAME} up to date");
             }
         } else if !is_quiet {
-            println!("{} contains uncommitted changes, please commit or remove and then run `{} update` again.", SCHEMES_REPO_NAME, REPO_NAME);
+            println!("{SCHEMES_REPO_NAME} contains uncommitted changes, please commit or remove and then run `{REPO_NAME} update` again.");
         }
     } else {
         git_clone(SCHEMES_URL, schemes_path, is_quiet)?;
 
         if !is_quiet {
-            println!("{} installed", SCHEMES_REPO_NAME);
+            println!("{SCHEMES_REPO_NAME} installed");
         }
     }
 
@@ -95,10 +94,10 @@ fn git_clone(repo_url: &str, target_dir: impl AsRef<Path>, is_quiet: bool) -> Re
 
     if is_quiet {
         cmd.stdout(Stdio::null()).stderr(Stdio::null());
-    };
+    }
 
     cmd.status()
-        .with_context(|| format!("Failed to clone repository from {}", repo_url))?;
+        .with_context(|| format!("Failed to clone repository from {repo_url}"))?;
 
     Ok(())
 }

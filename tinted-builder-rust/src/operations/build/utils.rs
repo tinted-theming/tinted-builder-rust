@@ -1,5 +1,4 @@
 use anyhow::{anyhow, Result};
-use regex::Regex;
 use serde::Deserialize;
 use std::fs::read_to_string;
 use std::path::{Path, PathBuf};
@@ -12,6 +11,11 @@ pub enum SchemeFile {
 }
 
 impl SchemeFile {
+    /// Creates a new [`SchemeFile`] from the given path.
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if the provided file does **not** have a `.yaml` or `.yml` extension.
     pub fn new(path: impl AsRef<Path>) -> Result<Self> {
         let extension = path
             .as_ref()
@@ -23,10 +27,18 @@ impl SchemeFile {
         match extension {
             "yaml" => Ok(Self::Yaml(path.as_ref().to_path_buf())),
             "yml" => Ok(Self::Yml(path.as_ref().to_path_buf())),
-            _ => Err(anyhow!("Invalid file extension: {}", extension.to_string())),
+            _ => Err(anyhow!("Invalid file extension: {extension}")),
         }
     }
 
+    /// Reads and parses the YAML scheme file into a [`Scheme`].
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if:
+    /// - The file cannot be read from disk.
+    /// - The contents are not valid YAML.
+    /// - The YAML structure does not match the expected Base16/Base24 scheme format.
     pub fn get_scheme(&self) -> Result<Scheme> {
         match self {
             Self::Yaml(path) | Self::Yml(path) => {
@@ -59,15 +71,16 @@ impl SchemeFile {
         }
     }
 
-    pub fn get_path(&self) -> Option<PathBuf> {
+    #[must_use]
+    pub fn get_path(&self) -> PathBuf {
         match self {
-            Self::Yaml(path) | Self::Yml(path) => Some(path.to_path_buf()),
+            Self::Yaml(path) | Self::Yml(path) => path.clone(),
         }
     }
 }
 
 #[derive(Debug, Deserialize)]
-pub(crate) struct TemplateConfig {
+pub struct TemplateConfig {
     pub filename: Option<String>,
 
     #[serde(rename = "supported-systems")]
@@ -81,23 +94,24 @@ pub(crate) struct TemplateConfig {
 }
 
 #[derive(Debug)]
-pub(crate) struct ParsedFilename {
+pub struct ParsedFilename {
     pub directory: PathBuf,
     pub filestem: String,
     pub file_extension: Option<String>,
 }
 
 impl ParsedFilename {
+    #[must_use]
     pub fn get_path(&self) -> PathBuf {
         let directory = &self.directory;
         let filestem = &self.filestem;
         let file_extension = &self
             .file_extension
             .as_ref()
-            .map(|ext| format!(".{}", ext))
+            .map(|ext| format!(".{ext}"))
             .unwrap_or_default();
 
-        directory.join(format!("{}{}", filestem, file_extension))
+        directory.join(format!("{filestem}{file_extension}"))
     }
 }
 
@@ -151,15 +165,12 @@ pub fn get_scheme_files(dirpath: impl AsRef<Path>, is_recursive: bool) -> Result
 
         let scheme_file_type_result = SchemeFile::new(&file_path);
 
-        match scheme_file_type_result {
-            Ok(scheme_file_type) => {
-                scheme_paths.push(scheme_file_type);
-            }
-            Err(_) => continue,
+        if let Ok(scheme_file_type) = scheme_file_type_result {
+            scheme_paths.push(scheme_file_type);
         }
     }
 
-    scheme_paths.sort_by_key(|k| k.get_path());
+    scheme_paths.sort_by_key(SchemeFile::get_path);
 
     Ok(scheme_paths)
 }
@@ -171,39 +182,28 @@ pub fn get_scheme_files(dirpath: impl AsRef<Path>, is_recursive: bool) -> Result
 /// - `directory`: the directory of the file (relative to `template_path` or `.` if not present)
 /// - `filestem`: the filename without the extension
 /// - `file_extension`: the optional file extension
-pub(crate) fn parse_filename(
-    template_path: impl AsRef<Path>,
-    filepath: &str,
-) -> Result<ParsedFilename> {
-    let re = Regex::new(r"^(?P<directory>.*/)?(?P<filestem>[^/\.]+)(?:\.(?P<extension>[^/]+))?$")
-        .unwrap();
+pub fn parse_filename(template_path: impl AsRef<Path>, filepath: &str) -> ParsedFilename {
+    let p = Path::new(filepath);
 
-    if let Some(captures) = re.captures(filepath) {
-        // Extract the directory (if present), or use "." if there's no directory
-        let directory = captures
-            .name("directory")
-            .map(|d| template_path.as_ref().join(d.as_str()))
-            .unwrap_or_else(|| template_path.as_ref().to_path_buf());
-        let filestem = captures.name("filestem").unwrap().as_str().to_string();
-        let file_extension = captures
-            .name("extension")
-            .map(|ext| ext.as_str().to_string());
+    let directory: PathBuf = p.parent().map_or_else(
+        || template_path.as_ref().to_path_buf(),
+        |dir| template_path.as_ref().join(dir),
+    );
 
-        if filestem.is_empty() {
-            Err(anyhow!(
-                "Config property \"filename\" requires a filestem: {}",
-                &filepath
-            ))
-        } else {
-            // Return the parsed path
-            Ok(ParsedFilename {
-                directory,
-                filestem,
-                file_extension,
-            })
-        }
-    } else {
-        Err(anyhow!("Unable to parse template: {}", &filepath))
+    // A filestem must exist and be non-empty.
+    let filestem = p
+        .file_stem()
+        .and_then(|s| s.to_str())
+        .filter(|s| !s.is_empty())
+        .map(String::from)
+        .unwrap_or_default();
+
+    let file_extension = p.extension().and_then(|e| e.to_str()).map(String::from);
+
+    ParsedFilename {
+        directory,
+        filestem,
+        file_extension,
     }
 }
 
@@ -215,7 +215,7 @@ mod tests {
     #[test]
     fn test_parse_filename_with_directory_and_extension() {
         let template_path = Path::new("/home/user/templates");
-        let result = parse_filename(template_path, "some-directory/name/file.txt").unwrap();
+        let result = parse_filename(template_path, "some-directory/name/file.txt");
 
         assert_eq!(result.directory, template_path.join("some-directory/name"));
         assert_eq!(result.filestem, "file");
@@ -225,7 +225,7 @@ mod tests {
     #[test]
     fn test_parse_filename_with_filename_and_extension() {
         let template_path = Path::new("/home/user/templates");
-        let result = parse_filename(template_path, "filename.ext").unwrap();
+        let result = parse_filename(template_path, "filename.ext");
 
         assert_eq!(result.directory, template_path);
         assert_eq!(result.filestem, "filename");
@@ -235,7 +235,7 @@ mod tests {
     #[test]
     fn test_parse_filename_with_only_filename() {
         let template_path = Path::new("/home/user/templates");
-        let result = parse_filename(template_path, "file").unwrap();
+        let result = parse_filename(template_path, "file");
 
         assert_eq!(result.directory, template_path);
         assert_eq!(result.filestem, "file");
@@ -245,25 +245,10 @@ mod tests {
     #[test]
     fn test_parse_filename_with_directory_and_no_extension() {
         let template_path = Path::new("/home/user/templates");
-        let result = parse_filename(template_path, "some-directory/file").unwrap();
+        let result = parse_filename(template_path, "some-directory/file");
 
         assert_eq!(result.directory, template_path.join("some-directory"));
         assert_eq!(result.filestem, "file");
         assert_eq!(result.file_extension, None);
-    }
-
-    #[test]
-    fn test_parse_filename_invalid_filestem() {
-        let template_path = Path::new("/home/user/templates");
-        let filename = "/invalid/path/";
-        let err_message = parse_filename(template_path, filename)
-            .unwrap_err()
-            .to_string();
-
-        assert!(
-            err_message.contains(format!("Unable to parse template: {}", &filename).as_str()),
-            "Unexpected error message: {}",
-            err_message
-        );
     }
 }

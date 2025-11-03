@@ -23,8 +23,9 @@ impl Template {
     /// # Returns
     ///
     /// A new `Template` instance with the provided content and scheme.
-    pub fn new(content: String, scheme: Scheme) -> Template {
-        Template { content, scheme }
+    #[must_use]
+    pub const fn new(content: String, scheme: Scheme) -> Self {
+        Self { content, scheme }
     }
 
     /// Renders the template into a `String` using the provided color scheme.

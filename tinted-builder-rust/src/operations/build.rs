@@ -59,8 +59,7 @@ pub fn build(
 ) -> Result<()> {
     if !user_schemes_path.as_ref().exists() {
         return Err(anyhow!(
-            "Schemes don't exist locally. First run `{} sync` and try again",
-            REPO_NAME
+            "Schemes don't exist locally. First run `{REPO_NAME} sync` and try again",
         ));
     }
 
@@ -88,7 +87,7 @@ pub fn build(
 
     let scheme_files: Vec<(PathBuf, Result<Scheme>)> = get_scheme_files(user_schemes_path, true)?
         .iter()
-        .map(|item| (item.get_path().unwrap_or_default(), item.get_scheme()))
+        .map(|item| (item.get_path(), item.get_scheme()))
         .collect();
 
     let all_scheme_files: Vec<(PathBuf, Scheme)> = scheme_files
@@ -104,11 +103,11 @@ pub fn build(
         .collect::<Result<Vec<(PathBuf, Scheme)>>>()?;
 
     // For each template definition in the templates/config.yaml file
-    for (template_item_config_name, template_item_config_value) in template_config.iter() {
+    for (template_item_config_name, template_item_config_value) in &template_config {
         let supported_systems = template_item_config_value
             .supported_systems
             .clone()
-            .unwrap_or(vec![SchemeSystem::default()]);
+            .unwrap_or_else(|| vec![SchemeSystem::default()]);
 
         let list_systems: Vec<&SchemeSystem> = supported_systems
             .iter()
@@ -125,7 +124,7 @@ pub fn build(
                 &theme_template_path,
                 system,
                 (template_item_config_name, template_item_config_value),
-                all_scheme_files.clone(),
+                &all_scheme_files.clone(),
                 is_quiet,
             )?;
         }
@@ -160,13 +159,13 @@ fn render_list(
     template_path: impl AsRef<Path>,
     scheme_system: &SchemeSystem,
     (config_name, config_value): (&str, &TemplateConfig),
-    all_scheme_files: Vec<(PathBuf, Scheme)>,
+    all_scheme_files: &[(PathBuf, Scheme)],
     is_quiet: bool,
 ) -> Result<()> {
     let filename = get_filename(config_value, is_quiet)?;
     let mustache_template_path = template_path
         .as_ref()
-        .join(format!("templates/{}.mustache", config_name));
+        .join(format!("templates/{config_name}.mustache"));
     let template_content = read_to_string(&mustache_template_path).context(format!(
         "Mustache template missing: {}",
         mustache_template_path.display()
@@ -175,8 +174,8 @@ fn render_list(
     data.insert(
         "schemes",
         all_scheme_files
-            .clone()
-            .into_iter()
+            .iter()
+            .cloned()
             .filter_map(|(_, scheme)| match scheme {
                 Scheme::Base16(scheme) => {
                     if *scheme_system == SchemeSystem::List
@@ -206,11 +205,11 @@ fn render_list(
         .replace("{{ scheme-system }}", &scheme_system.to_string())
         .replace("{{scheme-system}}", &scheme_system.to_string());
 
-    let parsed_filename = parse_filename(&template_path, &filepath)?;
+    let parsed_filename = parse_filename(&template_path, &filepath);
     let output_path = parsed_filename.get_path();
 
     if !parsed_filename.directory.exists() {
-        create_dir_all(&parsed_filename.directory)?
+        create_dir_all(&parsed_filename.directory)?;
     }
 
     write_to_file(&output_path, &output)?;
@@ -234,7 +233,7 @@ fn get_filename(config_value: &TemplateConfig, is_quiet: bool) -> Result<String>
         #[allow(deprecated)]
         &config_value.output,
     ) {
-        (Some(filename), _, _) => Ok(filename.to_string()),
+        (Some(filename), _, _) => Ok(filename.clone()),
         (None, Some(extension), Some(output)) => {
             if !is_quiet {
                 println!("Warning: \"extension\" is a deprecated config property, use \"filename\" instead.");
@@ -242,8 +241,7 @@ fn get_filename(config_value: &TemplateConfig, is_quiet: bool) -> Result<String>
             }
 
             Ok(format!(
-                "{}/{{{{ scheme-system }}}}-{{{{ scheme-slug }}}}{}",
-                output, extension
+                "{output}/{{{{ scheme-system }}}}-{{{{ scheme-slug }}}}{extension}",
             ))
         }
         (None, None, Some(output)) => {
@@ -252,8 +250,7 @@ fn get_filename(config_value: &TemplateConfig, is_quiet: bool) -> Result<String>
             }
 
             Ok(format!(
-                "{}/{{{{ scheme-system }}}}-{{{{ scheme-slug }}}}",
-                output
+                "{output}/{{{{ scheme-system }}}}-{{{{ scheme-slug }}}}",
             ))
         }
         (None, Some(extension), None) => {
@@ -262,8 +259,7 @@ fn get_filename(config_value: &TemplateConfig, is_quiet: bool) -> Result<String>
             }
 
             Ok(format!(
-                "{{{{ scheme-system }}}}-{{{{ scheme-slug }}}}{}",
-                extension
+                "{{{{ scheme-system }}}}-{{{{ scheme-slug }}}}{extension}",
             ))
         }
         _ => Err(anyhow!(
@@ -282,11 +278,11 @@ fn generate_themes_for_config(
     let filename = get_filename(config_value, is_quiet)?;
     let mustache_template_path = theme_template_path
         .as_ref()
-        .join(format!("templates/{}.mustache", config_name));
+        .join(format!("templates/{config_name}.mustache"));
     let supported_systems = &config_value
         .supported_systems
         .clone()
-        .unwrap_or(vec![SchemeSystem::default()]);
+        .unwrap_or_else(|| vec![SchemeSystem::default()]);
     let template_content = read_to_string(&mustache_template_path).context(format!(
         "Mustache template missing: {}",
         mustache_template_path.display()
@@ -294,8 +290,7 @@ fn generate_themes_for_config(
 
     for (scheme_path, scheme) in scheme_files {
         let (scheme_slug, scheme_system) = match scheme {
-            Scheme::Base16(scheme) => Ok((&scheme.slug, &scheme.system)),
-            Scheme::Base24(scheme) => Ok((&scheme.slug, &scheme.system)),
+            Scheme::Base16(scheme) | Scheme::Base24(scheme) => Ok((&scheme.slug, &scheme.system)),
             scheme => Err(anyhow!(
                 "Unsupported scheme system: {}",
                 scheme.get_scheme_system()
@@ -305,21 +300,21 @@ fn generate_themes_for_config(
         // Replace string variables. Use lazy replace instead of running through mustache template
         // rendering engine for performace
         let filepath = filename
-            .replace("{{ scheme-slug }}", &scheme_slug.to_string())
-            .replace("{{scheme-slug}}", &scheme_slug.to_string())
+            .replace("{{ scheme-slug }}", &scheme_slug.clone())
+            .replace("{{scheme-slug}}", &scheme_slug.clone())
             .replace("{{ scheme-system }}", &scheme_system.to_string())
             .replace("{{scheme-system}}", &scheme_system.to_string());
 
-        let parsed_filename = parse_filename(&theme_template_path, &filepath)?;
+        let parsed_filename = parse_filename(&theme_template_path, &filepath);
         if !parsed_filename.directory.exists() {
-            create_dir_all(&parsed_filename.directory)?
+            create_dir_all(&parsed_filename.directory)?;
         }
 
         generate_theme(
             &template_content,
             parsed_filename,
             scheme_path,
-            scheme_system.clone(),
+            &scheme_system.clone(),
         )?;
     }
 
@@ -382,12 +377,10 @@ fn generate_theme(
     template_content: &str,
     parsed_filename: ParsedFilename,
     scheme_path: impl AsRef<Path>,
-    system: SchemeSystem,
+    system: &SchemeSystem,
 ) -> Result<()> {
     let scheme_file_type = SchemeFile::new(scheme_path)?;
-    let scheme_path = scheme_file_type
-        .get_path()
-        .ok_or(anyhow!("Unable to get path from FileType"))?;
+    let scheme_path = scheme_file_type.get_path();
     let scheme_file_stem = scheme_path
         .file_stem()
         .unwrap_or_default()
@@ -403,10 +396,9 @@ fn generate_theme(
 
     match &scheme {
         Scheme::Base16(scheme_inner) | Scheme::Base24(scheme_inner) => {
-            if scheme_inner.system != system {
+            if scheme_inner.system != *system {
                 return Err(anyhow!(
-                    "Scheme enum variant is mismatched with the provided scheme (\"{}\")",
-                    system
+                    "Scheme enum variant is mismatched with the provided scheme (\"{system}\")",
                 ));
             }
 

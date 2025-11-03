@@ -1,12 +1,12 @@
 mod cli;
 mod operations {
-    pub(crate) mod build;
-    pub(crate) mod sync;
+    pub mod build;
+    pub mod sync;
 }
 mod helpers;
 
 use anyhow::{anyhow, Result};
-use std::path::PathBuf;
+use std::{borrow, path::PathBuf};
 
 use crate::cli::get_matches;
 
@@ -15,14 +15,15 @@ const REPO_NAME: &str = env!("CARGO_PKG_NAME");
 fn replace_tilde_slash_with_home(path_str: &str) -> Result<PathBuf> {
     let trimmed_path_str = path_str.trim();
     if trimmed_path_str.starts_with("~/") {
-        match dirs::home_dir() {
-            Some(home_dir) => Ok(PathBuf::from(trimmed_path_str.replacen(
-                "~/",
-                format!("{}/", home_dir.display()).as_str(),
-                1,
-            ))),
-            None => Err(anyhow!("Unable to determine a home directory for \"{}\", please use an absolute path instead", trimmed_path_str))
-        }
+        dirs::home_dir().map_or_else(
+            || Err(anyhow!("Unable to determine a home directory for \"{trimmed_path_str}\", please use an absolute path instead")),
+            |home_dir|
+                Ok(PathBuf::from(trimmed_path_str.replacen(
+                    "~/",
+                    format!("{}/", home_dir.display()).as_str(),
+                    1,
+                )))
+        )
     } else {
         Ok(PathBuf::from(trimmed_path_str))
     }
@@ -36,14 +37,14 @@ fn main() -> Result<()> {
         } else {
             Ok(dirs::data_dir()
                 .ok_or_else(|| anyhow!("Error getting data directory"))?
-                .join(format!("tinted-theming/{}", REPO_NAME)))
+                .join(format!("tinted-theming/{REPO_NAME}")))
         };
     let data_path = data_path_result?;
     let schemes_path_result: Result<PathBuf> =
         if let Some(schemes_dir) = matches.get_one::<String>("schemes-dir") {
             let schemes_path = PathBuf::from(schemes_dir);
             if !schemes_path.exists() {
-                anyhow::bail!("The provided schemes path does not exist: {}", schemes_dir);
+                anyhow::bail!("The provided schemes path does not exist: {schemes_dir}");
             }
 
             replace_tilde_slash_with_home(schemes_dir)
@@ -71,15 +72,14 @@ fn main() -> Result<()> {
         Some(("sync", sub_matches)) => {
             let is_quiet: bool = sub_matches
                 .get_one::<bool>("quiet")
-                .map(|b| b.to_owned())
-                .unwrap_or(false);
+                .is_some_and(borrow::ToOwned::to_owned);
             operations::sync::sync(&schemes_path, is_quiet)?;
         }
         _ => {
-            println!("Basic usage: {} apply <SCHEME_NAME>", REPO_NAME);
+            println!("Basic usage: {REPO_NAME} apply <SCHEME_NAME>");
             println!("For more information try --help");
         }
-    };
+    }
 
     Ok(())
 }

@@ -4,10 +4,10 @@ use std::{error::Error, path::Path, process::Command};
 
 use anyhow::{Context, Result};
 
-#[allow(dead_code)]
-pub fn run_command(command_vec: Vec<String>) -> Result<(String, String), Box<dyn Error>> {
+#[allow(dead_code, clippy::missing_panics_doc, clippy::missing_errors_doc)]
+pub fn run_command(command_vec: &[String]) -> Result<(String, String), Box<dyn Error>> {
     let output = Command::new(env!("CARGO_BIN_EXE_tinted-builder-rust"))
-        .args(&command_vec)
+        .args(command_vec)
         .output()
         .expect("Failed to execute command");
 
@@ -24,7 +24,7 @@ pub fn run_command(command_vec: Vec<String>) -> Result<(String, String), Box<dyn
     Ok((String::from_utf8(stdout)?, String::from_utf8(stderr)?))
 }
 
-#[allow(dead_code)]
+#[allow(dead_code, clippy::missing_errors_doc)]
 pub fn write_to_file(path: impl AsRef<Path>, contents: &str) -> Result<()> {
     if path.as_ref().exists() {
         remove_file(&path)
@@ -39,7 +39,7 @@ pub fn write_to_file(path: impl AsRef<Path>, contents: &str) -> Result<()> {
     Ok(())
 }
 
-#[allow(dead_code)]
+#[allow(dead_code, clippy::missing_errors_doc)]
 pub fn copy_dir_all(src: impl AsRef<Path>, dst: impl AsRef<Path>) -> Result<()> {
     fs::create_dir_all(&dst)?;
 

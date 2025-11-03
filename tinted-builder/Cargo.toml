@@ -26,3 +26,8 @@ unicode-normalization = "0.1.23"
 [dev-dependencies]
 anyhow = "1.0.86"
 strip-ansi-escapes = "0.2.0"
+
+[lints.clippy]
+pedantic      = { level = "deny", priority = -1 }
+nursery       = { level = "deny", priority = -1 }
+unwrap_used   = "deny"

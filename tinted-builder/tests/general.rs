@@ -77,8 +77,8 @@ fn comments() -> Result<(), TintedBuilderError> {
 
 #[test]
 fn escaped_and_unescaped_vars() -> Result<(), TintedBuilderError> {
-    let template_source = r#"Author: {{{scheme-author}}}
-Author escaped: {{scheme-author}}"#;
+    let template_source = r"Author: {{{scheme-author}}}
+Author escaped: {{scheme-author}}";
     let expected = r#"Author: <a href="https://github.com/Misterio77">Gabriel Fontes</a>
 Author escaped: &lt;a href=&quot;https://github.com/Misterio77&quot;&gt;Gabriel Fontes&lt;/a&gt;"#;
     let scheme = Scheme::Base16(serde_yaml::from_str(SCHEME_CRAZY)?);

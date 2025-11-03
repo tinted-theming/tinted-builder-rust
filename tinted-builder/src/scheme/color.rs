@@ -11,23 +11,26 @@ pub struct Color {
 }
 
 impl Color {
-    pub fn new(hex_color: String) -> Result<Color, TintedBuilderError> {
-        let hex_full = process_hex_input(&hex_color).ok_or(TintedBuilderError::HexInputFormat)?;
+    /// Creates a `Color` from a hex string like `"ff00ff"` or `"#ffcc00"`.
+    ///
+    /// # Errors
+    ///
+    /// Returns `Err(TintedBuilderError::HexInputFormat)` if `hex_color` is not a valid
+    /// 6-digit hexadecimal color (optionally prefixed with `#`).
+    pub fn new(hex_color: &str) -> Result<Self, TintedBuilderError> {
+        let hex_full = process_hex_input(hex_color).ok_or(TintedBuilderError::HexInputFormat)?;
         let hex: (String, String, String) = (
             hex_full[0..2].to_lowercase(),
             hex_full[2..4].to_lowercase(),
             hex_full[4..6].to_lowercase(),
         );
         let rgb = hex_to_rgb(&hex)?;
-        let dec: (f32, f32, f32) = (
-            rgb.0 as f32 / 255.0,
-            rgb.1 as f32 / 255.0,
-            rgb.2 as f32 / 255.0,
-        );
+        let dec: (f32, f32, f32) = (f32::from(rgb.0), f32::from(rgb.1), f32::from(rgb.2));
 
-        Ok(Color { hex, rgb, dec })
+        Ok(Self { hex, rgb, dec })
     }
 
+    #[must_use]
     pub fn to_hex(&self) -> String {
         format!("{}{}{}", &self.hex.0, &self.hex.1, &self.hex.2)
     }
