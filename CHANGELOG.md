@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- Update dependencies
+
 ## [0.13.2] - 2025-09-08
 
 ### Fixed
