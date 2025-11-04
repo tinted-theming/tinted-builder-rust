@@ -1,13 +1,20 @@
 # Changelog
 
-## [0.13.1] - 2025-03-24
+## 0.10.0 - 2025-11-04
+
+### Changed
+
+- Update dependencies
+- Optimise and clean up code
+
+## 0.9.1 - 2025-03-24
 
 ### Fixed
 
 - Fix bug where double hash is printed for hex values with `Base16Scheme`
   `fmt::Display`
 
-## [0.13.0] - 2025-03-24
+## 0.9.0 - 2025-03-24
 
 ### Added
 

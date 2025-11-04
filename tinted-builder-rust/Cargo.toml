@@ -1,6 +1,6 @@
 [package]
 name = "tinted-builder-rust"
-version = "0.13.2"
+version = "0.14.0"
 edition = "2021"
 authors = ["Jamy Golden <code@jamygolden.com>", "Tinted Theming <tintedtheming@proton.me>"]
 license = "MIT OR Apache-2.0"
@@ -27,7 +27,7 @@ strip-ansi-escapes = "0.2.0"
 
 [dependencies.tinted-builder]
 path = "../tinted-builder"
-version = "0.9.0"
+version = "0.10.0"
 
 [[bin]]
 name = "tinted-builder-rust"
