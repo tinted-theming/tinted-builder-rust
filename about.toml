@@ -20,8 +20,3 @@ accepted = ["MPL-2.0"]
 
 [unicode-ident]
 accepted = ["Unicode-DFS-2016"]
-
-[lints.clippy]
-pedantic      = { level = "deny", priority = -1 }
-nursery       = { level = "deny", priority = -1 }
-unwrap_used   = "deny"
