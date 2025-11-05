@@ -1,5 +1,6 @@
 use std::fs::{self, remove_file, File};
 use std::io::Write;
+use std::path::PathBuf;
 use std::{error::Error, path::Path, process::Command};
 
 use anyhow::{Context, Result};
@@ -55,4 +56,14 @@ pub fn copy_dir_all(src: impl AsRef<Path>, dst: impl AsRef<Path>) -> Result<()> 
         }
     }
     Ok(())
+}
+
+#[allow(dead_code, clippy::missing_errors_doc)]
+pub fn unique_tmp_dir(sub: &str) -> Result<PathBuf> {
+    let p = std::env::var_os("CARGO_TARGET_TMPDIR").map_or_else(std::env::temp_dir, PathBuf::from);
+    let nanos = std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH)?
+        .as_nanos();
+
+    Ok(p.join(format!("tinted_builder_rust_{sub}_{nanos}")))
 }

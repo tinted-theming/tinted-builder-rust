@@ -2,6 +2,7 @@ use std::collections::HashMap;
 
 use crate::{error::TintedBuilderError, Base16Scheme};
 
+/// Renders a mustache template using a flat string context (Base16/Base24 variables).
 pub fn render(content: &str, ctx: &HashMap<String, String>) -> Result<String, TintedBuilderError> {
     let ctx = serde_yaml::to_string(&ctx)?;
     let rendered = ribboncurls::render(content, &ctx, None)?;
@@ -9,6 +10,9 @@ pub fn render(content: &str, ctx: &HashMap<String, String>) -> Result<String, Ti
     Ok(rendered)
 }
 
+/// Builds the flat Base16/Base24 variable context expected by templates.
+///
+/// Provides keys like `scheme-name`, `base0A-hex`, `base0A-hex-bgr`, `base0A-rgb-r`, etc.
 pub fn to_template_context(scheme: &Base16Scheme) -> HashMap<String, String> {
     let mut context = HashMap::new();
 

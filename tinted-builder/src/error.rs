@@ -56,4 +56,10 @@ pub enum TintedBuilderError {
     /// This variant is used when an input string does not correspond to any valid scheme system
     #[error("invalid scheme system: {0}")]
     InvalidSchemeSystem(String),
+
+    /// Error indicating a `Color` conversion problem
+    ///
+    /// This variant is used when a color is not able to convert from one color to another
+    #[error("unable to convert Color from \"{0}\" to \"{1}\"")]
+    ColorConversion(String, String),
 }

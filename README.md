@@ -73,7 +73,7 @@ The following is a table of the available subcommands for the CLI tool (tinted-b
 
 | Flag/Option       | Description                             | Applicable Subcommands | Default Value | Example Usage                             |
 |-------------------|-----------------------------------------|------------------------|---------------|-------------------------------------------|
-| `--schemes-dir` `-s`   | Path to a custom local schemes directory to use when building. Only necessary if the [latest schemes repository] is not desired. | `build` | `tinted-builder-rust build . --schemes-dir=/path/to/schemes/dir` |
+| `--schemes-dir` `-s`   | Path to one or more local schemes directories. Repeat this flag to include multiple directories. Used by `build` to find schemes and by `sync` to clone/pull into those paths. | `build`, `sync` | Defaults to `<data-dir>/schemes` | `tinted-builder-rust build . -s /path/one -s /path/two` |
 | `--data-dir` `-d`   | Specifies a custom path for the data directory. | All | Linux: `$XDG_DATA_HOME/tinted-theming/tinted-builder-rust` or `~/.local/share`. MacOS: `~/Library/Application\ Support/tinted-theming/tinted-builder-rust` | `tinted-builder-rust sync --data-dir /path/to/custom/data-dir` |
 | `--help` `-h`     | Displays help information for the subcommand. | All | - | `tinted-builder-rust --help`, `tinted-builder-rust build --help`, etc |
 | `--version` `-V`  | Shows the version of tinted-builder-rust. | All | - | `tinted-builder-rust --version` |
@@ -85,6 +85,73 @@ specification details the scheme yaml format or schema as well as the
 variables the builder should provide when rendering template mustache
 file. Have a look at the [builder specification] document for more
 details.
+
+### Tinted8 support
+
+In addition to Base16/Base24, this repository provides Tinted8 support in the
+library crate and CLI. Tinted8 simplifies schemes into a small, consistent set
+of keys and lets builders derive variants and supplemental colors.
+
+- Supported specs: Tinted8 Styling `~0.1.0`, Tinted8 Builder `~0.1.0`.
+- UI keys use flat, kebab-case names (see below).
+
+Example minimal Tinted8 scheme (YAML):
+
+```
+scheme:
+  system: "tinted8"
+  system-version: "0.1.0"
+  author: "User <user@example.com>"
+  name: "Ayu Mirage"
+  slug: "ayu-mirage"
+variant: "dark"
+palette:
+  black:   "#131721"
+  red:     "#f07178"
+  green:   "#b8cc52"
+  yellow:  "#ffb454"
+  blue:    "#59c2ff"
+  magenta: "#d2a6ff"
+  cyan:    "#95e6cb"
+  white:   "#e6e1cf"
+ui:
+  background.normal: "#131721"
+  foreground.normal: "#e6e1cf"
+```
+
+Example `templates/config.yaml` for a Tinted8 template:
+
+```
+default:
+  filename: "output/{{ scheme-system }}-{{ scheme-slug }}.ext"
+  supported-systems: [tinted8]
+  supports:
+    tinted8-styling: ">=0.1.0"
+    tinted8-builder: ">=0.1.0"
+```
+
+Example Mustache variables in a Tinted8 template:
+
+- `{{ scheme.name }}` — scheme name
+- `{{ scheme.slug }}` — scheme slug
+- `{{ palette.blue.bright.hex }}` — hex of blue bright variant (derived if missing)
+- `{{ ui.background.hex }}` — hex of the UI background color
+- `{{ syntax.string.hex }}` — hex for the default string color
+
+Notes:
+- The builder derives missing `dim/bright` variants and supplemental `gray`,
+  `orange`, and `brown` per the Tinted8 Builder spec.
+- Decimal channels are normalized 0–1 and available as strings at
+  `rgb`/`rgb16`/`dec` under each color (e.g. `palette.red.normal.dec.r`).
+
+### Error codes (high level)
+
+The CLI returns structured error codes grouped by stage. See `specs/tinted8/builder.md` for details.
+
+- E1xx — Intake & System Validation (e.g., E001 invalid system, E110 unknown system)
+- E2xx — Spec Compatibility (E002/E003 version mismatches)
+- E3xx — Template Configuration (E300–E305 missing/invalid config or templates)
+- E4xx — Build-Time Selection (E400 no schemes found)
 
 ## Library
 
@@ -114,6 +181,25 @@ let template = Template::new(template_str, scheme);
 template
     .render()
     .unwrap();
+
+### Programmatic CLI usage (build helper)
+
+The CLI crate also exposes a small helper to drive a template build from code:
+
+```rust
+// in Cargo.toml: tinted-builder-rust = { version = "*" }
+
+let template_dir = std::path::PathBuf::from("/path/to/template");
+let schemes_dir = std::path::PathBuf::from("/path/to/schemes");
+
+// Quiet output, returns Result<(), anyhow::Error>
+if let Err(err) = tinted_builder_rust::build(&template_dir, &schemes_dir, true) {
+    eprintln!("build failed: {err}");
+}
+```
+
+Common errors include E300/E301/E302 (missing tinted8 supports), E303 (missing mustache),
+E304 (invalid filename config), E305 (missing/invalid template config), and E400 (no schemes found).
 ```
 
 The Scheme struct is as follows:
@@ -162,6 +248,8 @@ Ribboncurls, have a look at [LICENSES-THIRD-PARTY.md].
 [latest schemes repository]: https://github.com/tinted-theming/schemes
 [home repository]: https://github.com/tinted-theming/home
 [builder specification]: https://github.com/tinted-theming/home/blob/main/builder.md
+[tinted8 styling spec]: specs/tinted8/styling.md
+[tinted8 builder spec]: specs/tinted8/builder.md
 [base16]: https://github.com/tinted-theming/home/blob/main/styling.md
 [base24]: https://github.com/tinted-theming/base24/blob/master/styling.md
 [ribboncurls]: https://github.com/tinted-theming/ribboncurls

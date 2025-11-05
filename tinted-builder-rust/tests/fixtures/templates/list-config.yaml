@@ -1,3 +1,5 @@
 list:
   filename: "{{ scheme-system }}-list.md"
-  supported-systems: [list, listbase16, listbase24]
+  supported-systems: [base16, base24]
+  options:
+    list: true

@@ -1,11 +1,14 @@
 mod base16;
 mod color;
+pub mod tinted8;
 
 use serde::{Deserialize, Serialize};
 use std::{fmt, str::FromStr};
 
 pub use crate::scheme::base16::Base16Scheme;
 pub use crate::scheme::color::Color;
+pub use crate::scheme::color::{ColorName, ColorVariant};
+pub use crate::scheme::tinted8::Scheme as Tinted8Scheme;
 use crate::TintedBuilderError;
 
 /// Enum representing schemes for different scheme systems. This enum is non-exhaustive, meaning
@@ -19,46 +22,60 @@ pub enum Scheme {
     /// Base24 variant with `Base16Scheme` deserialized content. `Base16Scheme` is built to support
     /// basic supersets of Base16 schemes.
     Base24(Base16Scheme),
+    /// Tinted8 scheme system with `Tinted8Scheme` deserialized content.
+    Tinted8(Box<Tinted8Scheme>),
 }
 
 impl Scheme {
+    /// Returns the author of the scheme.
     #[must_use]
     pub fn get_scheme_author(&self) -> String {
         match self {
             Self::Base16(scheme) | Self::Base24(scheme) => scheme.author.clone(),
+            Self::Tinted8(scheme) => scheme.scheme.author.clone(),
         }
     }
+    /// Returns the optional description (empty string when missing).
     #[must_use]
     pub fn get_scheme_description(&self) -> String {
         match self {
             Self::Base16(scheme) | Self::Base24(scheme) => {
                 scheme.description.clone().unwrap_or_default()
             }
+            Self::Tinted8(scheme) => scheme.scheme.description.clone().unwrap_or_default(),
         }
     }
+    /// Returns the human-readable name of the scheme.
     #[must_use]
     pub fn get_scheme_name(&self) -> String {
         match self {
             Self::Base16(scheme) | Self::Base24(scheme) => scheme.name.clone(),
+            Self::Tinted8(scheme) => scheme.scheme.name.clone(),
         }
     }
+    /// Returns the scheme slug.
     #[must_use]
     pub fn get_scheme_slug(&self) -> String {
         match self {
             Self::Base16(scheme) | Self::Base24(scheme) => scheme.slug.clone(),
+            Self::Tinted8(scheme) => scheme.scheme.slug.clone(),
         }
     }
+    /// Returns the scheme system for this variant.
     #[must_use]
     pub const fn get_scheme_system(&self) -> SchemeSystem {
         match self {
             Self::Base16(_) => SchemeSystem::Base16,
             Self::Base24(_) => SchemeSystem::Base24,
+            Self::Tinted8(_) => SchemeSystem::Tinted8,
         }
     }
+    /// Returns the scheme variant (light or dark).
     #[must_use]
     pub fn get_scheme_variant(&self) -> SchemeVariant {
         match self {
             Self::Base16(scheme) | Self::Base24(scheme) => scheme.variant.clone(),
+            Self::Tinted8(scheme) => scheme.variant.clone(),
         }
     }
 }
@@ -74,9 +91,8 @@ pub enum SchemeSystem {
     Base16,
     /// Base24 scheme system.
     Base24,
-    List,
-    ListBase16,
-    ListBase24,
+    /// Tinted8 scheme system.
+    Tinted8,
 }
 
 impl SchemeSystem {
@@ -86,15 +102,12 @@ impl SchemeSystem {
         match self {
             Self::Base16 => "base16",
             Self::Base24 => "base24",
-            Self::List => "list",
-            Self::ListBase16 => "listbase16",
-            Self::ListBase24 => "listbase24",
+            Self::Tinted8 => "tinted8",
         }
     }
     #[must_use]
     pub const fn variants() -> &'static [Self] {
-        const VARIANTS: &[SchemeSystem] = &[SchemeSystem::Base16, SchemeSystem::Base24];
-        VARIANTS
+        &[Self::Base16, Self::Base24, Self::Tinted8]
     }
 }
 
