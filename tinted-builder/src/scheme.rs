@@ -1,5 +1,6 @@
 mod base16;
 mod color;
+mod tinted8;
 
 use serde::{Deserialize, Serialize};
 use std::{fmt, str::FromStr};
@@ -77,6 +78,7 @@ pub enum SchemeSystem {
     List,
     ListBase16,
     ListBase24,
+    Tinted8,
 }
 
 impl SchemeSystem {
@@ -89,6 +91,7 @@ impl SchemeSystem {
             Self::List => "list",
             Self::ListBase16 => "listbase16",
             Self::ListBase24 => "listbase24",
+            Self::Tinted8 => "tinted8",
         }
     }
     #[must_use]
