@@ -4,6 +4,7 @@ use std::{collections::HashMap, fmt};
 
 pub use crate::scheme::color::Color;
 
+use crate::utils::titlecasify;
 use crate::{utils::slugify, SchemeSystem, SchemeVariant};
 
 pub const REQUIRED_TINTED8_PALETTE_KEYS: [&str; 8] = [
@@ -13,12 +14,12 @@ pub const REQUIRED_TINTED8_PALETTE_KEYS: [&str; 8] = [
 #[derive(Deserialize, Serialize)]
 struct YamlTinted8Scheme {
     pub system: SchemeSystem,
-    pub name: String,
     #[serde(rename = "scheme-author")]
     pub scheme_author: String,
     pub palette: HashMap<String, String>,
     pub variant: SchemeVariant,
 
+    pub name: Option<String>,
     pub theme: Option<HashMap<String, String>>,
     pub ui: Option<HashMap<String, String>>,
     #[serde(rename = "theme-author")]
@@ -79,9 +80,31 @@ impl<'de> Deserialize<'de> for Tinted8Scheme {
         D: Deserializer<'de>,
     {
         let wrapper = YamlTinted8Scheme::deserialize(deserializer)?;
-        let slug = wrapper
-            .slug
-            .map_or_else(|| slugify(&wrapper.name), |slug| slugify(&slug));
+
+        let (name, slug): (String, String) = match (
+            &wrapper.name,
+            &wrapper.slug,
+            &wrapper.family,
+            &wrapper.style,
+        ) {
+            (Some(name), None, _, _) => (name.to_owned(), slugify(name)),
+            (None, Some(slug), _, _) => (titlecasify(slug), slug.to_owned()),
+            (None, None, Some(family), Some(style)) => {
+                let name = format!("{family}-{style}");
+
+                (name.clone(), slugify(&name))
+            }
+            (None, None, Some(family), None) => {
+                let name = family.clone();
+
+                (name.clone(), slugify(&name))
+            }
+            _ => {
+                return Err(serde::de::Error::custom(
+                    "Either 'name', 'slug' or 'family' must exist in yaml scheme",
+                ))
+            }
+        };
 
         match wrapper.system {
             SchemeSystem::Tinted8 => {
@@ -115,7 +138,7 @@ impl<'de> Deserialize<'de> for Tinted8Scheme {
             .collect();
 
         Ok(Self {
-            name: wrapper.name,
+            name,
             slug,
             system: wrapper.system,
             scheme_author: wrapper.scheme_author,

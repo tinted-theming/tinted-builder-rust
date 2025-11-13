@@ -68,3 +68,10 @@ pub fn slugify(input: &str) -> String {
 
     cleaned_slug.trim_matches('-').to_string()
 }
+
+pub fn titlecasify(input: &str) -> String {
+    let re = Regex::new(r"-+").expect("Unable to unwrap regex");
+    let title = re.replace_all(&input, " ").to_string();
+
+    title
+}

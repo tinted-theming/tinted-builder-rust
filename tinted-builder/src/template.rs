@@ -85,6 +85,9 @@ impl Template {
 
                 Ok(rendered)
             }
+            _ => Err(TintedBuilderError::InvalidSchemeSystem(
+                "Tinted8 probably".to_string(),
+            )),
         }
     }
 }

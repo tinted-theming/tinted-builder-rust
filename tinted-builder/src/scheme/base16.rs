@@ -90,6 +90,18 @@ impl<'de> Deserialize<'de> for Base16Scheme {
                     )));
                 }
             }
+            SchemeSystem::Base24 => {
+                let contains_all_keys = REQUIRED_BASE24_PALETTE_KEYS
+                    .iter()
+                    .all(|&key| wrapper.palette.contains_key(key));
+
+                if !contains_all_keys {
+                    return Err(serde::de::Error::custom(format!(
+                        "{} scheme does not contain the required palette properties",
+                        wrapper.system
+                    )));
+                }
+            }
             _ => {
                 return Err(serde::de::Error::custom(format!(
                     "{} is not a valid Scheme system for a specific scheme",

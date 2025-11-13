@@ -7,6 +7,7 @@ mod helpers;
 
 use anyhow::{anyhow, Result};
 use std::{borrow, path::PathBuf};
+use tinted_builder::Scheme;
 
 use crate::cli::get_matches;
 
@@ -30,56 +31,83 @@ fn replace_tilde_slash_with_home(path_str: &str) -> Result<PathBuf> {
 }
 
 fn main() -> Result<()> {
-    let matches = get_matches();
-    let data_path_result: Result<PathBuf> =
-        if let Some(data_dir_path) = matches.get_one::<String>("data-dir") {
-            replace_tilde_slash_with_home(data_dir_path)
-        } else {
-            Ok(dirs::data_dir()
-                .ok_or_else(|| anyhow!("Error getting data directory"))?
-                .join(format!("tinted-theming/{REPO_NAME}")))
-        };
-    let data_path = data_path_result?;
-    let schemes_path_result: Result<PathBuf> =
-        if let Some(schemes_dir) = matches.get_one::<String>("schemes-dir") {
-            let schemes_path = PathBuf::from(schemes_dir);
-            if !schemes_path.exists() {
-                anyhow::bail!("The provided schemes path does not exist: {schemes_dir}");
-            }
+    let scheme_str = r##"
+system: "tinted8"
+scheme-author: "User <user@example.com>"
+family: "Ayu"
+style: "Mirage"
+variant: "dark"
+palette:
+  black:   "#131721"
+  red:     "#f07178"
+  green:   "#b8cc52"
+  yellow:  "#ffb454"
+  blue:    "#59c2ff"
+  magenta: "#d2a6ff"
+  cyan:    "#95e6cb"
+  white:   "#e6e1cf"
+syntax:
+  string: "#ffb454"
+  entity.name: "#95e6cb"
+ui:
+  background: "#131721"
+"##;
+    let scheme =
+        Scheme::Tinted8(serde_yaml::from_str(scheme_str).expect("unable to deserialize yaml"));
 
-            replace_tilde_slash_with_home(schemes_dir)
-        } else {
-            Ok(data_path.join("schemes"))
-        };
-    let schemes_path = schemes_path_result?;
-
-    match matches.subcommand() {
-        Some(("build", sub_matches)) => {
-            if let (Some(template_dir), Some(is_quiet), Some(sync)) = (
-                sub_matches.get_one::<String>("template-dir"),
-                sub_matches.get_one::<bool>("quiet"),
-                sub_matches.get_one::<bool>("sync"),
-            ) {
-                let template_path = PathBuf::from(template_dir);
-
-                if *sync {
-                    operations::sync::sync(&schemes_path, *is_quiet)?;
-                }
-
-                operations::build::build(&template_path, &schemes_path, *is_quiet)?;
-            }
-        }
-        Some(("sync", sub_matches)) => {
-            let is_quiet: bool = sub_matches
-                .get_one::<bool>("quiet")
-                .is_some_and(borrow::ToOwned::to_owned);
-            operations::sync::sync(&schemes_path, is_quiet)?;
-        }
-        _ => {
-            println!("Basic usage: {REPO_NAME} apply <SCHEME_NAME>");
-            println!("For more information try --help");
-        }
+    if let Scheme::Tinted8(scheme) = scheme {
+        println!("{scheme}");
     }
+    // let matches = get_matches();
+    // let data_path_result: Result<PathBuf> =
+    //     if let Some(data_dir_path) = matches.get_one::<String>("data-dir") {
+    //         replace_tilde_slash_with_home(data_dir_path)
+    //     } else {
+    //         Ok(dirs::data_dir()
+    //             .ok_or_else(|| anyhow!("Error getting data directory"))?
+    //             .join(format!("tinted-theming/{REPO_NAME}")))
+    //     };
+    // let data_path = data_path_result?;
+    // let schemes_path_result: Result<PathBuf> =
+    //     if let Some(schemes_dir) = matches.get_one::<String>("schemes-dir") {
+    //         let schemes_path = PathBuf::from(schemes_dir);
+    //         if !schemes_path.exists() {
+    //             anyhow::bail!("The provided schemes path does not exist: {schemes_dir}");
+    //         }
+    //
+    //         replace_tilde_slash_with_home(schemes_dir)
+    //     } else {
+    //         Ok(data_path.join("schemes"))
+    //     };
+    // let schemes_path = schemes_path_result?;
+    //
+    // match matches.subcommand() {
+    //     Some(("build", sub_matches)) => {
+    //         if let (Some(template_dir), Some(is_quiet), Some(sync)) = (
+    //             sub_matches.get_one::<String>("template-dir"),
+    //             sub_matches.get_one::<bool>("quiet"),
+    //             sub_matches.get_one::<bool>("sync"),
+    //         ) {
+    //             let template_path = PathBuf::from(template_dir);
+    //
+    //             if *sync {
+    //                 operations::sync::sync(&schemes_path, *is_quiet)?;
+    //             }
+    //
+    //             operations::build::build(&template_path, &schemes_path, *is_quiet)?;
+    //         }
+    //     }
+    //     Some(("sync", sub_matches)) => {
+    //         let is_quiet: bool = sub_matches
+    //             .get_one::<bool>("quiet")
+    //             .is_some_and(borrow::ToOwned::to_owned);
+    //         operations::sync::sync(&schemes_path, is_quiet)?;
+    //     }
+    //     _ => {
+    //         println!("Basic usage: {REPO_NAME} apply <SCHEME_NAME>");
+    //         println!("For more information try --help");
+    //     }
+    // }
 
     Ok(())
 }

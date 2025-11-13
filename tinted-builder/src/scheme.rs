@@ -7,6 +7,7 @@ use std::{fmt, str::FromStr};
 
 pub use crate::scheme::base16::Base16Scheme;
 pub use crate::scheme::color::Color;
+pub use crate::scheme::tinted8::Tinted8Scheme;
 use crate::TintedBuilderError;
 
 /// Enum representing schemes for different scheme systems. This enum is non-exhaustive, meaning
@@ -20,6 +21,8 @@ pub enum Scheme {
     /// Base24 variant with `Base16Scheme` deserialized content. `Base16Scheme` is built to support
     /// basic supersets of Base16 schemes.
     Base24(Base16Scheme),
+    /// Tinted8 scheme system with `Tinted8Scheme` deserialized content.
+    Tinted8(Tinted8Scheme),
 }
 
 impl Scheme {
@@ -27,6 +30,7 @@ impl Scheme {
     pub fn get_scheme_author(&self) -> String {
         match self {
             Self::Base16(scheme) | Self::Base24(scheme) => scheme.author.clone(),
+            Self::Tinted8(scheme) => scheme.scheme_author.clone(),
         }
     }
     #[must_use]
@@ -35,18 +39,21 @@ impl Scheme {
             Self::Base16(scheme) | Self::Base24(scheme) => {
                 scheme.description.clone().unwrap_or_default()
             }
+            Self::Tinted8(scheme) => scheme.description.clone().unwrap_or_default(),
         }
     }
     #[must_use]
     pub fn get_scheme_name(&self) -> String {
         match self {
             Self::Base16(scheme) | Self::Base24(scheme) => scheme.name.clone(),
+            Self::Tinted8(scheme) => scheme.name.clone(),
         }
     }
     #[must_use]
     pub fn get_scheme_slug(&self) -> String {
         match self {
             Self::Base16(scheme) | Self::Base24(scheme) => scheme.slug.clone(),
+            Self::Tinted8(scheme) => scheme.slug.clone(),
         }
     }
     #[must_use]
@@ -54,12 +61,14 @@ impl Scheme {
         match self {
             Self::Base16(_) => SchemeSystem::Base16,
             Self::Base24(_) => SchemeSystem::Base24,
+            Self::Tinted8(_) => SchemeSystem::Tinted8,
         }
     }
     #[must_use]
     pub fn get_scheme_variant(&self) -> SchemeVariant {
         match self {
             Self::Base16(scheme) | Self::Base24(scheme) => scheme.variant.clone(),
+            Self::Tinted8(scheme) => scheme.variant.clone(),
         }
     }
 }
