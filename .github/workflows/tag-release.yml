@@ -1,10 +1,8 @@
 name: Tag release
+permissions:
+  contents: write
 on:
   workflow_call:
-    secrets:
-      DOCKER_GHCR:
-        description: Docker GHCR token
-        required: true
     inputs:
       git_tag_name:
         required: true
@@ -20,9 +18,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
-          token: ${{ secrets.DOCKER_GHCR }}
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Add git tag to release
         run: |

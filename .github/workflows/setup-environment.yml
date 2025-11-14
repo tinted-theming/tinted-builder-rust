@@ -22,7 +22,7 @@ jobs:
       git_tag_name: ${{ steps.git_tag_name.outputs.value }}
       cargo_cache_key: ${{ steps.cargo_cache_key.outputs.value }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           fetch-depth: 1
           ref: ${{ inputs.git_tag_name || github.ref }}
@@ -33,16 +33,6 @@ jobs:
         run: |
           CARGO_CACHE_KEY="${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}"
           echo "value=$CARGO_CACHE_KEY" >> $GITHUB_OUTPUT
-
-      - uses: actions/cache@v4
-        with:
-          path: |
-            ~/.cargo/registry
-            ~/.cargo/git
-            target
-            ~/.cargo/bin
-          key: ${{ steps.cargo_cache_key.outputs.value }}
-          id: cache-cargo-release
 
       - name: Set git_tag_name from latest Cargo.toml version
         id: git_tag_name

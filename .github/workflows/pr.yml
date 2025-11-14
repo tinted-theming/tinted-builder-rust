@@ -10,7 +10,7 @@ jobs:
     outputs:
       cargo_cache_key: ${{ steps.cargo_cache_key.outputs.value }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Set cargo cache key
         id: cargo_cache_key
         run: |
