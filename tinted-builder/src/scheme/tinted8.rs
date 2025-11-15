@@ -35,11 +35,11 @@ pub struct Tinted8Scheme {
     pub system: SchemeSystem,
     pub name: String,
     pub scheme_author: String,
-    pub palette: HashMap<String, Color>,
     pub slug: String,
+    pub variant: SchemeVariant,
+    pub palette: HashMap<String, Color>,
     pub theme: HashMap<String, String>,
     pub ui: HashMap<String, String>,
-    pub variant: SchemeVariant,
 
     pub theme_author: Option<String>,
     pub description: Option<String>,
@@ -49,15 +49,23 @@ pub struct Tinted8Scheme {
 
 impl fmt::Display for Tinted8Scheme {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        writeln!(f, "author: \"{}\"", self.scheme_author)?;
+        writeln!(f, "system: \"{}\"", self.system)?;
+        writeln!(f, "name: \"{}\"", self.name)?;
+        writeln!(f, "scheme-author: \"{}\"", self.scheme_author)?;
+        if let Some(ref theme_author) = self.theme_author {
+            writeln!(f, "theme_author: \"{theme_author}\"")?;
+        }
+        writeln!(f, "slug: \"{}\"", self.slug)?;
+        writeln!(f, "variant: \"{}\"", self.variant)?;
+        if let Some(ref family) = self.family {
+            writeln!(f, "family: \"{family}\"")?;
+        }
+        if let Some(ref style) = self.style {
+            writeln!(f, "style: \"{style}\"")?;
+        }
         if let Some(ref desc) = self.description {
             writeln!(f, "description: \"{desc}\"")?;
         }
-        writeln!(f, "name: \"{}\"", self.name)?;
-        writeln!(f, "slug: \"{}\"", self.slug)?;
-        writeln!(f, "system: \"{}\"", self.system)?;
-        writeln!(f, "variant: \"{}\"", self.variant)?;
-        writeln!(f, "palette:")?;
 
         let mut palette_vec: Vec<(String, Color)> = self
             .palette
@@ -65,8 +73,8 @@ impl fmt::Display for Tinted8Scheme {
             .iter()
             .map(|(k, v)| (k.clone(), v.clone()))
             .collect();
-        palette_vec.sort_by_key(|k| k.0.clone());
 
+        writeln!(f, "palette:")?;
         for (key, value) in palette_vec {
             writeln!(f, "  {key}: \"{value}\"")?;
         }
