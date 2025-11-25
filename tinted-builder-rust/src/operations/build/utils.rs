@@ -56,6 +56,15 @@ impl SchemeFile {
 
                             Ok(scheme)
                         }
+                        Some(serde_yaml::Value::String(system_str))
+                            if system_str == &SchemeSystem::Tinted8.to_string() =>
+                        {
+                            let scheme_inner =
+                                serde_yaml::from_value(serde_yaml::Value::Mapping(map))?;
+                            let scheme = Scheme::Tinted8(scheme_inner);
+
+                            Ok(scheme)
+                        }
                         None | Some(_) => {
                             let scheme_inner =
                                 serde_yaml::from_value(serde_yaml::Value::Mapping(map))?;

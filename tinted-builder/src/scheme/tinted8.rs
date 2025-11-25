@@ -14,13 +14,16 @@ pub const REQUIRED_TINTED8_PALETTE_KEYS: [&str; 8] = [
 #[derive(Deserialize, Serialize)]
 struct YamlTinted8Scheme {
     pub system: SchemeSystem,
+    #[serde(rename = "system-version")]
+    pub system_version: Option<String>,
     #[serde(rename = "scheme-author")]
     pub scheme_author: String,
     pub palette: HashMap<String, String>,
     pub variant: SchemeVariant,
 
     pub name: Option<String>,
-    pub theme: Option<HashMap<String, String>>,
+    #[serde(rename = "syntax")]
+    pub syntax: Option<HashMap<String, String>>,
     pub ui: Option<HashMap<String, String>>,
     #[serde(rename = "theme-author")]
     pub theme_author: Option<String>,
@@ -33,15 +36,16 @@ struct YamlTinted8Scheme {
 #[derive(Debug, Clone)]
 pub struct Tinted8Scheme {
     pub system: SchemeSystem,
+    pub system_version: Option<String>,
     pub name: String,
     pub scheme_author: String,
+    pub theme_author: String,
     pub slug: String,
     pub variant: SchemeVariant,
     pub palette: HashMap<String, Color>,
-    pub theme: HashMap<String, String>,
+    pub syntax: HashMap<String, String>,
     pub ui: HashMap<String, String>,
 
-    pub theme_author: Option<String>,
     pub description: Option<String>,
     pub family: Option<String>,
     pub style: Option<String>,
@@ -52,9 +56,7 @@ impl fmt::Display for Tinted8Scheme {
         writeln!(f, "system: \"{}\"", self.system)?;
         writeln!(f, "name: \"{}\"", self.name)?;
         writeln!(f, "scheme-author: \"{}\"", self.scheme_author)?;
-        if let Some(ref theme_author) = self.theme_author {
-            writeln!(f, "theme_author: \"{theme_author}\"")?;
-        }
+        writeln!(f, "theme-author: \"{}\"", self.theme_author)?;
         writeln!(f, "slug: \"{}\"", self.slug)?;
         writeln!(f, "variant: \"{}\"", self.variant)?;
         if let Some(ref family) = self.family {
@@ -67,7 +69,7 @@ impl fmt::Display for Tinted8Scheme {
             writeln!(f, "description: \"{desc}\"")?;
         }
 
-        let mut palette_vec: Vec<(String, Color)> = self
+        let palette_vec: Vec<(String, Color)> = self
             .palette
             .clone()
             .iter()
@@ -149,14 +151,15 @@ impl<'de> Deserialize<'de> for Tinted8Scheme {
             name,
             slug,
             system: wrapper.system,
-            scheme_author: wrapper.scheme_author,
+            system_version: wrapper.system_version,
+            scheme_author: wrapper.scheme_author.clone(),
             description: wrapper.description,
             family: wrapper.family,
             style: wrapper.style,
             variant: wrapper.variant,
-            theme: wrapper.theme.expect("Unable to extract theme"),
-            theme_author: wrapper.theme_author,
-            ui: wrapper.ui.expect("Unable to extract ui"),
+            syntax: wrapper.syntax.unwrap_or_default(),
+            theme_author: wrapper.theme_author.unwrap_or(wrapper.scheme_author),
+            ui: wrapper.ui.unwrap_or_default(),
             palette: palette_result?,
         })
     }
@@ -172,11 +175,9 @@ impl Serialize for Tinted8Scheme {
         state.serialize_field("name", &self.name)?;
         state.serialize_field("slug", &self.slug)?;
         state.serialize_field("scheme-author", &self.scheme_author)?;
+        state.serialize_field("theme-author", &self.theme_author)?;
         if let Some(description) = &self.description {
             state.serialize_field("description", description)?;
-        }
-        if let Some(theme_author) = &self.theme_author {
-            state.serialize_field("theme-author", theme_author)?;
         }
         state.serialize_field("variant", &self.variant)?;
 
