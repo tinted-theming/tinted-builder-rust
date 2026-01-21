@@ -159,9 +159,9 @@ impl<'de> Deserialize<'de> for Scheme {
             family: wrapper.family,
             style: wrapper.style,
             variant: wrapper.variant,
-            syntax: wrapper.syntax.unwrap_or_default(),
+            // syntax: wrapper.syntax.unwrap_or_default(),
             theme_author: wrapper.theme_author.unwrap_or(wrapper.scheme_author),
-            ui: wrapper.ui.unwrap_or_default(),
+            // ui: wrapper.ui.unwrap_or_default(),
             // palette: palette_result?,
         })
     }
@@ -319,16 +319,24 @@ struct Ui {
     selection_background: Option<String>,
 }
 
+type Style = String;
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+enum LeafOrGroup<T> {
+    Leaf(Style),
+    Group(T),
+}
+
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 struct Syntax {
-    comment: Option<String>,
-    string: Option<SyntaxString>,
-    constant: Option<SyntaxConstant>,
-    entity: Option<SyntaxEntity>,
-    keyword: Option<SyntaxKeyword>,
-    markup: Option<SyntaxMarkup>,
-    diff: Option<SyntaxDiff>,
+    comment: Option<LeafOrGroup<Style>>,
+    string: Option<LeafOrGroup<SyntaxString>>,
+    constant: Option<LeafOrGroup<SyntaxConstant>>,
+    entity: Option<LeafOrGroup<SyntaxEntity>>,
+    keyword: Option<LeafOrGroup<SyntaxKeyword>>,
+    markup: Option<LeafOrGroup<SyntaxMarkup>>,
+    diff: Option<LeafOrGroup<SyntaxDiff>>,
 }
 
 impl Default for Syntax {
@@ -350,10 +358,8 @@ impl TryFrom<HashMap<String, String>> for Syntax {
     fn try_from(map: HashMap<String, String>) -> Result<Self, Self::Error> {
         let mut s = Syntax::default();
 
-        s.comment = map.remove("comment");
-        s.string = map
-            .remove("string")
-            .and_then(|item| SyntaxString::try_from(item).ok());
+        s.comment = map.remove("comment").map(LeafOrGroup::Leaf);
+        s.string = map.remove("string").map(LeafOrGroup::Group);
         s.constant = map
             .remove("constant")
             .map(|v| v.parse())
@@ -394,100 +400,84 @@ impl TryFrom<HashMap<String, String>> for Syntax {
 
 #[derive(Debug, Default, Clone, Serialize, Deserialize)]
 struct SyntaxEntity {
-    name: Option<SyntaxEntityName>,
-    other: Option<SyntaxEntityOther>,
+    name: Option<LeafOrGroup<SyntaxEntityName>>,
+    other: Option<LeafOrGroup<SyntaxEntityOther>>,
 }
 
 #[derive(Debug, Default, Clone, Serialize, Deserialize)]
 struct SyntaxEntityName {
-    class: Option<String>,
-    function: Option<String>,
-    tag: Option<String>,
-    variable: Option<String>,
+    class: Option<LeafOrGroup<Style>>,
+    function: Option<LeafOrGroup<Style>>,
+    tag: Option<LeafOrGroup<Style>>,
+    variable: Option<LeafOrGroup<Style>>,
 }
 
 #[derive(Debug, Default, Clone, Serialize, Deserialize)]
 struct SyntaxEntityOther {
     #[serde(rename = "attribute-name")]
-    attribute_name: Option<String>,
+    attribute_name: Option<LeafOrGroup<Style>>,
 }
 
 #[derive(Debug, Default, Clone, Serialize, Deserialize)]
 struct SyntaxKeyword {
-    control: Option<String>,
-    declaration: Option<String>,
+    control: Option<LeafOrGroup<Style>>,
+    declaration: Option<LeafOrGroup<Style>>,
 }
 
 #[derive(Debug, Default, Clone, Serialize, Deserialize)]
 struct SyntaxMarkup {
-    bold: Option<String>,
-    code: Option<String>,
-    italic: Option<String>,
-    quote: Option<String>,
+    bold: Option<LeafOrGroup<Style>>,
+    code: Option<LeafOrGroup<Style>>,
+    italic: Option<LeafOrGroup<Style>>,
+    quote: Option<LeafOrGroup<Style>>,
 }
 
 #[derive(Debug, Default, Clone, Serialize, Deserialize)]
 struct SyntaxDiff {
-    added: Option<String>,
-    changed: Option<String>,
-    deleted: Option<String>,
+    added: Option<LeafOrGroup<Style>>,
+    changed: Option<LeafOrGroup<Style>>,
+    deleted: Option<LeafOrGroup<Style>>,
 }
 
 #[derive(Debug, Default, Clone, Serialize, Deserialize)]
 struct SyntaxConstant {
-    numeric: Option<SyntaxConstantNumeric>,
-    language: Option<SyntaxConstantLanguage>,
-    character: Option<SyntaxConstantCharacter>,
+    numeric: Option<LeafOrGroup<SyntaxConstantNumeric>>,
+    language: Option<LeafOrGroup<SyntaxConstantLanguage>>,
+    character: Option<LeafOrGroup<SyntaxConstantCharacter>>,
 }
 
 #[derive(Debug, Default, Clone, Serialize, Deserialize)]
 struct SyntaxConstantNumeric {
-    integer: Option<String>,
-    float: Option<String>,
-    hex: Option<String>,
-    exponential: Option<String>,
+    integer: Option<LeafOrGroup<Style>>,
+    float: Option<LeafOrGroup<Style>>,
+    hex: Option<LeafOrGroup<Style>>,
+    exponential: Option<LeafOrGroup<Style>>,
 }
 
 #[derive(Debug, Default, Clone, Serialize, Deserialize)]
 struct SyntaxConstantLanguage {
-    boolean: Option<String>,
+    boolean: Option<LeafOrGroup<Style>>,
 }
 
 #[derive(Debug, Default, Clone, Serialize, Deserialize)]
 struct SyntaxConstantCharacter {
-    escape: Option<String>,
-    entity: Option<String>,
+    escape: Option<LeafOrGroup<Style>>,
+    entity: Option<LeafOrGroup<Style>>,
 }
 
 #[derive(Debug, Default, Clone, Serialize, Deserialize)]
 struct SyntaxString {
-    quoted: Option<String>,
-    regexp: Option<String>,
-    template: Option<String>,
+    quoted: Option<LeafOrGroup<Style>>,
+    regexp: Option<LeafOrGroup<Style>>,
+    template: Option<LeafOrGroup<Style>>,
 }
 
-macro_rules! impl_tryfrom_yaml_map {
-    ($($ty:ty),+ $(,)?) => {
-        $(
-            impl<TV> ::std::convert::TryFrom<::std::collections::HashMap<::std::string::String, TV>> for $ty
-            where
-                $ty: ::serde::de::DeserializeOwned,
-                ::std::collections::HashMap<::std::string::String, TV>: ::serde::Serialize,
-            {
-                type Error = ::serde_yaml::Error;
-                fn try_from(map: ::std::collections::HashMap<::std::string::String, TV>) -> ::std::result::Result<Self, Self::Error> {
-                    ::serde_yaml::from_value(::serde_yaml::to_value(map)?)
-                }
-            }
-        )+
-    };
-}
+#[cfg(test)]
+mod tests {
+    use super::*;
 
-impl_tryfrom_yaml_map!(
-    SyntaxString,
-    SyntaxConstant,
-    SyntaxEntity,
-    SyntaxKeyword,
-    SyntaxMarkup,
-    SyntaxDiff
-);
+    #[test]
+    fn test_hashmap_to_syntax_string() {
+        let map = HashMap::from([("string".to_string(), "hello".to_string())]);
+    }
+}
