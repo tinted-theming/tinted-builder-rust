@@ -30,3 +30,4 @@ strip-ansi-escapes = "0.2.1"
 pedantic      = { level = "deny", priority = -1 }
 nursery       = { level = "deny", priority = -1 }
 unwrap_used   = "deny"
+module_name_repetitions = "allow"

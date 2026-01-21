@@ -5,9 +5,9 @@ mod tinted8;
 use serde::{Deserialize, Serialize};
 use std::{fmt, str::FromStr};
 
-pub use crate::scheme::base16::Base16Scheme;
+pub use crate::scheme::base16::Scheme as Base16Scheme;
 pub use crate::scheme::color::Color;
-pub use crate::scheme::tinted8::Tinted8Scheme;
+pub use crate::scheme::tinted8::Scheme as Tinted8Scheme;
 use crate::TintedBuilderError;
 
 /// Enum representing schemes for different scheme systems. This enum is non-exhaustive, meaning

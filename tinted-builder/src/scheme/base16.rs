@@ -29,7 +29,7 @@ struct SchemeWrapper {
 }
 
 #[derive(Debug, Clone)]
-pub struct Base16Scheme {
+pub struct Scheme {
     pub system: SchemeSystem,
     pub name: String,
     pub slug: String,
@@ -39,7 +39,7 @@ pub struct Base16Scheme {
     pub palette: HashMap<String, Color>,
 }
 
-impl fmt::Display for Base16Scheme {
+impl fmt::Display for Scheme {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         writeln!(f, "author: \"{}\"", self.author)?;
         if let Some(ref desc) = self.description {
@@ -66,7 +66,7 @@ impl fmt::Display for Base16Scheme {
     }
 }
 
-impl<'de> Deserialize<'de> for Base16Scheme {
+impl<'de> Deserialize<'de> for Scheme {
     fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
     where
         D: Deserializer<'de>,
@@ -132,7 +132,7 @@ impl<'de> Deserialize<'de> for Base16Scheme {
     }
 }
 
-impl Serialize for Base16Scheme {
+impl Serialize for Scheme {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
         S: Serializer,
