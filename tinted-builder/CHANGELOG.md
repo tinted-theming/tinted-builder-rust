@@ -1,5 +1,12 @@
 # Changelog
 
+## Unreleased
+
+### Fixed
+
+- Fix bug where color `dec` values aren't correctly calculated introduced in
+  last release
+
 ## 0.10.0 - 2025-11-04
 
 ### Changed

@@ -25,7 +25,11 @@ impl Color {
             hex_full[4..6].to_lowercase(),
         );
         let rgb = hex_to_rgb(&hex)?;
-        let dec: (f32, f32, f32) = (f32::from(rgb.0), f32::from(rgb.1), f32::from(rgb.2));
+        let dec: (f32, f32, f32) = (
+            f32::from(rgb.0) / 255.0,
+            f32::from(rgb.1) / 255.0,
+            f32::from(rgb.2) / 255.0,
+        );
 
         Ok(Self { hex, rgb, dec })
     }

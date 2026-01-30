@@ -1,5 +1,12 @@
 # Changelog
 
+## Unreleased
+
+### Fixed
+
+- Update tinted-builder lib which includes bug fix where color `dec` values
+  aren't correctly calculated introduced in last release
+
 ## [0.14.0] - 2025-11-04
 
 ### Changed
