@@ -46,7 +46,7 @@ jobs:
         id: cache-cargo-deny
       - uses: actions-rust-lang/setup-rust-toolchain@v1
 
-      - uses: EmbarkStudios/cargo-deny-action@v1
+      - uses: EmbarkStudios/cargo-deny-action@v2
 
   audit:
     runs-on: ubuntu-latest
