@@ -16,7 +16,7 @@ fn build_cli() -> Command {
         )
         .arg(
             Arg::new("schemes-dir")
-                .action(ArgAction::Set)
+                .action(ArgAction::Append)
                 .global(true)
                 .help("Path to the schemes directory")
                 .long("schemes-dir")

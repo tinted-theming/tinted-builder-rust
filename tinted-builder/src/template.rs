@@ -1,4 +1,5 @@
 mod base16;
+mod tinted8;
 
 use crate::{error::TintedBuilderError, scheme::Scheme};
 
@@ -85,6 +86,62 @@ impl Template {
 
                 Ok(rendered)
             }
+            Scheme::Tinted8(ref scheme) => {
+                let ctx = tinted8::to_template_context(&scheme.clone())?;
+                let rendered = tinted8::render(&self.content, &ctx)?;
+
+                Ok(rendered)
+            }
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::{Scheme, Template};
+
+    const SCHEME: &str = r##"
+system: "base16"
+name: "Test"
+slug: "test"
+author: "Me"
+variant: "dark"
+palette:
+  base00: "#000000"
+  base01: "#111111"
+  base02: "#222222"
+  base03: "#333333"
+  base04: "#444444"
+  base05: "#555555"
+  base06: "#666666"
+  base07: "#777777"
+  base08: "#888888"
+  base09: "#999999"
+  base0A: "#aaaaaa"
+  base0B: "#bbbbbb"
+  base0C: "#cccccc"
+  base0D: "#dddddd"
+  base0E: "#eeeeee"
+  base0F: "#ffffff"
+"##;
+
+    #[test]
+    fn renders_plain_text() {
+        #[allow(clippy::unwrap_used)]
+        let tpl = Template::new(
+            "Hello".to_string(),
+            Scheme::Base16(serde_yaml::from_str(SCHEME).unwrap()),
+        );
+        assert_eq!(tpl.render().expect("unable to render"), "Hello");
+    }
+
+    #[test]
+    fn renders_base16_variable_hex() {
+        #[allow(clippy::unwrap_used)]
+        let tpl = Template::new(
+            "#{{base0A-hex}}".to_string(),
+            Scheme::Base16(serde_yaml::from_str(SCHEME).unwrap()),
+        );
+        assert_eq!(tpl.render().expect("unable to render"), "#aaaaaa");
     }
 }

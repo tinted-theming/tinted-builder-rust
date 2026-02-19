@@ -60,31 +60,36 @@ The following is a table of the available subcommands for the CLI tool (tinted-b
 
 | Flag/Option | Description | Applicable Subcommands | Default Value | Example Usage |
 |-------------|-------------|------------------------|---------------|---------------|
-| `--schemes-dir` `-s` | Path to a custom local schemes directory to use when building. Only necessary if the [latest schemes repository] is not desired. | `build` | `tinted-builder-rust build . --schemes-dir=/path/to/schemes/dir` |
+| `--schemes-dir` `-s` | Path to one or more local schemes directories. Repeat this flag to include multiple directories. Used by `build` to find schemes and by `sync` to clone/pull into those paths. | `build`, `sync` | Defaults to `<data-dir>/schemes` | `tinted-builder-rust build . -s /path/one -s /path/two` |
 | `--data-dir` `-d` | Specifies a custom path for the data directory. | All | Linux: `$XDG_DATA_HOME/tinted-theming/tinted-builder-rust`. macOS: `~/Library/Application\ Support/tinted-theming/tinted-builder-rust` | `tinted-builder-rust sync --data-dir /path/to/custom/data-dir` |
 | `--help` `-h` | Displays help information for the subcommand. | All | - | `tinted-builder-rust --help`, `tinted-builder-rust build --help`, etc |
 | `--version` `-V` | Shows the version of tinted-builder-rust. | All | - | `tinted-builder-rust --version` |
 
 ## List usage
 
-`tinted-builder-rust` supports `list`, `listbase16` and `listbase24`
-scheme systems. This allows for listing scheme information in a single
-file, eg:
+`tinted-builder-rust` supports an `options.list` config property which enables
+for accessing a scheme list in a single file.
 
 `template-repo/templates/config.yaml`:
 
 ```yaml
 some-base16-list:
     filename: "base16-list.md"
-    supported-systems: [listbase16]
+    supported-systems: [base16]
+    options:
+        list: true
 
 some-base24-list:
     filename: "base24-list.md"
-    supported-systems: [listbase24]
+    supported-systems: [base24]
+    options:
+        list: true
 
 list-all:
     filename: "list-all.md"
-    supported-systems: [list]
+    supported-systems: [base16, base24]
+    options:
+        list: true
 ```
 
 With an example template being `templates/some-base16-list.mustache`:

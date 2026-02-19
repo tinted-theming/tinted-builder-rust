@@ -1,6 +1,6 @@
 #![doc = include_str!("../README.md")]
 
-mod operations {
+pub mod operations {
     pub mod build;
 }
 
@@ -11,3 +11,6 @@ pub mod utils {
 }
 
 pub use crate::operations::build as operation_build;
+
+// For tests
+pub use operations::build::build;

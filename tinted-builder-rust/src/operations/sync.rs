@@ -8,10 +8,15 @@ const REPO_NAME: &str = env!("CARGO_PKG_NAME");
 const SCHEMES_REPO_NAME: &str = "schemes";
 const SCHEMES_URL: &str = "https://github.com/tinted-theming/schemes";
 
-/// This function checks if the schemes repository exists at the specified path. If the repository
-/// exists and has no uncommitted changes, it performs a `git pull` to update the repository. If
-/// the repository contains uncommitted changes, it notifies the user and does not perform the
-/// update. If the repository does not exist, it clones the repository from the specified URL.
+// Does a sync to keep the local repo up to date with the remote repo
+//
+//
+/// 1. This function checks if the schemes repository exists at the specified path.
+/// 2. If the repository exists and has no uncommitted changes, it performs a `git pull` to update
+///    the repository.
+/// 3. If the repository contains uncommitted changes, it notifies the user and does not perform
+///    the update.
+/// 4. If the repository does not exist, it clones the repository from the specified URL.
 ///
 /// This function is typically used in the context of a CLI tool to ensure that the latest schemes
 /// are available before performing operations that depend on them.
@@ -59,7 +64,7 @@ pub fn sync(schemes_path: impl AsRef<Path>, is_quiet: bool) -> Result<()> {
         let is_diff = git_diff(&schemes_path)?;
 
         if !is_diff {
-            git_pull(schemes_path, is_quiet)
+            git_pull(&schemes_path, is_quiet)
                 .with_context(|| format!("Error pulling {SCHEMES_REPO_NAME} from {SCHEMES_URL}"))?;
 
             if !is_quiet {
@@ -79,6 +84,10 @@ pub fn sync(schemes_path: impl AsRef<Path>, is_quiet: bool) -> Result<()> {
     Ok(())
 }
 
+/// Clones a git repository to a target directory.
+///
+/// # Errors
+/// Returns an error if the target exists, or on failures invoking `git clone`.
 fn git_clone(repo_url: &str, target_dir: impl AsRef<Path>, is_quiet: bool) -> Result<()> {
     if target_dir.as_ref().exists() {
         return Err(anyhow!(
@@ -102,6 +111,10 @@ fn git_clone(repo_url: &str, target_dir: impl AsRef<Path>, is_quiet: bool) -> Re
     Ok(())
 }
 
+/// Runs `git pull` in the given repository directory.
+///
+/// # Errors
+/// Returns an error when the directory is missing or the command fails.
 fn git_pull(repo_path: impl AsRef<Path>, is_quiet: bool) -> Result<()> {
     if !repo_path.as_ref().is_dir() {
         return Err(anyhow!(
@@ -135,6 +148,7 @@ fn git_pull(repo_path: impl AsRef<Path>, is_quiet: bool) -> Result<()> {
     }
 }
 
+/// Returns true when there are uncommitted changes in the repository.
 fn git_diff(target_dir: impl AsRef<Path>) -> Result<bool> {
     let output = Command::new("git")
         .arg("status")

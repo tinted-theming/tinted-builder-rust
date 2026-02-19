@@ -5,7 +5,7 @@ use std::fs;
 use std::path::PathBuf;
 use test_utils::{copy_dir_all, write_to_file};
 use tinted_builder::{SchemeSystem, SchemeVariant};
-use tinted_builder_rust::utils::get_scheme_files;
+use tinted_builder_rust::operations::build::utils::get_scheme_files;
 
 #[test]
 fn test_get_scheme_files_recursive() -> Result<()> {
@@ -25,13 +25,14 @@ fn test_get_scheme_files_recursive() -> Result<()> {
     // ---
     // Act
     // ---
-    let scheme_files = get_scheme_files(&schemes_path, true)?;
+    let scheme_files = get_scheme_files(&[schemes_path], true)?;
     let mut scheme_names: Vec<String> = vec![];
     let mut scheme_authors: Vec<String> = vec![];
     let mut scheme_variants: Vec<SchemeVariant> = vec![];
     let mut scheme_systems: Vec<SchemeSystem> = vec![];
 
     for scheme_file in scheme_files {
+        // match  scheme_file.get_scheme()? {}
         let scheme = scheme_file.get_scheme()?;
         let name = scheme.get_scheme_name();
         let author = scheme.get_scheme_author();
@@ -140,7 +141,7 @@ palette:
     // ---
     // Act
     // ---
-    let scheme_files = get_scheme_files(&data_path, false)?;
+    let scheme_files = get_scheme_files(&[data_path], false)?;
     let scheme_container = scheme_files
         .first()
         .expect("Unable to extract scheme_file")

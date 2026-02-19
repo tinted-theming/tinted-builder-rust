@@ -232,14 +232,7 @@ fn test_operation_build_base16() -> Result<()> {
         hidden_yaml_path.display()
     );
     assert!(
-        stdout.contains(
-            format!(
-                "Successfully generated \"base16\" themes for \"base16-template\" with filename \"{}\"",
-                themes_path
-                    .join("{{ scheme-system }}-{{ scheme-slug }}.md")
-                    .display()
-            ).as_str()
-        ),
+        stdout.contains("✔ Successfully generated \"base16\" themes for \"base16-template\""),
         "stdout does not contain the exptected output"
     );
 
@@ -302,14 +295,7 @@ fn test_operation_build_base24() -> Result<()> {
         "stderr does not contain the expected output"
     );
     assert!(
-        stdout.contains(
-            format!(
-                "Successfully generated \"base24\" themes for \"base24-template\" with filename \"{}\"",
-                themes_path
-                    .join(format!("{{{{ scheme-system }}}}-{{{{ scheme-slug }}}}{output_extension}"))
-                    .display()
-            ).as_str()
-        ),
+        stdout.contains("✔ Successfully generated \"base24\" themes for \"base24-template\""),
         "stdout does not contain the exptected output"
     );
 
@@ -373,7 +359,7 @@ fn test_operation_build_mixed() -> Result<()> {
     let (stdout, stderr) = run_command(&[
         "build".to_string(),
         template_theme_path.display().to_string(),
-        format!("--schemes-dir={}", schemes_path.display()),
+        format!("--schemes-dir={}", &schemes_path.display()),
     ])
     .expect("Unable to run command");
     let base16_rendered_content = fs::read_to_string(base16_rendered_theme_path)?;
@@ -395,14 +381,96 @@ fn test_operation_build_mixed() -> Result<()> {
         "stderr does not contain the expected output"
     );
     assert!(
-        stdout.contains(
-            format!(
-                "Successfully generated \"base16, base24\" themes for \"mixed-template\" with filename \"{}\"",
-                themes_path
-                    .join("{{ scheme-system }}-{{ scheme-slug }}.md")
-                    .display()
-            ).as_str()
-        ),
+        stdout
+            .contains("✔ Successfully generated \"base16, base24\" themes for \"mixed-template\""),
+        "stdout does not contain the exptected output"
+    );
+
+    Ok(())
+}
+
+/// Tests schemes/base16/*.yaml and schemes/base24/*.yaml generation
+#[test]
+fn test_operation_build_multi_scheme_dir_input() -> Result<()> {
+    // -------
+    // Arrange
+    // -------
+    let name = "operation_build_multi_scheme_dir_input";
+    let base16_scheme_name = "silk-light";
+    let base24_scheme_name = "dracula";
+    let template_theme_path = PathBuf::from(format!("./template-{name}"));
+    let template_templates_path = template_theme_path.join("templates");
+    let template_config_path = template_templates_path.join("config.yaml");
+    let base24_template_mustache_path = template_templates_path.join("mixed-template.mustache");
+    let schemes_path = template_theme_path.join("schemes");
+    let base16_schemes_path = schemes_path.join("base16");
+    let base24_schemes_path = schemes_path.join("base24");
+    let base16_scheme_file_path = base16_schemes_path.join(format!("{}.yaml", &base16_scheme_name));
+    let base24_scheme_file_path = base24_schemes_path.join(format!("{}.yaml", &base24_scheme_name));
+    let themes_path = template_theme_path.join("output-themes");
+    let base16_rendered_theme_path = themes_path.join(format!("base16-{}.md", &base16_scheme_name));
+    let base24_rendered_theme_path = themes_path.join(format!("base24-{}.md", &base24_scheme_name));
+    let base16_template_rendered_content_fixture = fs::read_to_string(format!(
+        "./tests/fixtures/rendered/base16-mixed-{base16_scheme_name}.md",
+    ))?;
+    let (_, base16_scheme_file_content, _, _) = setup("base16", base16_scheme_name)?;
+    let (
+        _,
+        base24_scheme_file_content,
+        base24_template_file_content,
+        base24_template_rendered_content_fixture,
+    ) = setup("base24", base24_scheme_name)?;
+
+    if template_theme_path.is_dir() {
+        fs::remove_dir_all(&template_theme_path)?;
+    }
+    fs::create_dir(&template_theme_path)?;
+    fs::create_dir(&schemes_path)?;
+    fs::create_dir(&base16_schemes_path)?;
+    fs::create_dir(&base24_schemes_path)?;
+    fs::create_dir(&template_templates_path)?;
+    write_to_file(&base16_scheme_file_path, &base16_scheme_file_content)?;
+    write_to_file(&base24_scheme_file_path, &base24_scheme_file_content)?;
+    write_to_file(
+        &template_config_path,
+        fs::read_to_string("./tests/fixtures/templates/mixed-config.yaml")?.as_str(),
+    )?;
+    write_to_file(
+        &base24_template_mustache_path,
+        &base24_template_file_content,
+    )?;
+
+    // ---
+    // Act
+    // ---
+    let (stdout, stderr) = run_command(&[
+        "build".to_string(),
+        template_theme_path.display().to_string(),
+        format!("--schemes-dir={}", &base16_schemes_path.display()),
+        format!("--schemes-dir={}", &base24_schemes_path.display()),
+    ])
+    .expect("Unable to run command");
+    let base16_rendered_content = fs::read_to_string(base16_rendered_theme_path)?;
+    let base24_rendered_content = fs::read_to_string(base24_rendered_theme_path)?;
+
+    // ------
+    // Assert
+    // ------
+    assert_eq!(
+        base16_rendered_content,
+        base16_template_rendered_content_fixture
+    );
+    assert_eq!(
+        base24_rendered_content,
+        base24_template_rendered_content_fixture
+    );
+    assert!(
+        stderr.is_empty(),
+        "stderr does not contain the expected output"
+    );
+    assert!(
+        stdout
+            .contains("✔ Successfully generated \"base16, base24\" themes for \"mixed-template\""),
         "stdout does not contain the exptected output"
     );
 
@@ -414,13 +482,13 @@ fn test_operation_build_listbase16() -> Result<()> {
     // -------
     // Arrange
     // -------
-    let name = "operation_build_list";
+    let name = "operation_build_listbase16";
     let template_theme_path = PathBuf::from(format!("./template-{name}"));
     let template_templates_path = template_theme_path.join("templates");
     let schemes_path = template_theme_path.join("schemes");
-    let rendered_list_theme_path = template_theme_path.join("list-list.md");
-    let rendered_listbase16_theme_path = template_theme_path.join("listbase16-list.md");
-    let rendered_listbase24_theme_path = template_theme_path.join("listbase24-list.md");
+    let rendered_list_theme_path = PathBuf::from("./tests/fixtures/rendered/list.md");
+    let rendered_listbase16_theme_path = PathBuf::from("./tests/fixtures/rendered/listbase16.md");
+    let rendered_listbase24_theme_path = PathBuf::from("./tests/fixtures/rendered/listbase24.md");
 
     if template_theme_path.is_dir() {
         fs::remove_dir_all(&template_theme_path)?;
@@ -445,6 +513,7 @@ fn test_operation_build_listbase16() -> Result<()> {
         format!("--schemes-dir={}", schemes_path.display()),
     ])
     .expect("Unable to run command");
+
     let rendered_list_content = fs::read_to_string(rendered_list_theme_path)?;
     let rendered_listbase16_content = fs::read_to_string(rendered_listbase16_theme_path)?;
     let rendered_listbase24_content = fs::read_to_string(rendered_listbase24_theme_path)?;
@@ -464,15 +533,70 @@ fn test_operation_build_listbase16() -> Result<()> {
         stderr.is_empty(),
         "stderr does not contain the expected output"
     );
-    let expected_output = format!(
-        r#"Successfully generated "list" list with filename "{0}/{{{{ scheme-system }}}}-list.md"
-Successfully generated "listbase16" list with filename "{0}/{{{{ scheme-system }}}}-list.md"
-Successfully generated "listbase24" list with filename "{0}/{{{{ scheme-system }}}}-list.md"
-"#,
-        template_theme_path.display(),
+
+    let expected_output = "✔ Successfully generated \"base16, base24\" list";
+
+    assert!(
+        stdout.contains(expected_output),
+        "stdout does not contain the exptected output"
     );
 
-    assert_eq!(stdout, expected_output);
+    Ok(())
+}
+
+#[test]
+fn test_operation_build_listtinted8() -> Result<()> {
+    // -------
+    // Arrange
+    // -------
+    let name = "operation_build_listtinted8";
+    let template_theme_path = PathBuf::from(format!("./template-{name}"));
+    let template_templates_path = template_theme_path.join("templates");
+    let schemes_path = template_theme_path.join("schemes");
+    let rendered_list_theme_path = PathBuf::from("./tests/fixtures/rendered/list-tinted8.md");
+
+    if template_theme_path.is_dir() {
+        fs::remove_dir_all(&template_theme_path)?;
+    }
+    fs::create_dir_all(&template_templates_path)?;
+    fs::copy(
+        "./tests/fixtures/templates/list-tinted8-config.yaml",
+        template_theme_path.join("templates/config.yaml"),
+    )?;
+    fs::copy(
+        "./tests/fixtures/templates/list-tinted8-template.mustache",
+        template_theme_path.join("templates/list.mustache"),
+    )?;
+    copy_dir_all("./tests/fixtures/schemes", &schemes_path)?;
+
+    // ---
+    // Act
+    // ---
+    let (stdout, stderr) = run_command(&[
+        "build".to_string(),
+        template_theme_path.display().to_string(),
+        format!("--schemes-dir={}", schemes_path.display()),
+    ])
+    .expect("Unable to run command");
+
+    let rendered_list_content = fs::read_to_string(rendered_list_theme_path)?;
+    let expected_list_content = fs::read_to_string(template_theme_path.join("tinted8-list.txt"))?;
+
+    // ------
+    // Assert
+    // ------
+    assert_eq!(rendered_list_content, expected_list_content);
+    assert!(
+        stderr.is_empty(),
+        "stderr does not contain the expected output"
+    );
+
+    let expected_output = "✔ Successfully generated \"tinted8\" list";
+
+    assert!(
+        stdout.contains(expected_output),
+        "stdout does not contain the exptected output"
+    );
 
     Ok(())
 }
@@ -518,7 +642,7 @@ invalid:
     // Assert
     // ------
     assert!(
-        stderr.contains(format!("unknown variant `{system}`").as_str()),
+        stderr.contains("Error: E305: Template config missing or invalid"),
         "stderr does not contain the expected output"
     );
     assert!(
@@ -664,13 +788,7 @@ fn test_operation_build_invalid_base16() -> Result<()> {
     // Assert
     // ------
     assert!(
-        stderr.contains(
-            format!(
-                r#"Error: Unable to deserialize scheme "{}": missing field `system`"#,
-                scheme_file_path.display()
-            )
-            .as_str()
-        ),
+        stderr.contains("E111: Missing required field `system`"),
         "stderr does not contain the expected output"
     );
     assert!(

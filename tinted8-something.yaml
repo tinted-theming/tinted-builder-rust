@@ -1,0 +1,68 @@
+system: "tinted8"
+name: "Ayu-Mirage"
+scheme-author: "User <user@example.com>"
+theme-author: "User <user@example.com>"
+slug: "ayu-mirage"
+variant: "dark"
+family: "Ayu"
+style: "Mirage"
+palette:
+  black: "#131721"
+  red: "#f07178"
+  green: "#b8cc52"
+  yellow: "#ffb454"
+  blue: "#59c2ff"
+  magenta: "#d2a6ff"
+  cyan: "#95e6cb"
+  white: "#e6e1cf"
+
+syntax:
+  comment: #000000
+  string: #ffb454
+  string.quoted: #ffb454
+  string.regexp: #ffb454
+  string.template: #ffb454
+  constant: #ffb454
+  constant.numeric: #ffb454
+  constant.numeric.integer: #ffb454
+  constant.numeric.float: #ffb454
+  constant.numeric.hex: #ffb454
+  constant.numeric.exponential: #ffb454
+  constant.language: #ffb454
+  constant.language.boolean: #ffb454
+  constant.character: #ffb454
+  constant.character.escape: #ffb454
+  constant.character.entity: #ffb454
+  entity: #95e6cb
+  entity.name: #95e6cb
+  entity.name.class: #95e6cb
+  entity.name.function: #95e6cb
+  entity.name.tag: #95e6cb
+  entity.name.variable: #95e6cb
+  entity.other: #ffb454
+  entity.other.attribute-name: #ffca87
+  keyword: #d2a6ff
+  keyword.control: #d2a6ff
+  keyword.declaration: #d2a6ff
+  markup: #95e6cb
+  markup.bold: #95e6cb
+  markup.code: #95e6cb
+  markup.italic: #95e6cb
+  markup.quote: #95e6cb
+  diff: #95e6cb
+  diff.added: #cee071
+  diff.changed: #ecd9ff
+  diff.deleted: #fa9a9f
+
+ui:
+  background: #133777
+  background_dark: #000000
+  background_light: #202b47
+  deprecated: #f07178
+  foreground: #e6e1cf
+  foreground_dark: #202b47
+  foreground_light: #f9f7ef
+  line_background: #000000
+  search_text: #ffb454
+  selection_background: #202b47
+

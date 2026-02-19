@@ -28,6 +28,10 @@ struct SchemeWrapper {
     pub(crate) palette: HashMap<String, String>,
 }
 
+/// Deserialized Base16/Base24 scheme with normalized palette and metadata.
+///
+/// The `palette` map contains Base16 or Base24 color keys mapped to normalized `Color` values.
+/// Serialization preserves sorted palette keys and hex values with a leading `#`.
 #[derive(Debug, Clone)]
 pub struct Base16Scheme {
     pub system: SchemeSystem,
@@ -102,7 +106,7 @@ impl<'de> Deserialize<'de> for Base16Scheme {
                     )));
                 }
             }
-            SchemeSystem::List | SchemeSystem::ListBase16 | SchemeSystem::ListBase24 => {
+            _ => {
                 return Err(serde::de::Error::custom(format!(
                     "{} is not a valid Scheme system for a specific scheme",
                     wrapper.system
@@ -114,7 +118,7 @@ impl<'de> Deserialize<'de> for Base16Scheme {
             .palette
             .into_iter()
             .map(|(key, value)| {
-                Color::new(&value)
+                Color::new(&value, None, None)
                     .map(|color| (key, color))
                     .map_err(|e| serde::de::Error::custom(e.to_string()))
             })
