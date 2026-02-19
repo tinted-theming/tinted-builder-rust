@@ -2,6 +2,7 @@ accepted = [
     "Apache-2.0",
     "MIT",
     "MPL-2.0",
+    "GPL-3.0",
     "BSD-3-Clause",
     "Unicode-3.0",
 ]
