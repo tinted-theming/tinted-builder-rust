@@ -11,7 +11,6 @@ use crate::scheme::tinted8::yaml::Tinted8Scheme as YamlTinted8Scheme;
 use crate::tinted8::SUPPORTED_BUILDER_SPEC_VERSION;
 use crate::utils::slugify;
 use crate::utils::titlecasify;
-use crate::SchemeVariant;
 use serde::{Deserialize, Deserializer, Serialize};
 use std::fmt;
 
@@ -22,9 +21,6 @@ use std::fmt;
 #[derive(Debug, Clone, Serialize)]
 pub struct Scheme {
     pub scheme: SchemeMeta,
-    pub variant: SchemeVariant,
-    pub family: Option<String>,
-    pub style: Option<String>,
     pub palette: Palette,
     pub syntax: Syntax,
     pub ui: Ui,
@@ -53,11 +49,11 @@ impl fmt::Display for Scheme {
         }
         #[allow(clippy::writeln_empty_string)]
         writeln!(f, "")?;
-        writeln!(f, "variant: \"{}\"", self.variant)?;
-        if let Some(ref family) = self.family {
+        writeln!(f, "variant: \"{}\"", self.scheme.variant)?;
+        if let Some(ref family) = self.scheme.family {
             writeln!(f, "family: \"{family}\"")?;
         }
-        if let Some(ref style) = self.style {
+        if let Some(ref style) = self.scheme.style {
             writeln!(f, "style: \"{style}\"")?;
         }
 
@@ -131,13 +127,13 @@ impl<'de> Deserialize<'de> for Scheme {
             theme_author: wrapper.scheme.theme_author.unwrap_or(wrapper.scheme.author),
             supported_builder_version: builder_spec_version,
             supported_styling_version: styling_spec_version,
+            family: wrapper.family,
+            style: wrapper.style,
+            variant: wrapper.variant,
         };
 
         Ok(Self {
             scheme: scheme_meta,
-            family: wrapper.family,
-            style: wrapper.style,
-            variant: wrapper.variant,
             syntax,
             ui,
             palette,

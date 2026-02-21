@@ -19,8 +19,8 @@ fn deserialize_family_style_derives_name() -> Result<(), TintedBuilderError> {
 
     assert_eq!(ts.scheme.name, "Ayu-Mirage");
     assert_eq!(ts.scheme.slug, "ayu-mirage");
-    assert_eq!(ts.family, Some("Ayu".to_string()));
-    assert_eq!(ts.style, Some("Mirage".to_string()));
+    assert_eq!(ts.scheme.family, Some("Ayu".to_string()));
+    assert_eq!(ts.scheme.style, Some("Mirage".to_string()));
 
     Ok(())
 }

@@ -30,6 +30,8 @@ struct SchemeMetaCtx {
     builder_version: String,
     #[serde(rename = "system-version")]
     system_version: String,
+    family: String,
+    style: String,
 }
 
 #[derive(Serialize)]
@@ -53,12 +55,14 @@ pub fn to_template_context(
         name: meta.name.clone(),
         author: meta.author.clone(),
         description: meta.description.clone().unwrap_or_default(),
+        variant: meta.variant.to_string(),
         slug: meta.slug.clone(),
         slug_underscored: meta.slug.replace('-', "_"),
         system: meta.system.to_string(),
-        variant: scheme.variant.as_str().to_string(),
         builder_version: meta.supported_builder_version.clone(),
         system_version: meta.supported_styling_version.clone(),
+        family: meta.family.clone().unwrap_or_default(),
+        style: meta.style.clone().unwrap_or_default(),
     };
 
     let ctx = TemplateCtx {
