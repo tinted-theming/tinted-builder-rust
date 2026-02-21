@@ -143,7 +143,10 @@ pub struct BasicUi {
     pub line_background: Option<String>,
     #[serde(rename = "line.foreground")]
     pub line_foreground: Option<String>,
-    pub search_text: Option<String>,
+    #[serde(rename = "search.background")]
+    pub search_background: Option<String>,
+    #[serde(rename = "search.foreground")]
+    pub search_foreground: Option<String>,
     #[serde(rename = "selection.background")]
     pub selection_background: Option<String>,
     #[serde(rename = "selection.foreground")]
