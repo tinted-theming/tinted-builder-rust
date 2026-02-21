@@ -75,7 +75,7 @@ impl Scheme {
     pub fn get_scheme_variant(&self) -> SchemeVariant {
         match self {
             Self::Base16(scheme) | Self::Base24(scheme) => scheme.variant.clone(),
-            Self::Tinted8(scheme) => scheme.variant.clone(),
+            Self::Tinted8(scheme) => scheme.scheme.variant.clone(),
         }
     }
 }

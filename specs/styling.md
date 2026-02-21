@@ -39,8 +39,8 @@ A Tinted8 scheme is stored as a YAML document with the following fields:
 | `palette`               | Yes | - | Defines the base color palette for the theme. |
 | `scheme.name`           | No  | Derived from `slug` or `family` + `style` | Human-readable name. |
 | `scheme.slug`           | No  | Derived from `name` or `family` + `style` | Machine-friendly identifier. |
-| `family`                | No  | - | Broad design family (e.g. "Tokyo"). |
-| `style`                 | No  | - | Variation within a family (e.g. "Night", "Moon"). |
+| `scheme.family`         | No  | - | Broad design family (e.g. "Tokyo"). |
+| `scheme.style`          | No  | - | Variation within a family (e.g. "Night", "Moon"). |
 | `scheme.theme-author`   | No  | `scheme-author` | Attribution for the original or inspirational theme. |
 | `scheme.description`    | No  | - | Short human-readable summary. |
 | `syntax`                | No  | List of default properties and values available later in this document. | Short human-readable summary. |

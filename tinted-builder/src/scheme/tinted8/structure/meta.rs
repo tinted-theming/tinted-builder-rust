@@ -1,3 +1,4 @@
+use crate::SchemeVariant;
 use serde::Serialize;
 
 use crate::SchemeSystem;
@@ -11,5 +12,8 @@ pub struct SchemeMeta {
     pub slug: String,
     pub supported_styling_version: String,
     pub supported_builder_version: String,
+    pub variant: SchemeVariant,
+    pub family: Option<String>,
+    pub style: Option<String>,
     pub description: Option<String>,
 }
