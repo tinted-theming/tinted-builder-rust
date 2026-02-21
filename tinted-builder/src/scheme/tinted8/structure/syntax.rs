@@ -76,6 +76,7 @@ pub enum SyntaxKey {
     KeywordControl,
     KeywordDeclaration,
     Markup,
+    MarkupText,
     MarkupBold,
     MarkupCode,
     MarkupItalic,
@@ -572,6 +573,7 @@ pub struct SyntaxEntityName {
 #[derive(Debug, Clone, Serialize)]
 pub struct SyntaxEntityOther {
     pub default: Color,
+    #[serde(rename = "attribute-name")]
     pub attribute_name: Color,
 }
 
