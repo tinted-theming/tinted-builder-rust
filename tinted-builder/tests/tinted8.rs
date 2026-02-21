@@ -85,7 +85,7 @@ fn deserialize_ui_normals_from_palette() -> Result<(), TintedBuilderError> {
         scheme.palette.white_normal.to_hex()
     );
     assert_eq!(
-        scheme.ui.search_text.to_hex(),
+        scheme.ui.search.foreground.to_hex(),
         scheme.palette.yellow_normal.to_hex()
     );
 
