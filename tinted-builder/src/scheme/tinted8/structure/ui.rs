@@ -19,7 +19,8 @@ pub enum UiKey {
     ForegroundLight,
     LineBackground,
     LineForeground,
-    SearchText,
+    SearchBackground,
+    SearchForeground,
     SelectionForeground,
     SelectionBackground,
 }
@@ -36,7 +37,8 @@ impl UiKey {
             Self::ForegroundLight => "foreground.light",
             Self::LineBackground => "line.background",
             Self::LineForeground => "line.foreground",
-            Self::SearchText => "search-text",
+            Self::SearchBackground => "search.background",
+            Self::SearchForeground => "search.foreground",
             Self::SelectionForeground => "selection.foreground",
             Self::SelectionBackground => "selection.background",
         }
@@ -53,7 +55,8 @@ impl UiKey {
             Self::ForegroundLight,
             Self::LineBackground,
             Self::LineForeground,
-            Self::SearchText,
+            Self::SearchBackground,
+            Self::SearchForeground,
             Self::SelectionForeground,
             Self::SelectionBackground,
         ]
@@ -74,7 +77,7 @@ pub struct Ui {
     pub deprecated: Color,
     pub foreground: UiForeground,
     pub line: UiLine,
-    pub search_text: Color,
+    pub search: UiSearch,
     pub selection: UiSelection,
 }
 
@@ -94,6 +97,10 @@ impl Ui {
             background: palette.gray_dim.clone(),
             foreground: palette.white_dim.clone(),
         };
+        let search = UiSearch {
+            background: palette.black_bright.clone(),
+            foreground: palette.yellow_normal.clone(),
+        };
         let selection = UiSelection {
             background: palette.black_bright.clone(),
             foreground: palette.white_normal.clone(),
@@ -103,11 +110,12 @@ impl Ui {
             background,
             foreground,
             deprecated: palette.brown_normal.clone(),
-            search_text: palette.yellow_normal.clone(),
+            search,
             line,
             selection,
         }
     }
+    #[allow(clippy::too_many_lines)]
     pub fn try_from_basic(basic: BasicUi, palette: &Palette) -> Result<Self, UiError> {
         let default = Self::new(palette);
 
@@ -176,6 +184,23 @@ impl Ui {
                 .map_err(|err| UiError::UnableToConvertFrom(err.to_string()))?,
         };
 
+        let search = UiSearch {
+            background: basic
+                .search_background
+                .map_or_else(
+                    || Ok(default.search.background),
+                    |ref s| Color::new(s, None, None),
+                )
+                .map_err(|err| UiError::UnableToConvertFrom(err.to_string()))?,
+            foreground: basic
+                .search_foreground
+                .map_or_else(
+                    || Ok(default.search.foreground),
+                    |ref s| Color::new(s, None, None),
+                )
+                .map_err(|err| UiError::UnableToConvertFrom(err.to_string()))?,
+        };
+
         let selection = UiSelection {
             background: basic
                 .selection_background
@@ -200,13 +225,7 @@ impl Ui {
                 .map_or_else(|| Ok(default.deprecated), |ref s| Color::new(s, None, None))
                 .map_err(|err| UiError::UnableToConvertFrom(err.to_string()))?,
             foreground,
-            search_text: basic
-                .search_text
-                .map_or_else(
-                    || Ok(default.search_text),
-                    |ref s| Color::new(s, None, None),
-                )
-                .map_err(|err| UiError::UnableToConvertFrom(err.to_string()))?,
+            search,
             line,
             selection,
         })
@@ -223,7 +242,8 @@ impl Ui {
             UiKey::ForegroundLight => &self.foreground.light,
             UiKey::LineBackground => &self.line.background,
             UiKey::LineForeground => &self.line.foreground,
-            UiKey::SearchText => &self.search_text,
+            UiKey::SearchBackground => &self.search.background,
+            UiKey::SearchForeground => &self.search.foreground,
             UiKey::SelectionForeground => &self.selection.foreground,
             UiKey::SelectionBackground => &self.selection.background,
         }
@@ -260,6 +280,11 @@ pub struct UiForeground {
 }
 #[derive(Debug, Clone, Serialize)]
 pub struct UiLine {
+    pub background: Color,
+    pub foreground: Color,
+}
+#[derive(Debug, Clone, Serialize)]
+pub struct UiSearch {
     pub background: Color,
     pub foreground: Color,
 }
