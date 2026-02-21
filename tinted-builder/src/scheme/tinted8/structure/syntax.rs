@@ -5,7 +5,7 @@ use serde::Serialize;
 use std::fmt;
 use thiserror::Error;
 
-const REQUIRED_SYNTAX_KEYS: [&str; 36] = [
+const REQUIRED_SYNTAX_KEYS: [&str; 37] = [
     "comment",
     "string",
     "string.quoted",
@@ -34,6 +34,7 @@ const REQUIRED_SYNTAX_KEYS: [&str; 36] = [
     "keyword.control",
     "keyword.declaration",
     "markup",
+    "markup.text",
     "markup.bold",
     "markup.code",
     "markup.italic",
@@ -116,6 +117,7 @@ impl SyntaxKey {
             Self::KeywordControl => "keyword.control",
             Self::KeywordDeclaration => "keyword.declaration",
             Self::Markup => "markup",
+            Self::MarkupText => "markup.text",
             Self::MarkupBold => "markup.bold",
             Self::MarkupCode => "markup.code",
             Self::MarkupItalic => "markup.italic",
@@ -157,6 +159,7 @@ impl SyntaxKey {
             Self::KeywordControl,
             Self::KeywordDeclaration,
             Self::Markup,
+            Self::MarkupText,
             Self::MarkupBold,
             Self::MarkupCode,
             Self::MarkupItalic,
@@ -234,6 +237,7 @@ impl Syntax {
             default: keyword_normal,
         };
         let syntax_markup = SyntaxMarkup {
+            text: markup_normal.clone(),
             bold: markup_normal.clone(),
             code: markup_normal.clone(),
             italic: markup_normal.clone(),
@@ -398,6 +402,11 @@ impl Syntax {
         };
         let markup = SyntaxMarkup {
             default: parse_or_default(basic.markup.as_deref(), &default_syntax.markup.default)?,
+            text: parse_or_inherit(
+                basic.markup_text.as_deref(),
+                basic.markup.as_deref(),
+                &default_syntax.markup.text,
+            )?,
             bold: parse_or_inherit(
                 basic.markup_bold.as_deref(),
                 basic.markup.as_deref(),
@@ -472,6 +481,7 @@ impl Syntax {
             SyntaxKey::KeywordControl => &self.keyword.control,
             SyntaxKey::KeywordDeclaration => &self.keyword.declaration,
             SyntaxKey::Markup => &self.markup.default,
+            SyntaxKey::MarkupText => &self.markup.text,
             SyntaxKey::MarkupBold => &self.markup.bold,
             SyntaxKey::MarkupCode => &self.markup.code,
             SyntaxKey::MarkupItalic => &self.markup.italic,
@@ -583,6 +593,7 @@ pub struct SyntaxDiff {
 #[derive(Debug, Clone, Serialize)]
 pub struct SyntaxMarkup {
     pub default: Color,
+    pub text: Color,
     pub bold: Color,
     pub code: Color,
     pub italic: Color,

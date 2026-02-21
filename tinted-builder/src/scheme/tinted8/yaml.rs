@@ -273,6 +273,8 @@ pub struct BasicSyntax {
     #[serde(rename = "keyword.declaration")]
     pub keyword_declaration: Option<String>,
     pub markup: Option<String>,
+    #[serde(rename = "markup.text")]
+    pub markup_text: Option<String>,
     #[serde(rename = "markup.bold")]
     pub markup_bold: Option<String>,
     #[serde(rename = "markup.code")]
