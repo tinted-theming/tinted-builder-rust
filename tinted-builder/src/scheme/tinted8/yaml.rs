@@ -230,6 +230,12 @@ pub struct BasicSyntax {
     pub comment_line: Option<String>,
     #[serde(rename = "comment.block")]
     pub comment_block: Option<String>,
+    #[serde(rename = "invalid")]
+    pub invalid: Option<String>,
+    #[serde(rename = "invalid.deprecated")]
+    pub invalid_deprecated: Option<String>,
+    #[serde(rename = "invalid.illegal")]
+    pub invalid_illegal: Option<String>,
     pub string: Option<String>,
     #[serde(rename = "string.quoted")]
     pub string_quoted: Option<String>,
@@ -241,6 +247,10 @@ pub struct BasicSyntax {
     pub string_regexp: Option<String>,
     #[serde(rename = "string.template")]
     pub string_template: Option<String>,
+    #[serde(rename = "string.interpolated")]
+    pub string_interpolated: Option<String>,
+    #[serde(rename = "string.unquoted")]
+    pub string_unquoted: Option<String>,
     pub constant: Option<String>,
     #[serde(rename = "constant.numeric")]
     pub constant_numeric: Option<String>,
@@ -256,6 +266,8 @@ pub struct BasicSyntax {
     pub constant_language: Option<String>,
     #[serde(rename = "constant.language.boolean")]
     pub constant_language_boolean: Option<String>,
+    #[serde(rename = "constant.other")]
+    pub constant_other: Option<String>,
     #[serde(rename = "constant.character")]
     pub constant_character: Option<String>,
     #[serde(rename = "constant.character.escape")]
@@ -274,15 +286,61 @@ pub struct BasicSyntax {
     pub entity_name_tag: Option<String>,
     #[serde(rename = "entity.name.variable")]
     pub entity_name_variable: Option<String>,
+    #[serde(rename = "entity.name.type")]
+    pub entity_name_type: Option<String>,
+    #[serde(rename = "entity.name.namespace")]
+    pub entity_name_namespace: Option<String>,
+    #[serde(rename = "entity.name.section")]
+    pub entity_name_section: Option<String>,
     #[serde(rename = "entity.other")]
     pub entity_other: Option<String>,
     #[serde(rename = "entity.other.attribute-name")]
     pub entity_other_attribute_name: Option<String>,
+    #[serde(rename = "entity.other.inherited-class")]
+    pub entity_other_inherited_class: Option<String>,
     pub keyword: Option<String>,
     #[serde(rename = "keyword.control")]
     pub keyword_control: Option<String>,
     #[serde(rename = "keyword.declaration")]
     pub keyword_declaration: Option<String>,
+    #[serde(rename = "keyword.operator")]
+    pub keyword_operator: Option<String>,
+    #[serde(rename = "keyword.other")]
+    pub keyword_other: Option<String>,
+    #[serde(rename = "storage")]
+    pub storage: Option<String>,
+    #[serde(rename = "storage.type")]
+    pub storage_type: Option<String>,
+    #[serde(rename = "storage.modifier")]
+    pub storage_modifier: Option<String>,
+    #[serde(rename = "support")]
+    pub support: Option<String>,
+    #[serde(rename = "support.function")]
+    pub support_function: Option<String>,
+    #[serde(rename = "support.class")]
+    pub support_class: Option<String>,
+    #[serde(rename = "support.type")]
+    pub support_type: Option<String>,
+    #[serde(rename = "support.constant")]
+    pub support_constant: Option<String>,
+    #[serde(rename = "support.variable")]
+    pub support_variable: Option<String>,
+    #[serde(rename = "variable")]
+    pub variable: Option<String>,
+    #[serde(rename = "variable.parameter")]
+    pub variable_parameter: Option<String>,
+    #[serde(rename = "variable.language")]
+    pub variable_language: Option<String>,
+    #[serde(rename = "variable.function")]
+    pub variable_function: Option<String>,
+    #[serde(rename = "punctuation")]
+    pub punctuation: Option<String>,
+    #[serde(rename = "punctuation.accessor")]
+    pub punctuation_accessor: Option<String>,
+    #[serde(rename = "punctuation.separator")]
+    pub punctuation_separator: Option<String>,
+    #[serde(rename = "punctuation.terminator")]
+    pub punctuation_terminator: Option<String>,
     pub markup: Option<String>,
     #[serde(rename = "markup.heading")]
     pub markup_heading: Option<String>,
@@ -294,6 +352,14 @@ pub struct BasicSyntax {
     pub markup_italic: Option<String>,
     #[serde(rename = "markup.quote")]
     pub markup_quote: Option<String>,
+    #[serde(rename = "markup.underline")]
+    pub markup_underline: Option<String>,
+    #[serde(rename = "markup.list")]
+    pub markup_list: Option<String>,
+    #[serde(rename = "markup.link")]
+    pub markup_link: Option<String>,
+    #[serde(rename = "markup.raw")]
+    pub markup_raw: Option<String>,
     #[serde(rename = "diff")]
     pub diff: Option<String>,
     #[serde(rename = "diff.added")]

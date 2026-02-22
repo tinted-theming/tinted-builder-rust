@@ -5,12 +5,21 @@ use serde::Serialize;
 use std::fmt;
 use thiserror::Error;
 
-const REQUIRED_SYNTAX_KEYS: [&str; 37] = [
+const REQUIRED_SYNTAX_KEYS: [&str; 74] = [
     "comment",
+    "comment.line",
+    "comment.block",
+    "invalid",
+    "invalid.deprecated",
+    "invalid.illegal",
     "string",
     "string.quoted",
+    "string.quoted.single",
+    "string.quoted.double",
     "string.regexp",
     "string.template",
+    "string.interpolated",
+    "string.unquoted",
     "constant",
     "constant.numeric",
     "constant.numeric.integer",
@@ -19,6 +28,7 @@ const REQUIRED_SYNTAX_KEYS: [&str; 37] = [
     "constant.numeric.exponential",
     "constant.language",
     "constant.language.boolean",
+    "constant.other",
     "constant.character",
     "constant.character.escape",
     "constant.character.entity",
@@ -28,17 +38,44 @@ const REQUIRED_SYNTAX_KEYS: [&str; 37] = [
     "entity.name.function",
     "entity.name.tag",
     "entity.name.variable",
+    "entity.name.type",
+    "entity.name.namespace",
+    "entity.name.section",
     "entity.other",
     "entity.other.attribute-name",
+    "entity.other.inherited-class",
     "keyword",
     "keyword.control",
     "keyword.declaration",
+    "keyword.operator",
+    "keyword.other",
+    "storage",
+    "storage.type",
+    "storage.modifier",
+    "support",
+    "support.function",
+    "support.class",
+    "support.type",
+    "support.constant",
+    "support.variable",
+    "variable",
+    "variable.parameter",
+    "variable.language",
+    "variable.function",
+    "punctuation",
+    "punctuation.accessor",
+    "punctuation.separator",
+    "punctuation.terminator",
     "markup",
     "markup.heading",
     "markup.bold",
     "markup.code",
     "markup.italic",
     "markup.quote",
+    "markup.underline",
+    "markup.list",
+    "markup.link",
+    "markup.raw",
     "diff",
     "diff.added",
     "diff.changed",
@@ -51,10 +88,17 @@ pub enum SyntaxKey {
     Comment,
     CommentLine,
     CommentBlock,
+    Invalid,
+    InvalidDeprecated,
+    InvalidIllegal,
     String,
     StringQuoted,
+    StringQuotedSingle,
+    StringQuotedDouble,
     StringRegexp,
     StringTemplate,
+    StringInterpolated,
+    StringUnquoted,
     Constant,
     ConstantNumeric,
     ConstantNumericInteger,
@@ -63,6 +107,7 @@ pub enum SyntaxKey {
     ConstantNumericExponential,
     ConstantLanguage,
     ConstantLanguageBoolean,
+    ConstantOther,
     ConstantCharacter,
     ConstantCharacterEscape,
     ConstantCharacterEntity,
@@ -72,17 +117,44 @@ pub enum SyntaxKey {
     EntityNameFunction,
     EntityNameTag,
     EntityNameVariable,
+    EntityNameType,
+    EntityNameNamespace,
+    EntityNameSection,
     EntityOther,
     EntityOtherAttributeName,
+    EntityOtherInheritedClass,
     Keyword,
     KeywordControl,
     KeywordDeclaration,
+    KeywordOperator,
+    KeywordOther,
+    Storage,
+    StorageType,
+    StorageModifier,
+    Support,
+    SupportFunction,
+    SupportClass,
+    SupportType,
+    SupportConstant,
+    SupportVariable,
+    Variable,
+    VariableParameter,
+    VariableLanguage,
+    VariableFunction,
+    Punctuation,
+    PunctuationAccessor,
+    PunctuationSeparator,
+    PunctuationTerminator,
     Markup,
     MarkupHeading,
     MarkupBold,
     MarkupCode,
     MarkupItalic,
     MarkupQuote,
+    MarkupUnderline,
+    MarkupList,
+    MarkupLink,
+    MarkupRaw,
     Diff,
     DiffAdded,
     DiffChanged,
@@ -95,10 +167,17 @@ impl SyntaxKey {
             Self::Comment => "comment",
             Self::CommentLine => "comment.block",
             Self::CommentBlock => "comment.line",
+            Self::Invalid => "invalid",
+            Self::InvalidDeprecated => "invalid.deprecated",
+            Self::InvalidIllegal => "invalid.illegal",
             Self::String => "string",
             Self::StringQuoted => "string.quoted",
+            Self::StringQuotedSingle => "string.quoted.single",
+            Self::StringQuotedDouble => "string.quoted.double",
             Self::StringRegexp => "string.regexp",
             Self::StringTemplate => "string.template",
+            Self::StringInterpolated => "string.interpolated",
+            Self::StringUnquoted => "string.unquoted",
             Self::Constant => "constant",
             Self::ConstantNumeric => "constant.numeric",
             Self::ConstantNumericInteger => "constant.numeric.integer",
@@ -107,6 +186,7 @@ impl SyntaxKey {
             Self::ConstantNumericExponential => "constant.numeric.exponential",
             Self::ConstantLanguage => "constant.language",
             Self::ConstantLanguageBoolean => "constant.language.boolean",
+            Self::ConstantOther => "constant.other",
             Self::ConstantCharacter => "constant.character",
             Self::ConstantCharacterEscape => "constant.character.escape",
             Self::ConstantCharacterEntity => "constant.character.entity",
@@ -116,17 +196,44 @@ impl SyntaxKey {
             Self::EntityNameFunction => "entity.name.function",
             Self::EntityNameTag => "entity.name.tag",
             Self::EntityNameVariable => "entity.name.variable",
+            Self::EntityNameType => "entity.name.type",
+            Self::EntityNameNamespace => "entity.name.namespace",
+            Self::EntityNameSection => "entity.name.section",
             Self::EntityOther => "entity.other",
             Self::EntityOtherAttributeName => "entity.other.attribute-name",
+            Self::EntityOtherInheritedClass => "entity.other.inherited-class",
             Self::Keyword => "keyword",
             Self::KeywordControl => "keyword.control",
             Self::KeywordDeclaration => "keyword.declaration",
+            Self::KeywordOperator => "keyword.operator",
+            Self::KeywordOther => "keyword.other",
+            Self::Storage => "storage",
+            Self::StorageType => "storage.type",
+            Self::StorageModifier => "storage.modifier",
+            Self::Support => "support",
+            Self::SupportFunction => "support.function",
+            Self::SupportClass => "support.class",
+            Self::SupportType => "support.type",
+            Self::SupportConstant => "support.constant",
+            Self::SupportVariable => "support.variable",
+            Self::Variable => "variable",
+            Self::VariableParameter => "variable.parameter",
+            Self::VariableLanguage => "variable.language",
+            Self::VariableFunction => "variable.function",
+            Self::Punctuation => "punctuation",
+            Self::PunctuationAccessor => "punctuation.accessor",
+            Self::PunctuationSeparator => "punctuation.separator",
+            Self::PunctuationTerminator => "punctuation.terminator",
             Self::Markup => "markup",
             Self::MarkupHeading => "markup.heading",
             Self::MarkupBold => "markup.bold",
             Self::MarkupCode => "markup.code",
             Self::MarkupItalic => "markup.italic",
             Self::MarkupQuote => "markup.quote",
+            Self::MarkupUnderline => "markup.underline",
+            Self::MarkupList => "markup.list",
+            Self::MarkupLink => "markup.link",
+            Self::MarkupRaw => "markup.raw",
             Self::Diff => "diff",
             Self::DiffAdded => "diff.added",
             Self::DiffChanged => "diff.changed",
@@ -137,10 +244,19 @@ impl SyntaxKey {
     pub const fn variants() -> &'static [Self] {
         &[
             Self::Comment,
+            Self::CommentLine,
+            Self::CommentBlock,
+            Self::Invalid,
+            Self::InvalidDeprecated,
+            Self::InvalidIllegal,
             Self::String,
             Self::StringQuoted,
+            Self::StringQuotedSingle,
+            Self::StringQuotedDouble,
             Self::StringRegexp,
             Self::StringTemplate,
+            Self::StringInterpolated,
+            Self::StringUnquoted,
             Self::Constant,
             Self::ConstantNumeric,
             Self::ConstantNumericInteger,
@@ -149,6 +265,7 @@ impl SyntaxKey {
             Self::ConstantNumericExponential,
             Self::ConstantLanguage,
             Self::ConstantLanguageBoolean,
+            Self::ConstantOther,
             Self::ConstantCharacter,
             Self::ConstantCharacterEscape,
             Self::ConstantCharacterEntity,
@@ -158,17 +275,44 @@ impl SyntaxKey {
             Self::EntityNameFunction,
             Self::EntityNameTag,
             Self::EntityNameVariable,
+            Self::EntityNameType,
+            Self::EntityNameNamespace,
+            Self::EntityNameSection,
             Self::EntityOther,
             Self::EntityOtherAttributeName,
+            Self::EntityOtherInheritedClass,
             Self::Keyword,
             Self::KeywordControl,
             Self::KeywordDeclaration,
+            Self::KeywordOperator,
+            Self::KeywordOther,
+            Self::Storage,
+            Self::StorageType,
+            Self::StorageModifier,
+            Self::Support,
+            Self::SupportFunction,
+            Self::SupportClass,
+            Self::SupportType,
+            Self::SupportConstant,
+            Self::SupportVariable,
+            Self::Variable,
+            Self::VariableParameter,
+            Self::VariableLanguage,
+            Self::VariableFunction,
+            Self::Punctuation,
+            Self::PunctuationAccessor,
+            Self::PunctuationSeparator,
+            Self::PunctuationTerminator,
             Self::Markup,
             Self::MarkupHeading,
             Self::MarkupBold,
             Self::MarkupCode,
             Self::MarkupItalic,
             Self::MarkupQuote,
+            Self::MarkupUnderline,
+            Self::MarkupList,
+            Self::MarkupLink,
+            Self::MarkupRaw,
             Self::Diff,
             Self::DiffAdded,
             Self::DiffChanged,
@@ -210,7 +354,9 @@ impl Syntax {
                 double: string_normal.clone(),
             },
             regexp: palette.cyan_normal.clone(),
-            template: palette.orange_normal.clone(),
+            template: string_normal.clone(),
+            interpolated: string_normal.clone(),
+            unquoted: string_normal.clone(),
             default: string_normal,
         };
         let syntax_constant = SyntaxConstant {
@@ -230,6 +376,7 @@ impl Syntax {
                 escape: constant_normal.clone(),
                 entity: constant_normal.clone(),
             },
+            other: constant_normal.clone(),
             default: constant_normal,
         };
         let syntax_entity = SyntaxEntity {
@@ -239,17 +386,53 @@ impl Syntax {
                 function: palette.blue_normal.clone(),
                 tag: entity_normal.clone(),
                 variable: entity_normal.clone(),
+                r#type: entity_normal.clone(),
+                namespace: entity_normal.clone(),
+                section: palette.cyan_normal.clone(),
             },
             other: SyntaxEntityOther {
                 default: entity_normal.clone(),
                 attribute_name: palette.magenta_normal.clone(),
+                inherited_class: entity_normal.clone(),
             },
             default: entity_normal,
         };
         let syntax_keyword = SyntaxKeyword {
             control: keyword_normal.clone(),
             declaration: keyword_normal.clone(),
-            default: keyword_normal,
+            operator: keyword_normal.clone(),
+            other: keyword_normal.clone(),
+            default: keyword_normal.clone(),
+        };
+        let syntax_storage = SyntaxStorage {
+            default: keyword_normal.clone(),
+            r#type: keyword_normal.clone(),
+            modifier: keyword_normal.clone(),
+        };
+        let syntax_support = SyntaxSupport {
+            default: palette.blue_normal.clone(),
+            function: palette.blue_normal.clone(),
+            class: palette.blue_normal.clone(),
+            r#type: palette.blue_normal.clone(),
+            constant: palette.magenta_normal.clone(),
+            variable: palette.cyan_normal.clone(),
+        };
+        let syntax_variable = SyntaxVariable {
+            default: variable_normal.clone(),
+            parameter: palette.cyan_bright.clone(),
+            language: palette.magenta_normal.clone(),
+            function: palette.cyan_normal.clone(),
+        };
+        let syntax_punctuation = SyntaxPunctuation {
+            default: palette.gray_dim.clone(),
+            accessor: palette.gray_bright.clone(),
+            separator: palette.gray_dim.clone(),
+            terminator: palette.gray_dim.clone(),
+        };
+        let syntax_invalid = SyntaxInvalid {
+            default: palette.red_bright.clone(),
+            deprecated: palette.yellow_bright.clone(),
+            illegal: palette.red_bright.clone(),
         };
         let syntax_markup = SyntaxMarkup {
             heading: markup_normal.clone(),
@@ -257,6 +440,10 @@ impl Syntax {
             code: markup_normal.clone(),
             italic: markup_normal.clone(),
             quote: markup_normal.clone(),
+            underline: markup_normal.clone(),
+            list: markup_normal.clone(),
+            link: markup_normal.clone(),
+            raw: markup_normal.clone(),
             default: markup_normal,
         };
         let syntax_diff = SyntaxDiff {
@@ -268,10 +455,15 @@ impl Syntax {
 
         Self {
             comment: syntax_comment,
+            invalid: syntax_invalid,
             string: syntax_string,
             constant: syntax_constant,
             entity: syntax_entity,
             keyword: syntax_keyword,
+            storage: syntax_storage,
+            support: syntax_support,
+            variable: syntax_variable,
+            punctuation: syntax_punctuation,
             markup: syntax_markup,
             diff: syntax_diff,
         }
@@ -290,6 +482,19 @@ impl Syntax {
                 basic.string_template.as_deref(),
                 basic.string.as_deref(),
                 &default_syntax.string.template,
+            )?,
+        };
+        let invalid = SyntaxInvalid {
+            default: parse_or_default(basic.invalid.as_deref(), &default_syntax.invalid.default)?,
+            deprecated: parse_or_inherit(
+                basic.invalid_deprecated.as_deref(),
+                basic.invalid.as_deref(),
+                &default_syntax.invalid.deprecated,
+            )?,
+            illegal: parse_or_inherit(
+                basic.invalid_illegal.as_deref(),
+                basic.invalid.as_deref(),
+                &default_syntax.invalid.illegal,
             )?,
         };
         let string = SyntaxString {
@@ -320,6 +525,16 @@ impl Syntax {
                 basic.string_template.as_deref(),
                 basic.string.as_deref(),
                 &default_syntax.string.template,
+            )?,
+            interpolated: parse_or_inherit(
+                basic.string_interpolated.as_deref(),
+                basic.string.as_deref(),
+                &default_syntax.string.interpolated,
+            )?,
+            unquoted: parse_or_inherit(
+                basic.string_unquoted.as_deref(),
+                basic.string.as_deref(),
+                &default_syntax.string.unquoted,
             )?,
         };
         let constant = SyntaxConstant {
@@ -380,6 +595,11 @@ impl Syntax {
                     &default_syntax.constant.character.entity,
                 )?,
             },
+            other: parse_or_inherit(
+                basic.constant_other.as_deref(),
+                basic.constant.as_deref(),
+                &default_syntax.constant.other,
+            )?,
         };
         let entity = SyntaxEntity {
             default: parse_or_inherit(
@@ -413,6 +633,21 @@ impl Syntax {
                     basic.entity_name.as_deref(),
                     &default_syntax.entity.name.variable,
                 )?,
+                r#type: parse_or_inherit(
+                    basic.entity_name_type.as_deref(),
+                    basic.entity_name.as_deref(),
+                    &default_syntax.entity.name.r#type,
+                )?,
+                namespace: parse_or_inherit(
+                    basic.entity_name_namespace.as_deref(),
+                    basic.entity_name.as_deref(),
+                    &default_syntax.entity.name.namespace,
+                )?,
+                section: parse_or_inherit(
+                    basic.entity_name_section.as_deref(),
+                    basic.entity_name.as_deref(),
+                    &default_syntax.entity.name.section,
+                )?,
             },
             other: SyntaxEntityOther {
                 default: parse_or_inherit(
@@ -423,6 +658,11 @@ impl Syntax {
                 attribute_name: parse_or_default(
                     basic.entity_other_attribute_name.as_deref(),
                     &default_syntax.entity.other.attribute_name,
+                )?,
+                inherited_class: parse_or_inherit(
+                    basic.entity_other_inherited_class.as_deref(),
+                    basic.entity_other.as_deref(),
+                    &default_syntax.entity.other.inherited_class,
                 )?,
             },
         };
@@ -437,6 +677,96 @@ impl Syntax {
                 basic.keyword_declaration.as_deref(),
                 basic.keyword.as_deref(),
                 &default_syntax.keyword.declaration,
+            )?,
+            operator: parse_or_inherit(
+                basic.keyword_operator.as_deref(),
+                basic.keyword.as_deref(),
+                &default_syntax.keyword.operator,
+            )?,
+            other: parse_or_inherit(
+                basic.keyword_other.as_deref(),
+                basic.keyword.as_deref(),
+                &default_syntax.keyword.other,
+            )?,
+        };
+        let storage = SyntaxStorage {
+            default: parse_or_default(basic.storage.as_deref(), &default_syntax.storage.default)?,
+            r#type: parse_or_inherit(
+                basic.storage_type.as_deref(),
+                basic.storage.as_deref(),
+                &default_syntax.storage.r#type,
+            )?,
+            modifier: parse_or_inherit(
+                basic.storage_modifier.as_deref(),
+                basic.storage.as_deref(),
+                &default_syntax.storage.modifier,
+            )?,
+        };
+        let support = SyntaxSupport {
+            default: parse_or_default(basic.support.as_deref(), &default_syntax.support.default)?,
+            function: parse_or_inherit(
+                basic.support_function.as_deref(),
+                basic.support.as_deref(),
+                &default_syntax.support.function,
+            )?,
+            class: parse_or_inherit(
+                basic.support_class.as_deref(),
+                basic.support.as_deref(),
+                &default_syntax.support.class,
+            )?,
+            r#type: parse_or_inherit(
+                basic.support_type.as_deref(),
+                basic.support.as_deref(),
+                &default_syntax.support.r#type,
+            )?,
+            constant: parse_or_inherit(
+                basic.support_constant.as_deref(),
+                basic.support.as_deref(),
+                &default_syntax.support.constant,
+            )?,
+            variable: parse_or_inherit(
+                basic.support_variable.as_deref(),
+                basic.support.as_deref(),
+                &default_syntax.support.variable,
+            )?,
+        };
+        let variable = SyntaxVariable {
+            default: parse_or_default(basic.variable.as_deref(), &default_syntax.variable.default)?,
+            parameter: parse_or_inherit(
+                basic.variable_parameter.as_deref(),
+                basic.variable.as_deref(),
+                &default_syntax.variable.parameter,
+            )?,
+            language: parse_or_inherit(
+                basic.variable_language.as_deref(),
+                basic.variable.as_deref(),
+                &default_syntax.variable.language,
+            )?,
+            function: parse_or_inherit(
+                basic.variable_function.as_deref(),
+                basic.variable.as_deref(),
+                &default_syntax.variable.function,
+            )?,
+        };
+        let punctuation = SyntaxPunctuation {
+            default: parse_or_default(
+                basic.punctuation.as_deref(),
+                &default_syntax.punctuation.default,
+            )?,
+            accessor: parse_or_inherit(
+                basic.punctuation_accessor.as_deref(),
+                basic.punctuation.as_deref(),
+                &default_syntax.punctuation.accessor,
+            )?,
+            separator: parse_or_inherit(
+                basic.punctuation_separator.as_deref(),
+                basic.punctuation.as_deref(),
+                &default_syntax.punctuation.separator,
+            )?,
+            terminator: parse_or_inherit(
+                basic.punctuation_terminator.as_deref(),
+                basic.punctuation.as_deref(),
+                &default_syntax.punctuation.terminator,
             )?,
         };
         let markup = SyntaxMarkup {
@@ -466,6 +796,26 @@ impl Syntax {
                 basic.markup.as_deref(),
                 &default_syntax.markup.quote,
             )?,
+            underline: parse_or_inherit(
+                basic.markup_underline.as_deref(),
+                basic.markup.as_deref(),
+                &default_syntax.markup.underline,
+            )?,
+            list: parse_or_inherit(
+                basic.markup_list.as_deref(),
+                basic.markup.as_deref(),
+                &default_syntax.markup.list,
+            )?,
+            link: parse_or_inherit(
+                basic.markup_link.as_deref(),
+                basic.markup.as_deref(),
+                &default_syntax.markup.link,
+            )?,
+            raw: parse_or_inherit(
+                basic.markup_raw.as_deref(),
+                basic.markup.as_deref(),
+                &default_syntax.markup.raw,
+            )?,
         };
         let diff = SyntaxDiff {
             default: parse_or_default(basic.diff.as_deref(), &default_syntax.diff.default)?,
@@ -476,10 +826,15 @@ impl Syntax {
 
         Ok(Self {
             comment,
+            invalid,
             string,
             constant,
             entity,
             keyword,
+            storage,
+            support,
+            variable,
+            punctuation,
             markup,
             diff,
         })
@@ -495,10 +850,17 @@ impl Syntax {
             SyntaxKey::Comment => &self.comment.default,
             SyntaxKey::CommentLine => &self.comment.line,
             SyntaxKey::CommentBlock => &self.comment.block,
+            SyntaxKey::Invalid => &self.invalid.default,
+            SyntaxKey::InvalidDeprecated => &self.invalid.deprecated,
+            SyntaxKey::InvalidIllegal => &self.invalid.illegal,
             SyntaxKey::String => &self.string.default,
             SyntaxKey::StringQuoted => &self.string.quoted.default,
+            SyntaxKey::StringQuotedSingle => &self.string.quoted.single,
+            SyntaxKey::StringQuotedDouble => &self.string.quoted.double,
             SyntaxKey::StringRegexp => &self.string.regexp,
             SyntaxKey::StringTemplate => &self.string.template,
+            SyntaxKey::StringInterpolated => &self.string.interpolated,
+            SyntaxKey::StringUnquoted => &self.string.unquoted,
             SyntaxKey::Constant => &self.constant.default,
             SyntaxKey::ConstantNumeric => &self.constant.numeric.default,
             SyntaxKey::ConstantNumericInteger => &self.constant.numeric.integer,
@@ -507,6 +869,7 @@ impl Syntax {
             SyntaxKey::ConstantNumericExponential => &self.constant.numeric.exponential,
             SyntaxKey::ConstantLanguage => &self.constant.language.default,
             SyntaxKey::ConstantLanguageBoolean => &self.constant.language.boolean,
+            SyntaxKey::ConstantOther => &self.constant.other,
             SyntaxKey::ConstantCharacter => &self.constant.character.default,
             SyntaxKey::ConstantCharacterEscape => &self.constant.character.escape,
             SyntaxKey::ConstantCharacterEntity => &self.constant.character.entity,
@@ -516,17 +879,44 @@ impl Syntax {
             SyntaxKey::EntityNameFunction => &self.entity.name.function,
             SyntaxKey::EntityNameTag => &self.entity.name.tag,
             SyntaxKey::EntityNameVariable => &self.entity.name.variable,
+            SyntaxKey::EntityNameType => &self.entity.name.r#type,
+            SyntaxKey::EntityNameNamespace => &self.entity.name.namespace,
+            SyntaxKey::EntityNameSection => &self.entity.name.section,
             SyntaxKey::EntityOther => &self.entity.other.default,
             SyntaxKey::EntityOtherAttributeName => &self.entity.other.attribute_name,
+            SyntaxKey::EntityOtherInheritedClass => &self.entity.other.inherited_class,
             SyntaxKey::Keyword => &self.keyword.default,
             SyntaxKey::KeywordControl => &self.keyword.control,
             SyntaxKey::KeywordDeclaration => &self.keyword.declaration,
+            SyntaxKey::KeywordOperator => &self.keyword.operator,
+            SyntaxKey::KeywordOther => &self.keyword.other,
+            SyntaxKey::Storage => &self.storage.default,
+            SyntaxKey::StorageType => &self.storage.r#type,
+            SyntaxKey::StorageModifier => &self.storage.modifier,
+            SyntaxKey::Support => &self.support.default,
+            SyntaxKey::SupportFunction => &self.support.function,
+            SyntaxKey::SupportClass => &self.support.class,
+            SyntaxKey::SupportType => &self.support.r#type,
+            SyntaxKey::SupportConstant => &self.support.constant,
+            SyntaxKey::SupportVariable => &self.support.variable,
+            SyntaxKey::Variable => &self.variable.default,
+            SyntaxKey::VariableParameter => &self.variable.parameter,
+            SyntaxKey::VariableLanguage => &self.variable.language,
+            SyntaxKey::VariableFunction => &self.variable.function,
+            SyntaxKey::Punctuation => &self.punctuation.default,
+            SyntaxKey::PunctuationAccessor => &self.punctuation.accessor,
+            SyntaxKey::PunctuationSeparator => &self.punctuation.separator,
+            SyntaxKey::PunctuationTerminator => &self.punctuation.terminator,
             SyntaxKey::Markup => &self.markup.default,
             SyntaxKey::MarkupHeading => &self.markup.heading,
             SyntaxKey::MarkupBold => &self.markup.bold,
             SyntaxKey::MarkupCode => &self.markup.code,
             SyntaxKey::MarkupItalic => &self.markup.italic,
             SyntaxKey::MarkupQuote => &self.markup.quote,
+            SyntaxKey::MarkupUnderline => &self.markup.underline,
+            SyntaxKey::MarkupList => &self.markup.list,
+            SyntaxKey::MarkupLink => &self.markup.link,
+            SyntaxKey::MarkupRaw => &self.markup.raw,
             SyntaxKey::Diff => &self.diff.default,
             SyntaxKey::DiffAdded => &self.diff.added,
             SyntaxKey::DiffChanged => &self.diff.changed,
@@ -548,10 +938,15 @@ impl fmt::Display for Syntax {
 #[derive(Debug, Clone, Serialize)]
 pub struct Syntax {
     pub comment: SyntaxComment,
+    pub invalid: SyntaxInvalid,
     pub string: SyntaxString,
     pub constant: SyntaxConstant,
     pub entity: SyntaxEntity,
     pub keyword: SyntaxKeyword,
+    pub storage: SyntaxStorage,
+    pub support: SyntaxSupport,
+    pub variable: SyntaxVariable,
+    pub punctuation: SyntaxPunctuation,
     pub markup: SyntaxMarkup,
     pub diff: SyntaxDiff,
 }
@@ -576,6 +971,8 @@ pub struct SyntaxString {
     pub quoted: SyntaxStringQuoted,
     pub regexp: Color,
     pub template: Color,
+    pub interpolated: Color,
+    pub unquoted: Color,
 }
 
 #[derive(Debug, Clone, Serialize)]
@@ -584,6 +981,7 @@ pub struct SyntaxConstant {
     pub numeric: SyntaxConstantNumeric,
     pub language: SyntaxConstantLanguage,
     pub character: SyntaxConstantCharacter,
+    pub other: Color,
 }
 
 #[derive(Debug, Clone, Serialize)]
@@ -619,6 +1017,8 @@ pub struct SyntaxEntity {
 pub struct SyntaxVariable {
     pub default: Color,
     pub parameter: Color,
+    pub language: Color,
+    pub function: Color,
 }
 
 #[derive(Debug, Clone, Serialize)]
@@ -628,6 +1028,10 @@ pub struct SyntaxEntityName {
     pub function: Color,
     pub tag: Color,
     pub variable: Color,
+    #[serde(rename = "type")]
+    pub r#type: Color,
+    pub namespace: Color,
+    pub section: Color,
 }
 
 #[derive(Debug, Clone, Serialize)]
@@ -635,6 +1039,8 @@ pub struct SyntaxEntityOther {
     pub default: Color,
     #[serde(rename = "attribute-name")]
     pub attribute_name: Color,
+    #[serde(rename = "inherited-class")]
+    pub inherited_class: Color,
 }
 
 #[derive(Debug, Clone, Serialize)]
@@ -642,6 +1048,42 @@ pub struct SyntaxKeyword {
     pub default: Color,
     pub control: Color,
     pub declaration: Color,
+    pub operator: Color,
+    pub other: Color,
+}
+
+#[derive(Debug, Clone, Serialize)]
+pub struct SyntaxStorage {
+    pub default: Color,
+    #[serde(rename = "type")]
+    pub r#type: Color,
+    pub modifier: Color,
+}
+
+#[derive(Debug, Clone, Serialize)]
+pub struct SyntaxSupport {
+    pub default: Color,
+    pub function: Color,
+    pub class: Color,
+    #[serde(rename = "type")]
+    pub r#type: Color,
+    pub constant: Color,
+    pub variable: Color,
+}
+
+#[derive(Debug, Clone, Serialize)]
+pub struct SyntaxPunctuation {
+    pub default: Color,
+    pub accessor: Color,
+    pub separator: Color,
+    pub terminator: Color,
+}
+
+#[derive(Debug, Clone, Serialize)]
+pub struct SyntaxInvalid {
+    pub default: Color,
+    pub deprecated: Color,
+    pub illegal: Color,
 }
 
 #[derive(Debug, Clone, Serialize)]
@@ -660,6 +1102,10 @@ pub struct SyntaxMarkup {
     pub code: Color,
     pub italic: Color,
     pub quote: Color,
+    pub underline: Color,
+    pub list: Color,
+    pub link: Color,
+    pub raw: Color,
 }
 
 #[derive(Error, Debug)]

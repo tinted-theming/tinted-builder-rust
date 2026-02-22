@@ -153,10 +153,19 @@ color code) value.
 | Theming Property                    | Example Context | Purpose |
 | ----------------------------------- | --------------- | ------- |
 | syntax.comment                      | `// Comment` → `// Comment` | Comments in the code, usually for non-executable text providing context or explanation. |
+| syntax.comment.line                 | `// Comment` → `//` | Line comment scopes. |
+| syntax.comment.block                | `/* comment */` → `/* */` | Block comment scopes. |
+| syntax.invalid                      | `@` in invalid context → `@` | Invalid or erroneous constructs. |
+| syntax.invalid.deprecated           | Deprecated API use → token | Deprecated constructs. |
+| syntax.invalid.illegal              | Illegal token → token | Illegal constructs that should not appear. |
 | syntax.string                       | `"Hello world"` → `"Hello world"` | All string related values. |
 | syntax.string.quoted                | `"Hello world"` → `"Hello world"` | Quoted strings, such as text enclosed in double or single quotes. |
+| syntax.string.quoted.single         | `'hello'` → `'hello'` | Single-quoted strings. |
+| syntax.string.quoted.double         | `"hello"` → `"hello"` | Double-quoted strings. |
 | syntax.string.regexp                | `/^Hello/g` → `/^Hello/g` | Regular expressions or patterns used to match character combinations in strings. |
 | syntax.string.template              | `` `Hello ${name}` `` → `` `Hello ${name}` `` | Template literals and interpolations. |
+| syntax.string.interpolated          | `` `Hello ${name}` `` → `${name}` | Interpolated/embedded portions inside strings. |
+| syntax.string.unquoted              | `hello` → `hello` | Unquoted string content in languages that allow it. |
 | syntax.constant                     | `null` → `null` | Parent of all literal constants (booleans, numbers, nulls, characters, etc.). |
 | syntax.constant.numeric             | `42` → `42` | Parent of all numeric constants. |
 | syntax.constant.numeric.integer     | `12` → `12` | Integer values. |
@@ -167,20 +176,48 @@ color code) value.
 | syntax.constant.character           | `'\\n'` → `'\\n'` | Parent of character literal constants (e.g., `'A'`, `'\\n'`, `'\\t'`). |
 | syntax.constant.character.escape    | `'What\'s that?'` → `\'` | Escaped characters inside strings. |
 | syntax.constant.character.entity    | `Foo&apos;s` → `&apos;` | Special character entities (HTML/XML). |
+| syntax.constant.other               | Misc literal → token | Other constants not covered by numeric/language/character. |
 | syntax.entity.name                  | `class Person {}` → `Person` | Parent of all entity names (class, function, tag, variable). |
 | syntax.entity.name.class            | `class Person {}` → `Person` | Class names in object-oriented languages. |
 | syntax.entity.name.function         | `function greet() {}` → `greet` | Function names in code. |
 | syntax.entity.name.tag              | `<div>Hello</div>` → `div` | HTML or XML tag names. |
 | syntax.entity.name.variable         | `let username = "foo";` → `username` | Variable identifiers in code. |
+| syntax.entity.name.type             | `List<String>` → `List` | Type names. |
+| syntax.entity.name.namespace        | `MyApp.Utils.foo` → `MyApp` | Namespace/package/module names. |
+| syntax.entity.name.section          | Markdown heading → `Heading` | Section or heading names. |
 | syntax.entity.other.attribute-name  | `<img src="logo.png">` → `src` | Attribute names, commonly used in HTML, XML, or other markup languages. |
+| syntax.entity.other.inherited-class | `class B extends A` → `A` | Inherited/extended class names. |
 | syntax.keyword                      | `function foo()` → `function` | Language keywords (e.g., function, if, const). Parent of keyword categories. |
 | syntax.keyword.control              | `if (x > 0)` → `if` | Control flow keywords. |
 | syntax.keyword.declaration          | `const age = 42;` → `const` | Declaration keywords. |
+| syntax.keyword.operator             | `a + b` → `+` | Operator keywords/symbolic operators that tokenize as keywords. |
+| syntax.keyword.other                | Keyword not covered by other categories. |
+| syntax.storage                      | `static int` → `static` | Storage-related qualifiers. |
+| syntax.storage.type                 | `static int` → `int` | Storage type qualifiers. |
+| syntax.storage.modifier             | `public class` → `public` | Storage modifiers/qualifiers. |
+| syntax.support                      | `printf` → `printf` | Library/framework-provided identifiers. |
+| syntax.support.function             | `printf` → `printf` | Library/framework functions. |
+| syntax.support.class                | `String` → `String` | Library/framework classes. |
+| syntax.support.type                 | `HTMLElement` → `HTMLElement` | Library/framework types. |
+| syntax.support.constant             | `PI` → `PI` | Library/framework constants. |
+| syntax.support.variable             | `$@special` → `$@special` | Library/framework variables. |
+| syntax.variable                     | `let x` → `x` | Variables. |
+| syntax.variable.parameter           | `function f(x)` → `x` | Function/method parameters. |
+| syntax.variable.language            | `this`/`self` → `this` | Language-provided variables. |
+| syntax.variable.function            | `fn foo() {}` → `foo` | Function variables/identifiers. |
+| syntax.punctuation                  | `a, b;` → `,` `;` | Punctuation characters. |
+| syntax.punctuation.accessor         | `obj.prop` → `.` | Accessor punctuation. |
+| syntax.punctuation.separator        | `a, b` → `,` | List/argument separators. |
+| syntax.punctuation.terminator       | `let x = 1;` → `;` | Statement terminators. |
 | syntax.markup                       | `<blockquote>Text</blockquote>` → `Text` | Parent of all markup-styled content. |
 | syntax.markup.bold                  | `<strong>Foo Bar</strong>` → `Foo Bar` | Bold text. |
 | syntax.markup.code                  | `<code>inline</code>` → `inline` | Inline/code blocks. |
 | syntax.markup.italic                | `<em>note</em>` → `note` | Italic text. |
 | syntax.markup.quote                 | `<blockquote>Be yourself</blockquote>` → `Be yourself` | Quoted text. |
+| syntax.markup.underline             | `<u>note</u>` → `note` | Underlined text. |
+| syntax.markup.list                  | `- item` → `-` | List markers. |
+| syntax.markup.link                  | `[text](url)` → `text` | Link text. |
+| syntax.markup.raw                   | "```code```" → `code` | Raw blocks/inline code. |
 | syntax.diff.added                   | `+ const newFeature = true;` → `+ const newFeature = true;` | Added lines in a diff view, typically representing new code or content. |
 | syntax.diff.changed                 | `~ const version = "0.1.0";` → `~ const version = "0.1.0";` | Changed lines in a diff view, typically representing modified content. |
 | syntax.diff.deleted                 | `- const oldFeature = false;` → `- const oldFeature = false;` | Deleted lines in a diff view, typically representing removed code or content. |
