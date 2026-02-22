@@ -226,9 +226,17 @@ pub struct BasicPalette {
 #[serde(rename_all = "kebab-case")]
 pub struct BasicSyntax {
     pub comment: Option<String>,
+    #[serde(rename = "comment.line")]
+    pub comment_line: Option<String>,
+    #[serde(rename = "comment.block")]
+    pub comment_block: Option<String>,
     pub string: Option<String>,
     #[serde(rename = "string.quoted")]
     pub string_quoted: Option<String>,
+    #[serde(rename = "string.single")]
+    pub string_quoted_single: Option<String>,
+    #[serde(rename = "string.double")]
+    pub string_quoted_double: Option<String>,
     #[serde(rename = "string.regexp")]
     pub string_regexp: Option<String>,
     #[serde(rename = "string.template")]
@@ -276,8 +284,8 @@ pub struct BasicSyntax {
     #[serde(rename = "keyword.declaration")]
     pub keyword_declaration: Option<String>,
     pub markup: Option<String>,
-    #[serde(rename = "markup.text")]
-    pub markup_text: Option<String>,
+    #[serde(rename = "markup.heading")]
+    pub markup_heading: Option<String>,
     #[serde(rename = "markup.bold")]
     pub markup_bold: Option<String>,
     #[serde(rename = "markup.code")]

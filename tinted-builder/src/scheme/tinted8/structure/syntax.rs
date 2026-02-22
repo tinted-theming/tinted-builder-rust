@@ -34,7 +34,7 @@ const REQUIRED_SYNTAX_KEYS: [&str; 37] = [
     "keyword.control",
     "keyword.declaration",
     "markup",
-    "markup.text",
+    "markup.heading",
     "markup.bold",
     "markup.code",
     "markup.italic",
@@ -49,6 +49,8 @@ const REQUIRED_SYNTAX_KEYS: [&str; 37] = [
 #[derive(Debug, Clone)]
 pub enum SyntaxKey {
     Comment,
+    CommentLine,
+    CommentBlock,
     String,
     StringQuoted,
     StringRegexp,
@@ -76,7 +78,7 @@ pub enum SyntaxKey {
     KeywordControl,
     KeywordDeclaration,
     Markup,
-    MarkupText,
+    MarkupHeading,
     MarkupBold,
     MarkupCode,
     MarkupItalic,
@@ -91,6 +93,8 @@ impl SyntaxKey {
     const fn as_str(&self) -> &str {
         match self {
             Self::Comment => "comment",
+            Self::CommentLine => "comment.block",
+            Self::CommentBlock => "comment.line",
             Self::String => "string",
             Self::StringQuoted => "string.quoted",
             Self::StringRegexp => "string.regexp",
@@ -118,7 +122,7 @@ impl SyntaxKey {
             Self::KeywordControl => "keyword.control",
             Self::KeywordDeclaration => "keyword.declaration",
             Self::Markup => "markup",
-            Self::MarkupText => "markup.text",
+            Self::MarkupHeading => "markup.heading",
             Self::MarkupBold => "markup.bold",
             Self::MarkupCode => "markup.code",
             Self::MarkupItalic => "markup.italic",
@@ -160,7 +164,7 @@ impl SyntaxKey {
             Self::KeywordControl,
             Self::KeywordDeclaration,
             Self::Markup,
-            Self::MarkupText,
+            Self::MarkupHeading,
             Self::MarkupBold,
             Self::MarkupCode,
             Self::MarkupItalic,
@@ -187,16 +191,26 @@ impl Syntax {
     ///
     /// These default colors are set according to tinted8 0.1.0 styling spec
     pub fn new(palette: &Palette) -> Self {
-        let string_normal = palette.green_normal.clone();
-        let constant_normal = palette.yellow_normal.clone();
-        let entity_normal = palette.yellow_normal.clone();
+        let string_normal = palette.yellow_normal.clone();
+        let constant_normal = palette.magenta_normal.clone();
+        let entity_normal = palette.white_normal.clone();
         let keyword_normal = palette.magenta_normal.clone();
         let markup_normal = palette.cyan_normal.clone();
-        let syntax_comment = palette.gray_dim.clone();
+        let variable_normal = palette.cyan_dim.clone();
+        let comment_normal = palette.gray_dim.clone();
+        let syntax_comment = SyntaxComment {
+            line: comment_normal.clone(),
+            block: comment_normal.clone(),
+            default: comment_normal,
+        };
         let syntax_string = SyntaxString {
-            quoted: string_normal.clone(),
-            regexp: string_normal.clone(),
-            template: string_normal.clone(),
+            quoted: SyntaxStringQuoted {
+                default: string_normal.clone(),
+                single: string_normal.clone(),
+                double: string_normal.clone(),
+            },
+            regexp: palette.cyan_normal.clone(),
+            template: palette.orange_normal.clone(),
             default: string_normal,
         };
         let syntax_constant = SyntaxConstant {
@@ -222,13 +236,13 @@ impl Syntax {
             name: SyntaxEntityName {
                 default: entity_normal.clone(),
                 class: entity_normal.clone(),
-                function: entity_normal.clone(),
+                function: palette.blue_normal.clone(),
                 tag: entity_normal.clone(),
                 variable: entity_normal.clone(),
             },
             other: SyntaxEntityOther {
                 default: entity_normal.clone(),
-                attribute_name: palette.yellow_bright.clone(),
+                attribute_name: palette.magenta_normal.clone(),
             },
             default: entity_normal,
         };
@@ -238,7 +252,7 @@ impl Syntax {
             default: keyword_normal,
         };
         let syntax_markup = SyntaxMarkup {
-            text: markup_normal.clone(),
+            heading: markup_normal.clone(),
             bold: markup_normal.clone(),
             code: markup_normal.clone(),
             italic: markup_normal.clone(),
@@ -265,14 +279,38 @@ impl Syntax {
     /// Tries to convert `BasicSyntax` (create after deserializing yaml) to Syntax
     pub fn try_from_basic(basic: &BasicSyntax, palette: &Palette) -> Result<Self, SyntaxError> {
         let default_syntax = Self::new(palette);
-        let comment = parse_or_default(basic.comment.as_deref(), &default_syntax.comment)?;
+        let comment = SyntaxComment {
+            default: parse_or_default(basic.string.as_deref(), &default_syntax.comment.default)?,
+            line: parse_or_inherit(
+                basic.comment_line.as_deref(),
+                basic.comment.as_deref(),
+                &default_syntax.comment.default,
+            )?,
+            block: parse_or_inherit(
+                basic.string_template.as_deref(),
+                basic.string.as_deref(),
+                &default_syntax.string.template,
+            )?,
+        };
         let string = SyntaxString {
             default: parse_or_default(basic.string.as_deref(), &default_syntax.string.default)?,
-            quoted: parse_or_inherit(
-                basic.string_quoted.as_deref(),
-                basic.string.as_deref(),
-                &default_syntax.string.quoted,
-            )?,
+            quoted: SyntaxStringQuoted {
+                default: parse_or_inherit(
+                    basic.string_quoted.as_deref(),
+                    basic.string.as_deref(),
+                    &default_syntax.string.quoted.default,
+                )?,
+                single: parse_or_inherit(
+                    basic.string_quoted_single.as_deref(),
+                    basic.string.as_deref(),
+                    &default_syntax.string.quoted.single,
+                )?,
+                double: parse_or_inherit(
+                    basic.string_quoted_double.as_deref(),
+                    basic.string.as_deref(),
+                    &default_syntax.string.quoted.double,
+                )?,
+            },
             regexp: parse_or_inherit(
                 basic.string_regexp.as_deref(),
                 basic.string.as_deref(),
@@ -403,10 +441,10 @@ impl Syntax {
         };
         let markup = SyntaxMarkup {
             default: parse_or_default(basic.markup.as_deref(), &default_syntax.markup.default)?,
-            text: parse_or_inherit(
-                basic.markup_text.as_deref(),
+            heading: parse_or_inherit(
+                basic.markup_heading.as_deref(),
                 basic.markup.as_deref(),
-                &default_syntax.markup.text,
+                &default_syntax.markup.heading,
             )?,
             bold: parse_or_inherit(
                 basic.markup_bold.as_deref(),
@@ -454,9 +492,11 @@ impl Syntax {
     // For Display trait
     pub const fn get_color(&self, key: &SyntaxKey) -> &Color {
         match key {
-            SyntaxKey::Comment => &self.comment,
+            SyntaxKey::Comment => &self.comment.default,
+            SyntaxKey::CommentLine => &self.comment.line,
+            SyntaxKey::CommentBlock => &self.comment.block,
             SyntaxKey::String => &self.string.default,
-            SyntaxKey::StringQuoted => &self.string.quoted,
+            SyntaxKey::StringQuoted => &self.string.quoted.default,
             SyntaxKey::StringRegexp => &self.string.regexp,
             SyntaxKey::StringTemplate => &self.string.template,
             SyntaxKey::Constant => &self.constant.default,
@@ -482,7 +522,7 @@ impl Syntax {
             SyntaxKey::KeywordControl => &self.keyword.control,
             SyntaxKey::KeywordDeclaration => &self.keyword.declaration,
             SyntaxKey::Markup => &self.markup.default,
-            SyntaxKey::MarkupText => &self.markup.text,
+            SyntaxKey::MarkupHeading => &self.markup.heading,
             SyntaxKey::MarkupBold => &self.markup.bold,
             SyntaxKey::MarkupCode => &self.markup.code,
             SyntaxKey::MarkupItalic => &self.markup.italic,
@@ -507,7 +547,7 @@ impl fmt::Display for Syntax {
 
 #[derive(Debug, Clone, Serialize)]
 pub struct Syntax {
-    pub comment: Color,
+    pub comment: SyntaxComment,
     pub string: SyntaxString,
     pub constant: SyntaxConstant,
     pub entity: SyntaxEntity,
@@ -517,9 +557,23 @@ pub struct Syntax {
 }
 
 #[derive(Debug, Clone, Serialize)]
+pub struct SyntaxStringQuoted {
+    pub default: Color,
+    pub single: Color,
+    pub double: Color,
+}
+
+#[derive(Debug, Clone, Serialize)]
+pub struct SyntaxComment {
+    pub default: Color,
+    pub line: Color,
+    pub block: Color,
+}
+
+#[derive(Debug, Clone, Serialize)]
 pub struct SyntaxString {
     pub default: Color,
-    pub quoted: Color,
+    pub quoted: SyntaxStringQuoted,
     pub regexp: Color,
     pub template: Color,
 }
@@ -562,6 +616,12 @@ pub struct SyntaxEntity {
 }
 
 #[derive(Debug, Clone, Serialize)]
+pub struct SyntaxVariable {
+    pub default: Color,
+    pub parameter: Color,
+}
+
+#[derive(Debug, Clone, Serialize)]
 pub struct SyntaxEntityName {
     pub default: Color,
     pub class: Color,
@@ -595,7 +655,7 @@ pub struct SyntaxDiff {
 #[derive(Debug, Clone, Serialize)]
 pub struct SyntaxMarkup {
     pub default: Color,
-    pub text: Color,
+    pub heading: Color,
     pub bold: Color,
     pub code: Color,
     pub italic: Color,

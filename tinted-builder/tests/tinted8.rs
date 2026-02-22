@@ -98,7 +98,7 @@ fn deserialize_syntax_overrides() -> Result<(), TintedBuilderError> {
 
     assert_eq!(scheme.syntax.comment.to_hex(), "888888");
     assert_eq!(scheme.syntax.string.default.to_hex(), "aabbcc");
-    assert_eq!(scheme.syntax.string.quoted.to_hex(), "ddeeff");
+    assert_eq!(scheme.syntax.string.quoted.default.to_hex(), "ddeeff");
     assert_eq!(scheme.syntax.constant.default.to_hex(), "112233");
     assert_eq!(scheme.syntax.keyword.default.to_hex(), "445566");
 
@@ -109,7 +109,7 @@ fn deserialize_syntax_overrides() -> Result<(), TintedBuilderError> {
 fn deserialize_syntax_inherits_from_parent() -> Result<(), TintedBuilderError> {
     let scheme: Tinted8Scheme = serde_yaml::from_str(SCHEME_WITH_SYNTAX)?;
 
-    assert_eq!(scheme.syntax.string.regexp.to_hex(), "aabbcc");
+    assert_eq!(scheme.syntax.string.default.to_hex(), "aabbcc");
     assert_eq!(scheme.syntax.string.template.to_hex(), "aabbcc");
     assert_eq!(scheme.syntax.keyword.control.to_hex(), "445566");
     assert_eq!(scheme.syntax.keyword.declaration.to_hex(), "445566");
