@@ -225,13 +225,27 @@ color code) value.
 | ui.background-dark           | Sidebar → background | Darker background areas, typically used for sidebars, footers, or other sections. |
 | ui.background-light          | Active tab → background | Lighter background areas, typically used for light modes or highlighting. |
 | ui.deprecated                | `<font color="red">Hello</font>` → `<font>` | Deprecated or outdated UI elements, signaling that they are no longer recommended. |
+| ui.accent                    | Focus rings / active border | Primary accent color for focus/active indications. |
+| ui.border                    | Panel/tab borders | Generic border/divider color. |
+| ui.cursor                    | Editor caret | The text cursor color in editors. |
 | ui.foreground                | Editor text → `"hello"` | General text in the user interface. |
 | ui.foreground-dark           | Sidebar file names → `filename.md` | Text in dark-themed UI areas or sections where a lighter font is needed. |
 | ui.foreground-light          | Active tab label → `main.js` | Light-colored text in the UI, often used in headings or highlighted sections. |
+| ui.gutter-background         | Editor gutter → background | Background color for the gutter/line number area. |
+| ui.gutter-foreground         | Editor gutter → line numbers | Foreground color for the gutter/line numbers. |
 | ui.line-background           | Active line highlight → background | The background of lines in the user interface, such as list items or code lines. |
-| ui.search-text               | Search results → result | Text in search results or highlighted search terms. |
+| ui.line-foreground           | Line info → text | Foreground for line area (e.g., line numbers). |
+| ui.link                      | UI links | Link and interactive text color in UI chrome. |
+| ui.search-background         | Search highlight → background | Background of highlighted search matches. |
+| ui.search-foreground         | Search highlight → text | Foreground of highlighted search matches. |
 | ui.selection-background      | Selected code → background | The background of selected items in the user interface (e.g., highlighted text or options). |
 | ui.selection-foreground      | Selected code → foreground | The foreground of selected items in the user interface (e.g., highlighted text or options). |
+| ui.selection-inactive-background | Unfocused selection → background | Selection background when the editor is unfocused. |
+| ui.status-error              | Status/error banners | Error status/badge color. |
+| ui.status-warning            | Status/warning banners | Warning status/badge color. |
+| ui.status-info               | Status/info banners | Information status/badge color. |
+| ui.tooltip-background        | Tooltip/hover → background | Background of tooltips and hover popovers. |
+| ui.tooltip-foreground        | Tooltip/hover → text | Foreground of tooltips and hover popovers. |
 
 The `syntax` properties were largely derived from [TextMate Theme structure].
 

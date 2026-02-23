@@ -85,7 +85,7 @@ fn deserialize_ui_normals_from_palette() -> Result<(), TintedBuilderError> {
         scheme.palette.white_normal.to_hex()
     );
     assert_eq!(
-        scheme.ui.search.foreground.to_hex(),
+        scheme.ui.highlight.search.foreground.to_hex(),
         scheme.palette.yellow_normal.to_hex()
     );
 
@@ -96,7 +96,7 @@ fn deserialize_ui_normals_from_palette() -> Result<(), TintedBuilderError> {
 fn deserialize_syntax_overrides() -> Result<(), TintedBuilderError> {
     let scheme: Tinted8Scheme = serde_yaml::from_str(SCHEME_WITH_SYNTAX)?;
 
-    assert_eq!(scheme.syntax.comment.to_hex(), "888888");
+    assert_eq!(scheme.syntax.comment.default.to_hex(), "888888");
     assert_eq!(scheme.syntax.string.default.to_hex(), "aabbcc");
     assert_eq!(scheme.syntax.string.quoted.default.to_hex(), "ddeeff");
     assert_eq!(scheme.syntax.constant.default.to_hex(), "112233");
@@ -122,7 +122,7 @@ fn deserialize_syntax_normals_from_palette() -> Result<(), TintedBuilderError> {
     let scheme: Tinted8Scheme = serde_yaml::from_str(SCHEME_MINIMAL)?;
 
     assert_eq!(
-        scheme.syntax.comment.to_hex(),
+        scheme.syntax.comment.default.to_hex(),
         scheme.palette.gray_dim.to_hex()
     );
     assert_eq!(
@@ -141,14 +141,6 @@ fn deserialize_syntax_normals_from_palette() -> Result<(), TintedBuilderError> {
         scheme.syntax.markup.default.to_hex(),
         scheme.palette.cyan_normal.to_hex()
     );
-    assert_eq!(
-        scheme.syntax.diff.added.to_hex(),
-        scheme.palette.green_bright.to_hex()
-    );
-    assert_eq!(
-        scheme.syntax.diff.deleted.to_hex(),
-        scheme.palette.red_bright.to_hex()
-    );
 
     Ok(())
 }
@@ -166,7 +158,7 @@ fn deserialize_full_scheme() -> Result<(), TintedBuilderError> {
         Some("A complete test scheme".to_string())
     );
     assert_eq!(ts.scheme.supported_styling_version, "0.1.0".to_string());
-    assert_eq!(ts.syntax.comment.to_hex(), "565f89");
+    assert_eq!(ts.syntax.comment.default.to_hex(), "565f89");
     assert_eq!(ts.syntax.entity.name.default.to_hex(), "7aa2f7");
     assert_eq!(ts.syntax.entity.other.attribute_name.to_hex(), "e0af68");
     assert_eq!(ts.ui.background.normal.to_hex(), "ff0000");

@@ -227,8 +227,8 @@ Builders must ensure all Theming Properties resolve to a valid color.
 | syntax.string.quoted.single              | yellow_default  |
 | syntax.string.quoted.double              | yellow_default  |
 | syntax.string.regexp                     | cyan_default    |
-| syntax.string.template                   | orange_default  |
-| syntax.string.interpolated               | orange_bright   |
+| syntax.string.template                   | yellow_default  |
+| syntax.string.interpolated               | yellow_default  |
 | syntax.string.unquoted                   | yellow_default  |
 | syntax.constant                          | magenta_default |
 | syntax.constant.numeric                  | magenta_default |
@@ -294,14 +294,27 @@ Builders must ensure all Theming Properties resolve to a valid color.
 | ui.background.dark                       | black_dim       |
 | ui.background.light                      | black_bright    |
 | ui.deprecated                            | brown_default   |
+| ui.accent                                | blue_default    |
+| ui.border                                | gray_dim        |
+| ui.cursor                                | white_default   |
 | ui.foreground.normal                     | white_default   |
 | ui.foreground.dark                       | white_dim       |
 | ui.foreground.light                      | white_bright    |
+| ui.gutter.background                     | black_dim       |
+| ui.gutter.foreground                     | white_dim       |
 | ui.line.background                       | gray_dim        |
 | ui.line.foreground                       | white_dim       |
-| ui.search-text                           | yellow_default  |
+| ui.link                                  | cyan_default    |
+| ui.search.background                     | black_bright    |
+| ui.search.foreground                     | yellow_default  |
 | ui.selection.background                  | black_bright    |
 | ui.selection.foreground                  | white_normal    |
+| ui.selection.inactive-background         | black_bright    |
+| ui.status.error                          | red_default     |
+| ui.status.warning                        | yellow_default  |
+| ui.status.info                           | cyan_default    |
+| ui.tooltip.background                    | black_dim       |
+| ui.tooltip.foreground                    | white_default   |
 
 ## Output and Template Config
 

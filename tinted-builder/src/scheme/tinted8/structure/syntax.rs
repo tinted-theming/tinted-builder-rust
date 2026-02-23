@@ -5,83 +5,6 @@ use serde::Serialize;
 use std::fmt;
 use thiserror::Error;
 
-const REQUIRED_SYNTAX_KEYS: [&str; 74] = [
-    "comment",
-    "comment.line",
-    "comment.block",
-    "invalid",
-    "invalid.deprecated",
-    "invalid.illegal",
-    "string",
-    "string.quoted",
-    "string.quoted.single",
-    "string.quoted.double",
-    "string.regexp",
-    "string.template",
-    "string.interpolated",
-    "string.unquoted",
-    "constant",
-    "constant.numeric",
-    "constant.numeric.integer",
-    "constant.numeric.float",
-    "constant.numeric.hex",
-    "constant.numeric.exponential",
-    "constant.language",
-    "constant.language.boolean",
-    "constant.other",
-    "constant.character",
-    "constant.character.escape",
-    "constant.character.entity",
-    "entity",
-    "entity.name",
-    "entity.name.class",
-    "entity.name.function",
-    "entity.name.tag",
-    "entity.name.variable",
-    "entity.name.type",
-    "entity.name.namespace",
-    "entity.name.section",
-    "entity.other",
-    "entity.other.attribute-name",
-    "entity.other.inherited-class",
-    "keyword",
-    "keyword.control",
-    "keyword.declaration",
-    "keyword.operator",
-    "keyword.other",
-    "storage",
-    "storage.type",
-    "storage.modifier",
-    "support",
-    "support.function",
-    "support.class",
-    "support.type",
-    "support.constant",
-    "support.variable",
-    "variable",
-    "variable.parameter",
-    "variable.language",
-    "variable.function",
-    "punctuation",
-    "punctuation.accessor",
-    "punctuation.separator",
-    "punctuation.terminator",
-    "markup",
-    "markup.heading",
-    "markup.bold",
-    "markup.code",
-    "markup.italic",
-    "markup.quote",
-    "markup.underline",
-    "markup.list",
-    "markup.link",
-    "markup.raw",
-    "diff",
-    "diff.added",
-    "diff.changed",
-    "diff.deleted",
-];
-
 #[non_exhaustive]
 #[derive(Debug, Clone)]
 pub enum SyntaxKey {
@@ -114,6 +37,7 @@ pub enum SyntaxKey {
     Entity,
     EntityName,
     EntityNameClass,
+    EntityNameFilename,
     EntityNameFunction,
     EntityNameTag,
     EntityNameVariable,
@@ -193,6 +117,7 @@ impl SyntaxKey {
             Self::Entity => "entity",
             Self::EntityName => "entity.name",
             Self::EntityNameClass => "entity.name.class",
+            Self::EntityNameFilename => "entity.name.filename",
             Self::EntityNameFunction => "entity.name.function",
             Self::EntityNameTag => "entity.name.tag",
             Self::EntityNameVariable => "entity.name.variable",
@@ -339,9 +264,12 @@ impl Syntax {
         let constant_normal = palette.magenta_normal.clone();
         let entity_normal = palette.white_normal.clone();
         let keyword_normal = palette.magenta_normal.clone();
+        let storage_normal = palette.blue_normal.clone();
         let markup_normal = palette.cyan_normal.clone();
-        let variable_normal = palette.cyan_dim.clone();
-        let comment_normal = palette.gray_dim.clone();
+        let variable_normal = palette.white_normal.clone();
+        let comment_normal = palette.gray_normal.clone();
+        let punctuation_normal = palette.gray_dim.clone();
+        let syntax_support_normal = palette.blue_normal.clone();
         let syntax_comment = SyntaxComment {
             line: comment_normal.clone(),
             block: comment_normal.clone(),
@@ -383,6 +311,7 @@ impl Syntax {
             name: SyntaxEntityName {
                 default: entity_normal.clone(),
                 class: entity_normal.clone(),
+                filename: entity_normal.clone(),
                 function: palette.blue_normal.clone(),
                 tag: entity_normal.clone(),
                 variable: entity_normal.clone(),
@@ -402,32 +331,32 @@ impl Syntax {
             declaration: keyword_normal.clone(),
             operator: keyword_normal.clone(),
             other: keyword_normal.clone(),
-            default: keyword_normal.clone(),
+            default: keyword_normal,
         };
         let syntax_storage = SyntaxStorage {
-            default: keyword_normal.clone(),
-            r#type: keyword_normal.clone(),
-            modifier: keyword_normal.clone(),
+            r#type: storage_normal.clone(),
+            modifier: storage_normal.clone(),
+            default: storage_normal,
         };
         let syntax_support = SyntaxSupport {
-            default: palette.blue_normal.clone(),
-            function: palette.blue_normal.clone(),
-            class: palette.blue_normal.clone(),
-            r#type: palette.blue_normal.clone(),
+            function: syntax_support_normal.clone(),
+            class: syntax_support_normal.clone(),
+            r#type: syntax_support_normal.clone(),
             constant: palette.magenta_normal.clone(),
-            variable: palette.cyan_normal.clone(),
+            variable: syntax_support_normal.clone(),
+            default: syntax_support_normal,
         };
         let syntax_variable = SyntaxVariable {
-            default: variable_normal.clone(),
             parameter: palette.cyan_bright.clone(),
             language: palette.magenta_normal.clone(),
             function: palette.cyan_normal.clone(),
+            default: variable_normal,
         };
         let syntax_punctuation = SyntaxPunctuation {
-            default: palette.gray_dim.clone(),
             accessor: palette.gray_bright.clone(),
-            separator: palette.gray_dim.clone(),
-            terminator: palette.gray_dim.clone(),
+            separator: punctuation_normal.clone(),
+            terminator: punctuation_normal.clone(),
+            default: punctuation_normal,
         };
         let syntax_invalid = SyntaxInvalid {
             default: palette.red_bright.clone(),
@@ -472,7 +401,7 @@ impl Syntax {
     pub fn try_from_basic(basic: &BasicSyntax, palette: &Palette) -> Result<Self, SyntaxError> {
         let default_syntax = Self::new(palette);
         let comment = SyntaxComment {
-            default: parse_or_default(basic.string.as_deref(), &default_syntax.comment.default)?,
+            default: parse_or_default(basic.comment.as_deref(), &default_syntax.comment.default)?,
             line: parse_or_inherit(
                 basic.comment_line.as_deref(),
                 basic.comment.as_deref(),
@@ -602,11 +531,7 @@ impl Syntax {
             )?,
         };
         let entity = SyntaxEntity {
-            default: parse_or_inherit(
-                basic.entity_name.as_deref(),
-                None,
-                &default_syntax.entity.default,
-            )?,
+            default: parse_or_default(basic.entity.as_deref(), &default_syntax.entity.default)?,
             name: SyntaxEntityName {
                 default: parse_or_inherit(
                     basic.entity_name.as_deref(),
@@ -617,6 +542,11 @@ impl Syntax {
                     basic.entity_name_class.as_deref(),
                     basic.entity_name.as_deref(),
                     &default_syntax.entity.name.default,
+                )?,
+                filename: parse_or_inherit(
+                    basic.entity_name_filename.as_deref(),
+                    basic.entity_name.as_deref(),
+                    &default_syntax.entity.name.filename,
                 )?,
                 function: parse_or_inherit(
                     basic.entity_name_function.as_deref(),
@@ -840,8 +770,8 @@ impl Syntax {
         })
     }
 
-    pub const fn get_property_list<'a>() -> &'a [&'a str] {
-        &REQUIRED_SYNTAX_KEYS
+    pub const fn get_property_list() -> &'static [SyntaxKey] {
+        SyntaxKey::variants()
     }
 
     // For Display trait
@@ -876,6 +806,7 @@ impl Syntax {
             SyntaxKey::Entity => &self.entity.default,
             SyntaxKey::EntityName => &self.entity.name.default,
             SyntaxKey::EntityNameClass => &self.entity.name.class,
+            SyntaxKey::EntityNameFilename => &self.entity.name.filename,
             SyntaxKey::EntityNameFunction => &self.entity.name.function,
             SyntaxKey::EntityNameTag => &self.entity.name.tag,
             SyntaxKey::EntityNameVariable => &self.entity.name.variable,
@@ -1025,6 +956,7 @@ pub struct SyntaxVariable {
 pub struct SyntaxEntityName {
     pub default: Color,
     pub class: Color,
+    pub filename: Color,
     pub function: Color,
     pub tag: Color,
     pub variable: Color,
