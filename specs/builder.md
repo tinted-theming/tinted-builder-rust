@@ -273,9 +273,10 @@ Builders must ensure all Theming Properties resolve to a valid color.
 | syntax.variable.language                 | magenta_default |
 | syntax.variable.function                 | cyan_default    |
 | syntax.punctuation                       | gray_dim        |
-| syntax.punctuation.accessor              | gray_bright     |
-| syntax.punctuation.separator             | gray_dim        |
-| syntax.punctuation.terminator            | gray_dim        |
+| syntax.punctuation.accessor              | white_default   |
+| syntax.punctuation.separator             | white_default   |
+| syntax.punctuation.terminator            | white_default   |
+| syntax.punctuation.definition            | white_default   |
 | syntax.markup                            | cyan_default    |
 | syntax.markup.heading                    | cyan_default    |
 | syntax.markup.bold                       | cyan_default    |

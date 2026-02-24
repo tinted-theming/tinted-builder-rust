@@ -69,6 +69,8 @@ pub enum SyntaxKey {
     PunctuationAccessor,
     PunctuationSeparator,
     PunctuationTerminator,
+    PunctuationDefinition,
+    PunctuationDefinitionString,
     Markup,
     MarkupHeading,
     MarkupBold,
@@ -149,6 +151,8 @@ impl SyntaxKey {
             Self::PunctuationAccessor => "punctuation.accessor",
             Self::PunctuationSeparator => "punctuation.separator",
             Self::PunctuationTerminator => "punctuation.terminator",
+            Self::PunctuationDefinition => "punctuation.definition",
+            Self::PunctuationDefinitionString => "punctuation.definition.string",
             Self::Markup => "markup",
             Self::MarkupHeading => "markup.heading",
             Self::MarkupBold => "markup.bold",
@@ -228,6 +232,7 @@ impl SyntaxKey {
             Self::PunctuationAccessor,
             Self::PunctuationSeparator,
             Self::PunctuationTerminator,
+            Self::PunctuationDefinition,
             Self::Markup,
             Self::MarkupHeading,
             Self::MarkupBold,
@@ -260,15 +265,16 @@ impl Syntax {
     ///
     /// These default colors are set according to tinted8 0.1.0 styling spec
     pub fn new(palette: &Palette) -> Self {
-        let string_normal = palette.yellow_normal.clone();
+        let string_normal = palette.green_normal.clone();
         let constant_normal = palette.magenta_normal.clone();
         let entity_normal = palette.white_normal.clone();
+        let entity_other_normal = palette.magenta_normal.clone();
         let keyword_normal = palette.magenta_normal.clone();
         let storage_normal = palette.blue_normal.clone();
         let markup_normal = palette.cyan_normal.clone();
         let variable_normal = palette.white_normal.clone();
         let comment_normal = palette.gray_normal.clone();
-        let punctuation_normal = palette.gray_dim.clone();
+        let punctuation_normal = palette.white_normal.clone();
         let syntax_support_normal = palette.blue_normal.clone();
         let syntax_comment = SyntaxComment {
             line: comment_normal.clone(),
@@ -312,17 +318,17 @@ impl Syntax {
                 default: entity_normal.clone(),
                 class: entity_normal.clone(),
                 filename: entity_normal.clone(),
-                function: palette.blue_normal.clone(),
+                function: entity_normal.clone(),
                 tag: entity_normal.clone(),
                 variable: entity_normal.clone(),
                 r#type: entity_normal.clone(),
                 namespace: entity_normal.clone(),
-                section: palette.cyan_normal.clone(),
+                section: entity_normal.clone(),
             },
             other: SyntaxEntityOther {
-                default: entity_normal.clone(),
-                attribute_name: palette.magenta_normal.clone(),
-                inherited_class: entity_normal.clone(),
+                attribute_name: entity_other_normal.clone(),
+                inherited_class: entity_other_normal.clone(),
+                default: entity_other_normal,
             },
             default: entity_normal,
         };
@@ -342,7 +348,7 @@ impl Syntax {
             function: syntax_support_normal.clone(),
             class: syntax_support_normal.clone(),
             r#type: syntax_support_normal.clone(),
-            constant: palette.magenta_normal.clone(),
+            constant: syntax_support_normal.clone(),
             variable: syntax_support_normal.clone(),
             default: syntax_support_normal,
         };
@@ -353,9 +359,22 @@ impl Syntax {
             default: variable_normal,
         };
         let syntax_punctuation = SyntaxPunctuation {
-            accessor: palette.gray_bright.clone(),
-            separator: punctuation_normal.clone(),
-            terminator: punctuation_normal.clone(),
+            accessor: SyntaxPunctuationAcessor {
+                default: punctuation_normal.clone(),
+            },
+            separator: SyntaxPunctuationSeparator {
+                default: punctuation_normal.clone(),
+            },
+            terminator: SyntaxPunctuationTerminator {
+                default: punctuation_normal.clone(),
+            },
+            definition: SyntaxPunctuationDefinition {
+                default: punctuation_normal.clone(),
+                string: palette.green_normal.clone(),
+            },
+            section: SyntaxPunctuationSection {
+                default: punctuation_normal.clone(),
+            },
             default: punctuation_normal,
         };
         let syntax_invalid = SyntaxInvalid {
@@ -683,21 +702,46 @@ impl Syntax {
                 basic.punctuation.as_deref(),
                 &default_syntax.punctuation.default,
             )?,
-            accessor: parse_or_inherit(
-                basic.punctuation_accessor.as_deref(),
-                basic.punctuation.as_deref(),
-                &default_syntax.punctuation.accessor,
-            )?,
-            separator: parse_or_inherit(
-                basic.punctuation_separator.as_deref(),
-                basic.punctuation.as_deref(),
-                &default_syntax.punctuation.separator,
-            )?,
-            terminator: parse_or_inherit(
-                basic.punctuation_terminator.as_deref(),
-                basic.punctuation.as_deref(),
-                &default_syntax.punctuation.terminator,
-            )?,
+            accessor: SyntaxPunctuationAcessor {
+                default: parse_or_inherit(
+                    basic.punctuation_accessor.as_deref(),
+                    basic.punctuation.as_deref(),
+                    &default_syntax.punctuation.accessor.default,
+                )?,
+            },
+            section: SyntaxPunctuationSection {
+                default: parse_or_inherit(
+                    basic.punctuation_section.as_deref(),
+                    basic.punctuation.as_deref(),
+                    &default_syntax.punctuation.section.default,
+                )?,
+            },
+            separator: SyntaxPunctuationSeparator {
+                default: parse_or_inherit(
+                    basic.punctuation_separator.as_deref(),
+                    basic.punctuation.as_deref(),
+                    &default_syntax.punctuation.separator.default,
+                )?,
+            },
+            terminator: SyntaxPunctuationTerminator {
+                default: parse_or_inherit(
+                    basic.punctuation_terminator.as_deref(),
+                    basic.punctuation.as_deref(),
+                    &default_syntax.punctuation.terminator.default,
+                )?,
+            },
+            definition: SyntaxPunctuationDefinition {
+                default: parse_or_inherit(
+                    basic.punctuation_definition.as_deref(),
+                    basic.punctuation.as_deref(),
+                    &default_syntax.punctuation.definition.default,
+                )?,
+                string: parse_or_inherit(
+                    basic.punctuation_definition_string.as_deref(),
+                    basic.punctuation.as_deref(),
+                    &default_syntax.punctuation.definition.string,
+                )?,
+            },
         };
         let markup = SyntaxMarkup {
             default: parse_or_default(basic.markup.as_deref(), &default_syntax.markup.default)?,
@@ -835,9 +879,11 @@ impl Syntax {
             SyntaxKey::VariableLanguage => &self.variable.language,
             SyntaxKey::VariableFunction => &self.variable.function,
             SyntaxKey::Punctuation => &self.punctuation.default,
-            SyntaxKey::PunctuationAccessor => &self.punctuation.accessor,
-            SyntaxKey::PunctuationSeparator => &self.punctuation.separator,
-            SyntaxKey::PunctuationTerminator => &self.punctuation.terminator,
+            SyntaxKey::PunctuationAccessor => &self.punctuation.accessor.default,
+            SyntaxKey::PunctuationSeparator => &self.punctuation.separator.default,
+            SyntaxKey::PunctuationTerminator => &self.punctuation.terminator.default,
+            SyntaxKey::PunctuationDefinition => &self.punctuation.definition.default,
+            SyntaxKey::PunctuationDefinitionString => &self.punctuation.definition.string,
             SyntaxKey::Markup => &self.markup.default,
             SyntaxKey::MarkupHeading => &self.markup.heading,
             SyntaxKey::MarkupBold => &self.markup.bold,
@@ -1006,9 +1052,37 @@ pub struct SyntaxSupport {
 #[derive(Debug, Clone, Serialize)]
 pub struct SyntaxPunctuation {
     pub default: Color,
-    pub accessor: Color,
-    pub separator: Color,
-    pub terminator: Color,
+    pub accessor: SyntaxPunctuationAcessor,
+    pub section: SyntaxPunctuationSection,
+    pub separator: SyntaxPunctuationSeparator,
+    pub terminator: SyntaxPunctuationTerminator,
+    pub definition: SyntaxPunctuationDefinition,
+}
+
+#[derive(Debug, Clone, Serialize)]
+pub struct SyntaxPunctuationAcessor {
+    pub default: Color,
+}
+
+#[derive(Debug, Clone, Serialize)]
+pub struct SyntaxPunctuationSection {
+    pub default: Color,
+}
+
+#[derive(Debug, Clone, Serialize)]
+pub struct SyntaxPunctuationSeparator {
+    pub default: Color,
+}
+
+#[derive(Debug, Clone, Serialize)]
+pub struct SyntaxPunctuationTerminator {
+    pub default: Color,
+}
+
+#[derive(Debug, Clone, Serialize)]
+pub struct SyntaxPunctuationDefinition {
+    pub default: Color,
+    pub string: Color,
 }
 
 #[derive(Debug, Clone, Serialize)]

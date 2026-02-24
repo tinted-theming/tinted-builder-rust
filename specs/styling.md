@@ -209,6 +209,7 @@ color code) value.
 | syntax.punctuation.accessor         | `obj.prop` → `.` | Accessor punctuation. |
 | syntax.punctuation.separator        | `a, b` → `,` | List/argument separators. |
 | syntax.punctuation.terminator       | `let x = 1;` → `;` | Statement terminators. |
+| syntax.punctuation.definition       | `/* comment */` → `/* */`, `"string"` → `""` | Definition delimiters such as quotes and comment markers. |
 | syntax.markup                       | `<blockquote>Text</blockquote>` → `Text` | Parent of all markup-styled content. |
 | syntax.markup.bold                  | `<strong>Foo Bar</strong>` → `Foo Bar` | Bold text. |
 | syntax.markup.code                  | `<code>inline</code>` → `inline` | Inline/code blocks. |

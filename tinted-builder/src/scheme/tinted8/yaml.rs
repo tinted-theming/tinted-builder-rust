@@ -382,8 +382,14 @@ pub struct BasicSyntax {
     pub punctuation: Option<String>,
     #[serde(rename = "punctuation.accessor")]
     pub punctuation_accessor: Option<String>,
+    #[serde(rename = "punctuation.section")]
+    pub punctuation_section: Option<String>,
     #[serde(rename = "punctuation.separator")]
     pub punctuation_separator: Option<String>,
+    #[serde(rename = "punctuation.definition")]
+    pub punctuation_definition: Option<String>,
+    #[serde(rename = "punctuation.definition.string")]
+    pub punctuation_definition_string: Option<String>,
     #[serde(rename = "punctuation.terminator")]
     pub punctuation_terminator: Option<String>,
     pub markup: Option<String>,
