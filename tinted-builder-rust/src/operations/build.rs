@@ -167,7 +167,7 @@ pub fn build(
                     ));
                 }
                 if !is_quiet {
-                    println!("→ tinted8-styling: v{styling_ver} (supported range {styling_req})",);
+                    println!("→ tinted8-styling: v{styling_ver} (supported range {styling_req})");
                 }
             }
         }
@@ -413,7 +413,7 @@ fn generate_themes_for_config(
                 ));
             }
             if !is_quiet {
-                println!("→ tinted8-styling: v{scheme_styling_version} (supported range {req})",);
+                println!("→ tinted8-styling: v{scheme_styling_version} (supported range {req})");
             }
         }
 
