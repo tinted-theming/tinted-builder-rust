@@ -1,7 +1,7 @@
 pub mod structure;
 mod yaml;
 
-pub use crate::scheme::tinted8::structure::{Palette, Scheme};
+pub use crate::scheme::tinted8::structure::{Palette, Scheme, SyntaxKey};
 use crate::SchemeSystem;
 
 pub const SUPPORTED_BUILDER_SPEC_VERSION: &str = "0.1.0";

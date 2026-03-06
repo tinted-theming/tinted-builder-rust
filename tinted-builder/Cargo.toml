@@ -24,6 +24,10 @@ serde_yaml = "0.9.34"
 thiserror = "2.0.17"
 unicode-normalization = "0.1.25"
 
+[build-dependencies]
+serde = { version = "1.0.228", features = ["derive"] }
+serde_yaml = "0.9.34"
+
 [dev-dependencies]
 anyhow = "1.0.100"
 strip-ansi-escapes = "0.2.1"

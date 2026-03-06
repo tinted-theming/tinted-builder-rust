@@ -1,0 +1,296 @@
+syntax:
+  - key: comment
+    scope: comment
+    default: gray_dim
+    children:
+      - key: line
+        scope: comment.line
+      - key: block
+        scope: comment.block
+      - key: documentation
+        scope: comment.documentation
+
+  - key: invalid
+    scope: invalid
+    default: red_bright
+    children:
+      - key: deprecated
+        scope: invalid.deprecated
+        default: yellow_bright
+      - key: illegal
+        scope: invalid.illegal
+
+  - key: string
+    scope: string
+    default: green_normal
+    children:
+      - key: quoted
+        scope: string.quoted
+        children:
+          - key: single
+            scope: string.quoted.single
+          - key: double
+            scope: string.quoted.double
+      - key: regexp
+        scope: string.regexp
+        default: red_normal
+      - key: template
+        scope: string.template
+      - key: interpolated
+        scope: string.interpolated
+      - key: unquoted
+        scope: string.unquoted
+      - key: other
+        scope: string.other
+
+  - key: constant
+    scope: constant
+    default: orange_normal
+    children:
+      - key: numeric
+        scope: constant.numeric
+        children:
+          - key: integer
+            scope: constant.numeric.integer
+          - key: float
+            scope: constant.numeric.float
+          - key: hex
+            scope: constant.numeric.hex
+      - key: language
+        scope: constant.language
+      - key: character
+        scope: constant.character
+        children:
+          - key: escape
+            scope: constant.character.escape
+          - key: entity
+            scope: constant.character.entity
+      - key: other
+        scope: constant.other
+
+  - key: entity
+    scope: entity
+    default: white_normal
+    children:
+      - key: name
+        scope: entity.name
+        children:
+          - key: class
+            scope: entity.name.class
+            default: yellow_normal
+          - key: function
+            scope: entity.name.function
+            default: blue_normal
+            children:
+              - key: constructor
+                scope: entity.name.function.constructor
+                non_standard: true
+          - key: label
+            scope: entity.name.label
+          - key: tag
+            scope: entity.name.tag
+          - key: type
+            scope: entity.name.type
+            default: cyan_normal
+            children:
+              - key: class
+                scope: entity.name.type.class
+                non_standard: true
+              - key: enum
+                scope: entity.name.type.enum
+                non_standard: true
+              - key: struct
+                scope: entity.name.type.struct
+                non_standard: true
+          - key: namespace
+            scope: entity.name.namespace
+            default: yellow_dim
+          - key: section
+            scope: entity.name.section
+            default: cyan_normal
+      - key: other
+        scope: entity.other
+        default: white_normal
+        children:
+          - key: attribute_name
+            scope: entity.other.attribute-name
+            default: magenta_normal
+          - key: inherited_class
+            scope: entity.other.inherited-class
+
+  - key: keyword
+    scope: keyword
+    default: magenta_normal
+    children:
+      - key: control
+        scope: keyword.control
+        children:
+          - key: import
+            scope: keyword.control.import
+          - key: flow
+            scope: keyword.control.flow
+      - key: declaration
+        scope: keyword.declaration
+      - key: operator
+        scope: keyword.operator
+      - key: other
+        scope: keyword.other
+
+  - key: storage
+    scope: storage
+    default: magenta_normal
+    children:
+      - key: type
+        scope: storage.type
+      - key: modifier
+        scope: storage.modifier
+
+  - key: support
+    scope: support
+    default: blue_normal
+    children:
+      - key: function
+        scope: support.function
+        children:
+          - key: builtin
+            scope: support.function.builtin
+            default: blue_bright
+            non_standard: true
+      - key: class
+        scope: support.class
+      - key: type
+        scope: support.type
+      - key: constant
+        scope: support.constant
+        default: magenta_normal
+      - key: variable
+        scope: support.variable
+        default: cyan_normal
+      - key: other
+        scope: support.other
+
+  - key: variable
+    scope: variable
+    default: white_normal
+    children:
+      - key: parameter
+        scope: variable.parameter
+        default: cyan_bright
+      - key: language
+        scope: variable.language
+        default: magenta_normal
+      - key: other
+        scope: variable.other
+        children:
+          - key: constant
+            scope: variable.other.constant
+            non_standard: true
+          - key: property
+            scope: variable.other.property
+          - key: object
+            scope: variable.other.object
+            non_standard: true
+
+  - key: punctuation
+    scope: punctuation
+    default: white_dim
+    children:
+      - key: separator
+        scope: punctuation.separator
+        default: white_normal
+      - key: definition
+        scope: punctuation.definition
+        default: white_normal
+        children:
+          - key: string
+            scope: punctuation.definition.string
+            default: green_normal
+          - key: comment
+            scope: punctuation.definition.comment
+            default: gray_dim
+      - key: section
+        scope: punctuation.section
+        default: orange_normal
+
+  - key: markup
+    scope: markup
+    default: orange_normal
+    children:
+      - key: bold
+        scope: markup.bold
+      - key: italic
+        scope: markup.italic
+      - key: quote
+        scope: markup.quote
+      - key: underline
+        scope: markup.underline
+      - key: heading
+        scope: markup.heading
+        default: magenta_normal
+      - key: list
+        scope: markup.list
+        children:
+          - key: numbered
+            scope: markup.list.numbered
+            default: cyan_normal
+          - key: unnumbered
+            scope: markup.list.unnumbered
+            default: cyan_normal
+      - key: link
+        scope: markup.link
+        default: yellow_normal
+      - key: raw
+        scope: markup.raw
+      - key: inserted
+        scope: markup.inserted
+        default: green_bright
+      - key: changed
+        scope: markup.changed
+        default: yellow_bright
+      - key: deleted
+        scope: markup.deleted
+        default: red_bright
+
+  - key: source
+    scope: source
+    default: white_normal
+
+  - key: text
+    scope: text
+    default: white_normal
+
+  - key: meta
+    scope: meta
+    default: white_normal
+    children:
+      - key: function
+        scope: meta.function
+        non_standard: true
+      - key: class
+        scope: meta.class
+        non_standard: true
+      - key: block
+        scope: meta.block
+        non_standard: true
+      - key: tag
+        scope: meta.tag
+        non_standard: true
+      - key: type
+        scope: meta.type
+        non_standard: true
+      - key: import
+        scope: meta.import
+        non_standard: true
+      - key: preprocessor
+        scope: meta.preprocessor
+        non_standard: true
+      - key: embedded
+        scope: meta.embedded
+        non_standard: true
+      - key: object
+        scope: meta.object
+        default: orange_normal
+        non_standard: true
+      - key: annotation
+        scope: meta.annotation
+        default: orange_normal
