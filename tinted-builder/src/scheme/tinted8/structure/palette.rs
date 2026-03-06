@@ -667,7 +667,7 @@ fn color_black_and_white_to_gray(
     let gray_rgb_r: u8 = (gray_rgb.red.clamp(0.0, 1.0) * 255.0).round() as u8;
     let gray_rgb_g: u8 = (gray_rgb.green.clamp(0.0, 1.0) * 255.0).round() as u8;
     let gray_rgb_b: u8 = (gray_rgb.blue.clamp(0.0, 1.0) * 255.0).round() as u8;
-    let gray_hex = format!("{gray_rgb_r:02X}{gray_rgb_g:02X}{gray_rgb_b:02X}",);
+    let gray_hex = format!("{gray_rgb_r:02X}{gray_rgb_g:02X}{gray_rgb_b:02X}");
 
     Color::new(&gray_hex, Some(ColorName::Gray), Some(ColorVariant::Normal))
 }
