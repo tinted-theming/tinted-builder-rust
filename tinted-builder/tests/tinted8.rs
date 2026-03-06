@@ -97,9 +97,9 @@ fn deserialize_ui_normals_from_palette() -> Result<(), TintedBuilderError> {
 fn deserialize_syntax_overrides() -> Result<(), TintedBuilderError> {
     let scheme: Tinted8Scheme = serde_yaml::from_str(SCHEME_WITH_SYNTAX)?;
 
-    assert_eq!(scheme.syntax.comment.to_hex(), "888888");
+    assert_eq!(scheme.syntax.comment.default.to_hex(), "888888");
     assert_eq!(scheme.syntax.string.default.to_hex(), "aabbcc");
-    assert_eq!(scheme.syntax.string.quoted.to_hex(), "ddeeff");
+    assert_eq!(scheme.syntax.string.quoted.default.to_hex(), "ddeeff");
     assert_eq!(scheme.syntax.constant.default.to_hex(), "112233");
     assert_eq!(scheme.syntax.keyword.default.to_hex(), "445566");
 
@@ -110,9 +110,9 @@ fn deserialize_syntax_overrides() -> Result<(), TintedBuilderError> {
 fn deserialize_syntax_inherits_from_parent() -> Result<(), TintedBuilderError> {
     let scheme: Tinted8Scheme = serde_yaml::from_str(SCHEME_WITH_SYNTAX)?;
 
-    assert_eq!(scheme.syntax.string.regexp.to_hex(), "aabbcc");
+    assert_eq!(scheme.syntax.string.default.to_hex(), "aabbcc");
     assert_eq!(scheme.syntax.string.template.to_hex(), "aabbcc");
-    assert_eq!(scheme.syntax.keyword.control.to_hex(), "445566");
+    assert_eq!(scheme.syntax.keyword.control.default.to_hex(), "445566");
     assert_eq!(scheme.syntax.keyword.declaration.to_hex(), "445566");
 
     Ok(())
@@ -123,7 +123,7 @@ fn deserialize_syntax_normals_from_palette() -> Result<(), TintedBuilderError> {
     let scheme: Tinted8Scheme = serde_yaml::from_str(SCHEME_MINIMAL)?;
 
     assert_eq!(
-        scheme.syntax.comment.to_hex(),
+        scheme.syntax.comment.default.to_hex(),
         scheme.palette.gray_dim.to_hex()
     );
     assert_eq!(
@@ -132,7 +132,7 @@ fn deserialize_syntax_normals_from_palette() -> Result<(), TintedBuilderError> {
     );
     assert_eq!(
         scheme.syntax.constant.default.to_hex(),
-        scheme.palette.yellow_normal.to_hex()
+        scheme.palette.orange_normal.to_hex()
     );
     assert_eq!(
         scheme.syntax.keyword.default.to_hex(),
@@ -140,15 +140,7 @@ fn deserialize_syntax_normals_from_palette() -> Result<(), TintedBuilderError> {
     );
     assert_eq!(
         scheme.syntax.markup.default.to_hex(),
-        scheme.palette.cyan_normal.to_hex()
-    );
-    assert_eq!(
-        scheme.syntax.diff.added.to_hex(),
-        scheme.palette.green_bright.to_hex()
-    );
-    assert_eq!(
-        scheme.syntax.diff.deleted.to_hex(),
-        scheme.palette.red_bright.to_hex()
+        scheme.palette.orange_normal.to_hex()
     );
 
     Ok(())
@@ -167,7 +159,7 @@ fn deserialize_full_scheme() -> Result<(), TintedBuilderError> {
         Some("A complete test scheme".to_string())
     );
     assert_eq!(ts.scheme.supported_styling_version, "0.1.0".to_string());
-    assert_eq!(ts.syntax.comment.to_hex(), "565f89");
+    assert_eq!(ts.syntax.comment.default.to_hex(), "565f89");
     assert_eq!(ts.syntax.entity.name.default.to_hex(), "7aa2f7");
     assert_eq!(ts.syntax.entity.other.attribute_name.to_hex(), "e0af68");
     assert_eq!(ts.ui.global.background.normal.to_hex(), "ff0000");
@@ -312,14 +304,204 @@ syntax:
   string: "#9ece6a"
   constant: "#ff9e64"
   keyword: "#bb9af7"
+  entity: "#7aa2f7"
   entity.name: "#7aa2f7"
   entity.other.attribute-name: "#e0af68"
-  diff.added: "#9ece6a"
-  diff.deleted: "#f7768e"
+  markup.inserted: "#9ece6a"
+  markup.deleted: "#f7768e"
 ui:
   global:
     background:
       normal: "#ff0000"
     foreground.normal: "#c0caf5"
   selection.background: "#33467c"
+"##;
+
+#[test]
+fn syntax_all_keys_accessible() -> Result<(), TintedBuilderError> {
+    use tinted_builder::tinted8::SyntaxKey;
+
+    let scheme: Tinted8Scheme = serde_yaml::from_str(SCHEME_MINIMAL)?;
+
+    for key in SyntaxKey::variants() {
+        let color = scheme.syntax.get_color(key);
+        assert!(!color.to_hex().is_empty(), "Key {key} should have a color");
+    }
+
+    Ok(())
+}
+
+#[test]
+fn syntax_new_scopes_parse_correctly() -> Result<(), TintedBuilderError> {
+    let scheme: Tinted8Scheme = serde_yaml::from_str(SCHEME_WITH_NEW_SCOPES)?;
+
+    assert_eq!(scheme.syntax.comment.documentation.to_hex(), "aaaaaa");
+    assert_eq!(scheme.syntax.string.other.to_hex(), "bbbbbb");
+    assert_eq!(
+        scheme.syntax.entity.name.function.constructor.to_hex(),
+        "cccccc"
+    );
+    assert_eq!(scheme.syntax.entity.name.label.to_hex(), "dddddd");
+    assert_eq!(scheme.syntax.keyword.control.import.to_hex(), "eeeeee");
+    assert_eq!(scheme.syntax.keyword.control.flow.to_hex(), "111111");
+    assert_eq!(scheme.syntax.support.function.builtin.to_hex(), "222222");
+    assert_eq!(scheme.syntax.support.other.to_hex(), "333333");
+    assert_eq!(scheme.syntax.variable.other.default.to_hex(), "444444");
+    assert_eq!(scheme.syntax.variable.other.constant.to_hex(), "555555");
+    assert_eq!(
+        scheme.syntax.punctuation.definition.comment.to_hex(),
+        "777777"
+    );
+    assert_eq!(scheme.syntax.markup.heading.to_hex(), "888888");
+    assert_eq!(scheme.syntax.markup.list.numbered.to_hex(), "999999");
+    assert_eq!(scheme.syntax.markup.list.unnumbered.to_hex(), "ababab");
+    assert_eq!(scheme.syntax.markup.inserted.to_hex(), "bcbcbc");
+    assert_eq!(scheme.syntax.markup.changed.to_hex(), "cdcdcd");
+    assert_eq!(scheme.syntax.markup.deleted.to_hex(), "dedede");
+    assert_eq!(scheme.syntax.source.to_hex(), "efefef");
+    assert_eq!(scheme.syntax.text.to_hex(), "f0f0f0");
+    assert_eq!(scheme.syntax.meta.default.to_hex(), "f1f1f1");
+
+    Ok(())
+}
+
+#[test]
+fn syntax_inheritance_direct_children() -> Result<(), TintedBuilderError> {
+    let scheme: Tinted8Scheme = serde_yaml::from_str(SCHEME_WITH_INHERITANCE)?;
+
+    assert_eq!(scheme.syntax.keyword.default.to_hex(), "ff0000");
+    assert_eq!(scheme.syntax.keyword.control.default.to_hex(), "ff0000");
+    assert_eq!(scheme.syntax.keyword.declaration.to_hex(), "ff0000");
+
+    assert_eq!(scheme.syntax.markup.default.to_hex(), "00ff00");
+    assert_eq!(scheme.syntax.markup.list.default.to_hex(), "00ff00");
+    assert_eq!(scheme.syntax.markup.inserted.to_hex(), "00ff00");
+
+    Ok(())
+}
+
+#[test]
+fn syntax_inheritance_grandchildren() -> Result<(), TintedBuilderError> {
+    let scheme: Tinted8Scheme = serde_yaml::from_str(SCHEME_WITH_GRANDCHILD_INHERITANCE)?;
+
+    assert_eq!(scheme.syntax.keyword.default.to_hex(), "ff0000");
+    assert_eq!(scheme.syntax.keyword.control.default.to_hex(), "ff0000");
+    assert_eq!(scheme.syntax.keyword.control.import.to_hex(), "ff0000");
+    assert_eq!(scheme.syntax.keyword.control.flow.to_hex(), "ff0000");
+
+    Ok(())
+}
+
+#[test]
+fn syntax_partial_inheritance() -> Result<(), TintedBuilderError> {
+    let scheme: Tinted8Scheme = serde_yaml::from_str(SCHEME_WITH_PARTIAL_INHERITANCE)?;
+
+    assert_eq!(scheme.syntax.keyword.default.to_hex(), "ff0000");
+    assert_eq!(scheme.syntax.keyword.control.default.to_hex(), "00ff00");
+    assert_eq!(scheme.syntax.keyword.control.import.to_hex(), "00ff00");
+    assert_eq!(scheme.syntax.keyword.control.flow.to_hex(), "0000ff");
+
+    Ok(())
+}
+
+const SCHEME_WITH_NEW_SCOPES: &str = r##"
+scheme:
+  system: "tinted8"
+  author: "Test"
+  slug: "new-scopes"
+  system-version: "0.2.0"
+variant: "dark"
+palette:
+  black:   "#000000"
+  red:     "#ff0000"
+  green:   "#00ff00"
+  yellow:  "#ffff00"
+  blue:    "#0000ff"
+  magenta: "#ff00ff"
+  cyan:    "#00ffff"
+  white:   "#ffffff"
+syntax:
+  comment.documentation: "#aaaaaa"
+  string.other: "#bbbbbb"
+  entity.name.function.constructor: "#cccccc"
+  entity.name.label: "#dddddd"
+  keyword.control.import: "#eeeeee"
+  keyword.control.flow: "#111111"
+  support.function.builtin: "#222222"
+  support.other: "#333333"
+  variable.other: "#444444"
+  variable.other.constant: "#555555"
+  punctuation.definition.comment: "#777777"
+  markup.heading: "#888888"
+  markup.list.numbered: "#999999"
+  markup.list.unnumbered: "#ababab"
+  markup.inserted: "#bcbcbc"
+  markup.changed: "#cdcdcd"
+  markup.deleted: "#dedede"
+  source: "#efefef"
+  text: "#f0f0f0"
+  meta: "#f1f1f1"
+"##;
+
+const SCHEME_WITH_INHERITANCE: &str = r##"
+scheme:
+  system: "tinted8"
+  author: "Test"
+  slug: "inheritance"
+  system-version: "0.2.0"
+variant: "dark"
+palette:
+  black:   "#000000"
+  red:     "#ff0000"
+  green:   "#00ff00"
+  yellow:  "#ffff00"
+  blue:    "#0000ff"
+  magenta: "#ff00ff"
+  cyan:    "#00ffff"
+  white:   "#ffffff"
+syntax:
+  keyword: "#ff0000"
+  markup: "#00ff00"
+"##;
+
+const SCHEME_WITH_PARTIAL_INHERITANCE: &str = r##"
+scheme:
+  system: "tinted8"
+  author: "Test"
+  slug: "partial-inheritance"
+  system-version: "0.2.0"
+variant: "dark"
+palette:
+  black:   "#000000"
+  red:     "#ff0000"
+  green:   "#00ff00"
+  yellow:  "#ffff00"
+  blue:    "#0000ff"
+  magenta: "#ff00ff"
+  cyan:    "#00ffff"
+  white:   "#ffffff"
+syntax:
+  keyword: "#ff0000"
+  keyword.control: "#00ff00"
+  keyword.control.flow: "#0000ff"
+"##;
+
+const SCHEME_WITH_GRANDCHILD_INHERITANCE: &str = r##"
+scheme:
+  system: "tinted8"
+  author: "Test"
+  slug: "grandchild"
+  system-version: "0.2.0"
+variant: "dark"
+palette:
+  black:   "#000000"
+  red:     "#ff0000"
+  green:   "#00ff00"
+  yellow:  "#ffff00"
+  blue:    "#0000ff"
+  magenta: "#ff00ff"
+  cyan:    "#00ffff"
+  white:   "#ffffff"
+syntax:
+  keyword: "#ff0000"
 "##;
