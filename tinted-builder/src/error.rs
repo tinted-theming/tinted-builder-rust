@@ -57,6 +57,24 @@ pub enum TintedBuilderError {
     #[error("invalid scheme system: {0}")]
     InvalidSchemeSystem(String),
 
+    /// Error indicating that an invalid color name was provided.
+    ///
+    /// This variant is used when an input string does not correspond to any valid color name.
+    #[error("invalid color name: {0}")]
+    InvalidColorName(String),
+
+    /// Error indicating that an invalid color variant was provided.
+    ///
+    /// This variant is used when an input string does not correspond to any valid color variant.
+    #[error("invalid color variant: {0}")]
+    InvalidColorVariant(String),
+
+    /// Error indicating that an invalid color type was provided.
+    ///
+    /// This variant is used when an input string does not correspond to a valid color type.
+    #[error("invalid color type: {0}")]
+    InvalidColorType(String),
+
     /// Error indicating a `Color` conversion problem
     ///
     /// This variant is used when a color is not able to convert from one color to another

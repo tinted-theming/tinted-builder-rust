@@ -1,6 +1,7 @@
 use palette::{rgb::Rgb, FromColor, GetHue, Hsl, IntoColor};
 use serde::{Deserialize, Serialize, Serializer};
 use std::fmt;
+use std::str::FromStr;
 
 use crate::error::TintedBuilderError;
 
@@ -87,7 +88,7 @@ impl Color {
         let updated_rgb_r: u8 = (updated_rgb.red.clamp(0.0, 1.0) * 255.0).round() as u8;
         let updated_rgb_g: u8 = (updated_rgb.green.clamp(0.0, 1.0) * 255.0).round() as u8;
         let updated_rgb_b: u8 = (updated_rgb.blue.clamp(0.0, 1.0) * 255.0).round() as u8;
-        let updated_hex = format!("{updated_rgb_r:02X}{updated_rgb_g:02X}{updated_rgb_b:02X}",);
+        let updated_hex = format!("{updated_rgb_r:02X}{updated_rgb_g:02X}{updated_rgb_b:02X}");
 
         Self::new(
             &updated_hex,
@@ -125,7 +126,7 @@ impl Color {
                 let [to_rgb_r, to_rgb_g, to_rgb_b]: [u8; 3] =
                     [to_rgb.red, to_rgb.green, to_rgb.blue]
                         .map(|c| (c.clamp(0.0, 1.0) * 255.0).round() as u8);
-                let to_hex = format!("{to_rgb_r:02X}{to_rgb_g:02X}{to_rgb_b:02X}",);
+                let to_hex = format!("{to_rgb_r:02X}{to_rgb_g:02X}{to_rgb_b:02X}");
 
                 Self::new(
                     &to_hex,
@@ -150,7 +151,7 @@ impl Color {
                 let [to_rgb_r, to_rgb_g, to_rgb_b]: [u8; 3] =
                     [to_rgb.red, to_rgb.green, to_rgb.blue]
                         .map(|c| (c.clamp(0.0, 1.0) * 255.0).round() as u8);
-                let to_hex = format!("{to_rgb_r:02X}{to_rgb_g:02X}{to_rgb_b:02X}",);
+                let to_hex = format!("{to_rgb_r:02X}{to_rgb_g:02X}{to_rgb_b:02X}");
 
                 Self::new(
                     &to_hex,
@@ -191,6 +192,27 @@ impl fmt::Display for ColorVariant {
     }
 }
 
+impl FromStr for ColorVariant {
+    type Err = TintedBuilderError;
+
+    /// Parses a string to create a `ColorVariant`.
+    ///
+    /// # Errors
+    ///
+    /// Returns a `TintedBuilderError` if the input string does not match
+    /// any valid color variant.
+    fn from_str(variant_str: &str) -> Result<Self, Self::Err> {
+        match variant_str {
+            "dim" => Ok(Self::Dim),
+            "normal" => Ok(Self::Normal),
+            "bright" => Ok(Self::Bright),
+            _ => Err(TintedBuilderError::InvalidColorVariant(
+                variant_str.to_string(),
+            )),
+        }
+    }
+}
+
 impl ColorVariant {
     #[must_use]
     pub const fn get_list<'a>() -> &'a [Self] {
@@ -213,7 +235,62 @@ pub enum ColorName {
     Orange,
     Gray,
     Brown,
-    Other, // For backward compatibility
+    Other, // For unknown colors
+}
+
+pub struct ColorType(pub ColorName, pub ColorVariant);
+
+impl FromStr for ColorName {
+    type Err = TintedBuilderError;
+
+    /// Parses a string to create a `ColorName`.
+    ///
+    /// # Errors
+    ///
+    /// Returns a `TintedBuilderError` if the input string does not match
+    /// any valid color name.
+    fn from_str(name_str: &str) -> Result<Self, Self::Err> {
+        match name_str {
+            "black" => Ok(Self::Black),
+            "red" => Ok(Self::Red),
+            "green" => Ok(Self::Green),
+            "yellow" => Ok(Self::Yellow),
+            "blue" => Ok(Self::Blue),
+            "magenta" => Ok(Self::Magenta),
+            "cyan" => Ok(Self::Cyan),
+            "white" => Ok(Self::White),
+            "orange" => Ok(Self::Orange),
+            "gray" => Ok(Self::Gray),
+            "brown" => Ok(Self::Brown),
+            "other" => Ok(Self::Other),
+            _ => Err(TintedBuilderError::InvalidColorName(name_str.to_string())),
+        }
+    }
+}
+
+impl FromStr for ColorType {
+    type Err = TintedBuilderError;
+
+    /// Parses a string like `white_normal` into a `ColorType`.
+    ///
+    /// # Errors
+    ///
+    /// Returns a `TintedBuilderError` if the input string does not match
+    /// any valid color type.
+    fn from_str(color_str: &str) -> Result<Self, Self::Err> {
+        let trimmed = color_str.trim();
+        let lower = trimmed.to_lowercase();
+
+        let (name, variant) = lower
+            .split_once('_')
+            .or_else(|| lower.split_once('-'))
+            .ok_or_else(|| TintedBuilderError::InvalidColorType(trimmed.to_string()))?;
+
+        Ok(Self(
+            ColorName::from_str(name)?,
+            ColorVariant::from_str(variant)?,
+        ))
+    }
 }
 
 /// Converts a `(rr, gg, bb)` hex tuple to `rgb` bytes.

@@ -7,60 +7,64 @@ use crate::{
 };
 use std::fmt;
 
-#[non_exhaustive]
-#[derive(Debug, Clone)]
-pub enum UiKey {
-    BackgroundNormal,
-    BackgroundDark,
-    BackgroundLight,
-    Deprecated,
-    ForegroundNormal,
-    ForegroundDark,
-    ForegroundLight,
-    LineBackground,
-    LineForeground,
-    SearchBackground,
-    SearchForeground,
-    SelectionForeground,
-    SelectionBackground,
+macro_rules! define_ui_keys {
+    ($($variant:ident => $str:literal),* $(,)?) => {
+        #[non_exhaustive]
+        #[derive(Debug, Clone)]
+        pub enum UiKey {
+            $($variant),*
+        }
+
+        impl UiKey {
+            const fn as_str(&self) -> &str {
+                match self {
+                    $(Self::$variant => $str),*
+                }
+            }
+
+            #[must_use]
+            pub const fn variants() -> &'static [Self] {
+                &[$(Self::$variant),*]
+            }
+        }
+    };
 }
 
-impl UiKey {
-    const fn as_str(&self) -> &str {
-        match self {
-            Self::BackgroundNormal => "background.normal",
-            Self::BackgroundDark => "background.dark",
-            Self::BackgroundLight => "background.light",
-            Self::Deprecated => "deprecated",
-            Self::ForegroundNormal => "foreground.normal",
-            Self::ForegroundDark => "foreground.dark",
-            Self::ForegroundLight => "foreground.light",
-            Self::LineBackground => "line.background",
-            Self::LineForeground => "line.foreground",
-            Self::SearchBackground => "search.background",
-            Self::SearchForeground => "search.foreground",
-            Self::SelectionForeground => "selection.foreground",
-            Self::SelectionBackground => "selection.background",
-        }
-    }
-
-    pub const fn variants() -> &'static [Self] {
-        &[
-            Self::BackgroundNormal,
-            Self::BackgroundDark,
-            Self::BackgroundLight,
-            Self::Deprecated,
-            Self::ForegroundNormal,
-            Self::ForegroundDark,
-            Self::ForegroundLight,
-            Self::LineBackground,
-            Self::LineForeground,
-            Self::SearchBackground,
-            Self::SearchForeground,
-            Self::SelectionForeground,
-            Self::SelectionBackground,
-        ]
-    }
+define_ui_keys! {
+    GlobalBackgroundNormal => "global.background.normal",
+    GlobalBackgroundDark => "global.background.dark",
+    GlobalBackgroundLight => "global.background.light",
+    Deprecated => "deprecated",
+    Accent => "accent",
+    Border => "border",
+    Cursor => "cursor",
+    GlobalForegroundNormal => "global.foreground.normal",
+    GlobalForegroundDark => "global.foreground.dark",
+    GlobalForegroundLight => "global.foreground.light",
+    GutterBackground => "gutter.background",
+    GutterForeground => "gutter.foreground",
+    HighlightTextBackground => "highlight.text.background",
+    HighlightTextForeground => "highlight.text.foreground",
+    HighlightTextActiveBackground => "highlight.text.active-background",
+    HighlightTextActiveForeground => "highlight.text.active-foreground",
+    HighlightLineBackground => "highlight.line.background",
+    HighlightLineForeground => "highlight.line.foreground",
+    IndentGuideBackground => "indent-guide.background",
+    IndentGuideActiveBackground => "indent-guide.active-background",
+    Link => "link",
+    HighlightSearchBackground => "highlight.search.background",
+    HighlightSearchForeground => "highlight.search.foreground",
+    HighlightButtonBackground => "highlight.button.background",
+    HighlightButtonForeground => "highlight.button.foreground",
+    SelectionForeground => "selection.foreground",
+    SelectionBackground => "selection.background",
+    SelectionInactiveBackground => "selection.inactive-background",
+    StatusError => "status.error",
+    StatusWarning => "status.warning",
+    StatusInfo => "status.info",
+    TooltipBackground => "tooltip.background",
+    TooltipForeground => "tooltip.foreground",
+    WhitespaceForeground => "whitespace.foreground",
 }
 
 impl fmt::Display for UiKey {
@@ -73,129 +77,276 @@ impl fmt::Display for UiKey {
 
 #[derive(Debug, Clone, Serialize)]
 pub struct Ui {
-    pub background: UiBackground,
     pub deprecated: Color,
-    pub foreground: UiForeground,
-    pub line: UiLine,
-    pub search: UiSearch,
+    pub accent: Color,
+    pub border: Color,
+    pub cursor: Color,
+    pub global: UiGlobal,
+    pub gutter: UiBgFg,
+    pub highlight: UiHighlight,
+    #[serde(rename = "indent-guide")]
+    pub indent_guide: UiIndentGuide,
+    pub link: Color,
     pub selection: UiSelection,
+    pub status: UiStatus,
+    pub tooltip: UiBgFg,
+    pub whitespace: UiWhitespace,
 }
 
 impl Ui {
     pub fn new(palette: &Palette) -> Self {
-        let background = UiBackground {
+        let background = UiGlobalBackground {
             normal: palette.black_normal.clone(),
             dark: palette.black_dim.clone(),
             light: palette.black_bright.clone(),
         };
-        let foreground = UiForeground {
+        let foreground = UiGlobalForeground {
             normal: palette.white_normal.clone(),
             dark: palette.white_dim.clone(),
             light: palette.white_bright.clone(),
         };
-        let line = UiLine {
-            background: palette.gray_dim.clone(),
-            foreground: palette.white_dim.clone(),
+        let global = UiGlobal {
+            background: background.clone(),
+            foreground: foreground.clone(),
         };
-        let search = UiSearch {
-            background: palette.black_bright.clone(),
-            foreground: palette.yellow_normal.clone(),
+        let gutter = UiBgFg {
+            background: background.normal.clone(),
+            foreground: foreground.normal.clone(),
+        };
+        let highlight = UiHighlight {
+            button: UiBgFg {
+                background: palette.black_bright.clone(),
+                foreground: palette.white_normal.clone(),
+            },
+            line: UiBgFg {
+                background: palette.gray_dim.clone(),
+                foreground: palette.white_dim.clone(),
+            },
+            text: UiHighlightText {
+                background: palette.gray_dim.clone(),
+                foreground: palette.white_normal.clone(),
+                active_background: palette.gray_normal.clone(),
+                active_foreground: palette.white_normal.clone(),
+            },
+            search: UiBgFg {
+                background: palette.black_bright.clone(),
+                foreground: palette.yellow_normal.clone(),
+            },
+        };
+        let indent_guide = UiIndentGuide {
+            background: background.light,
+            active_background: palette.gray_dim.clone(),
         };
         let selection = UiSelection {
             background: palette.black_bright.clone(),
             foreground: palette.white_normal.clone(),
+            inactive_background: palette.black_bright.clone(),
+        };
+        let accent = palette.blue_normal.clone();
+        let border = palette.gray_dim.clone();
+        let cursor = foreground.normal.clone();
+        let link = palette.cyan_normal.clone();
+        let status = UiStatus {
+            error: palette.red_normal.clone(),
+            info: palette.orange_normal.clone(),
+            success: palette.green_normal.clone(),
+            warning: palette.yellow_normal.clone(),
+        };
+        let tooltip = UiBgFg {
+            background: palette.black_dim.clone(),
+            foreground: foreground.normal,
+        };
+        let whitespace = UiWhitespace {
+            foreground: palette.gray_normal.clone(),
         };
 
         Self {
-            background,
-            foreground,
+            global,
             deprecated: palette.brown_normal.clone(),
-            search,
-            line,
+            accent,
+            border,
+            cursor,
+            gutter,
+            highlight,
+            indent_guide,
+            link,
             selection,
+            status,
+            tooltip,
+            whitespace,
         }
     }
     #[allow(clippy::too_many_lines)]
     pub fn try_from_basic(basic: BasicUi, palette: &Palette) -> Result<Self, UiError> {
         let default = Self::new(palette);
 
-        let background = UiBackground {
+        let background = UiGlobalBackground {
             normal: basic
-                .background_normal
+                .global_background_normal
                 .map_or_else(
-                    || Ok(default.background.normal),
+                    || Ok(default.global.background.normal),
                     |ref s| Color::new(s, None, None),
                 )
                 .map_err(|err| UiError::UnableToConvertFrom(err.to_string()))?,
             dark: basic
-                .background_dark
+                .global_background_dark
                 .map_or_else(
-                    || Ok(default.background.dark),
+                    || Ok(default.global.background.dark),
                     |ref s| Color::new(s, None, None),
                 )
                 .map_err(|err| UiError::UnableToConvertFrom(err.to_string()))?,
             light: basic
-                .background_light
+                .global_background_light
                 .map_or_else(
-                    || Ok(default.background.light),
+                    || Ok(default.global.background.light),
                     |ref s| Color::new(s, None, None),
                 )
                 .map_err(|err| UiError::UnableToConvertFrom(err.to_string()))?,
         };
 
-        let foreground = UiForeground {
+        let foreground = UiGlobalForeground {
             normal: basic
-                .foreground_normal
+                .global_foreground_normal
                 .map_or_else(
-                    || Ok(default.foreground.normal),
+                    || Ok(default.global.foreground.normal),
                     |ref s| Color::new(s, None, None),
                 )
                 .map_err(|err| UiError::UnableToConvertFrom(err.to_string()))?,
             dark: basic
-                .foreground_dark
+                .global_foreground_dark
                 .map_or_else(
-                    || Ok(default.foreground.dark),
+                    || Ok(default.global.foreground.dark),
                     |ref s| Color::new(s, None, None),
                 )
                 .map_err(|err| UiError::UnableToConvertFrom(err.to_string()))?,
             light: basic
-                .foreground_light
+                .global_foreground_light
                 .map_or_else(
-                    || Ok(default.foreground.light),
+                    || Ok(default.global.foreground.light),
+                    |ref s| Color::new(s, None, None),
+                )
+                .map_err(|err| UiError::UnableToConvertFrom(err.to_string()))?,
+        };
+        let global = UiGlobal {
+            background,
+            foreground,
+        };
+
+        let gutter = UiBgFg {
+            background: basic
+                .gutter_background
+                .map_or_else(
+                    || Ok(default.gutter.background),
+                    |ref s| Color::new(s, None, None),
+                )
+                .map_err(|err| UiError::UnableToConvertFrom(err.to_string()))?,
+            foreground: basic
+                .gutter_foreground
+                .map_or_else(
+                    || Ok(default.gutter.foreground),
                     |ref s| Color::new(s, None, None),
                 )
                 .map_err(|err| UiError::UnableToConvertFrom(err.to_string()))?,
         };
 
-        let line = UiLine {
+        let highlight_button = UiBgFg {
             background: basic
-                .line_background
+                .highlight_button_background
                 .map_or_else(
-                    || Ok(default.line.background),
+                    || Ok(default.highlight.button.background),
                     |ref s| Color::new(s, None, None),
                 )
                 .map_err(|err| UiError::UnableToConvertFrom(err.to_string()))?,
             foreground: basic
-                .line_foreground
+                .highlight_button_foreground
                 .map_or_else(
-                    || Ok(default.line.foreground),
+                    || Ok(default.highlight.button.foreground),
+                    |ref s| Color::new(s, None, None),
+                )
+                .map_err(|err| UiError::UnableToConvertFrom(err.to_string()))?,
+        };
+        let highlight_text = UiHighlightText {
+            background: basic
+                .highlight_text_background
+                .map_or_else(
+                    || Ok(default.highlight.text.background),
+                    |ref s| Color::new(s, None, None),
+                )
+                .map_err(|err| UiError::UnableToConvertFrom(err.to_string()))?,
+            foreground: basic
+                .highlight_text_foreground
+                .map_or_else(
+                    || Ok(default.highlight.text.foreground),
+                    |ref s| Color::new(s, None, None),
+                )
+                .map_err(|err| UiError::UnableToConvertFrom(err.to_string()))?,
+            active_background: basic
+                .highlight_text_active_background
+                .map_or_else(
+                    || Ok(default.highlight.text.active_background),
+                    |ref s| Color::new(s, None, None),
+                )
+                .map_err(|err| UiError::UnableToConvertFrom(err.to_string()))?,
+            active_foreground: basic
+                .highlight_text_active_foreground
+                .map_or_else(
+                    || Ok(default.highlight.text.active_foreground),
+                    |ref s| Color::new(s, None, None),
+                )
+                .map_err(|err| UiError::UnableToConvertFrom(err.to_string()))?,
+        };
+        let highlight_line = UiBgFg {
+            background: basic
+                .highlight_line_background
+                .map_or_else(
+                    || Ok(default.highlight.line.background),
+                    |ref s| Color::new(s, None, None),
+                )
+                .map_err(|err| UiError::UnableToConvertFrom(err.to_string()))?,
+            foreground: basic
+                .highlight_line_foreground
+                .map_or_else(
+                    || Ok(default.highlight.line.foreground),
+                    |ref s| Color::new(s, None, None),
+                )
+                .map_err(|err| UiError::UnableToConvertFrom(err.to_string()))?,
+        };
+        let highlight_search = UiBgFg {
+            background: basic
+                .highlight_search_background
+                .map_or_else(
+                    || Ok(default.highlight.search.background),
+                    |ref s| Color::new(s, None, None),
+                )
+                .map_err(|err| UiError::UnableToConvertFrom(err.to_string()))?,
+            foreground: basic
+                .highlight_search_foreground
+                .map_or_else(
+                    || Ok(default.highlight.search.foreground),
                     |ref s| Color::new(s, None, None),
                 )
                 .map_err(|err| UiError::UnableToConvertFrom(err.to_string()))?,
         };
 
-        let search = UiSearch {
+        let highlight = UiHighlight {
+            button: highlight_button,
+            line: highlight_line,
+            search: highlight_search,
+            text: highlight_text,
+        };
+
+        let indent_guide = UiIndentGuide {
             background: basic
-                .search_background
+                .indent_guide_background
                 .map_or_else(
-                    || Ok(default.search.background),
+                    || Ok(default.indent_guide.background),
                     |ref s| Color::new(s, None, None),
                 )
                 .map_err(|err| UiError::UnableToConvertFrom(err.to_string()))?,
-            foreground: basic
-                .search_foreground
+            active_background: basic
+                .indent_guide_active_background
                 .map_or_else(
-                    || Ok(default.search.foreground),
+                    || Ok(default.indent_guide.active_background),
                     |ref s| Color::new(s, None, None),
                 )
                 .map_err(|err| UiError::UnableToConvertFrom(err.to_string()))?,
@@ -216,36 +367,135 @@ impl Ui {
                     |ref s| Color::new(s, None, None),
                 )
                 .map_err(|err| UiError::UnableToConvertFrom(err.to_string()))?,
+            inactive_background: basic
+                .selection_inactive_background
+                .map_or_else(
+                    || Ok(default.selection.inactive_background),
+                    |ref s| Color::new(s, None, None),
+                )
+                .map_err(|err| UiError::UnableToConvertFrom(err.to_string()))?,
         };
 
         Ok(Self {
-            background,
+            global,
             deprecated: basic
                 .deprecated
                 .map_or_else(|| Ok(default.deprecated), |ref s| Color::new(s, None, None))
                 .map_err(|err| UiError::UnableToConvertFrom(err.to_string()))?,
-            foreground,
-            search,
-            line,
+            accent: basic
+                .accent
+                .map_or_else(|| Ok(default.accent), |ref s| Color::new(s, None, None))
+                .map_err(|err| UiError::UnableToConvertFrom(err.to_string()))?,
+            border: basic
+                .border
+                .map_or_else(|| Ok(default.border), |ref s| Color::new(s, None, None))
+                .map_err(|err| UiError::UnableToConvertFrom(err.to_string()))?,
+            cursor: basic
+                .cursor
+                .map_or_else(|| Ok(default.cursor), |ref s| Color::new(s, None, None))
+                .map_err(|err| UiError::UnableToConvertFrom(err.to_string()))?,
+            gutter,
+            highlight,
+            indent_guide,
+            link: basic
+                .link
+                .map_or_else(|| Ok(default.link), |ref s| Color::new(s, None, None))
+                .map_err(|err| UiError::UnableToConvertFrom(err.to_string()))?,
             selection,
+            status: UiStatus {
+                error: basic
+                    .status_error
+                    .map_or_else(
+                        || Ok(default.status.error),
+                        |ref s| Color::new(s, None, None),
+                    )
+                    .map_err(|err| UiError::UnableToConvertFrom(err.to_string()))?,
+                info: basic
+                    .status_info
+                    .map_or_else(
+                        || Ok(default.status.info),
+                        |ref s| Color::new(s, None, None),
+                    )
+                    .map_err(|err| UiError::UnableToConvertFrom(err.to_string()))?,
+                success: basic
+                    .status_success
+                    .map_or_else(
+                        || Ok(default.status.success),
+                        |ref s| Color::new(s, None, None),
+                    )
+                    .map_err(|err| UiError::UnableToConvertFrom(err.to_string()))?,
+                warning: basic
+                    .status_warning
+                    .map_or_else(
+                        || Ok(default.status.warning),
+                        |ref s| Color::new(s, None, None),
+                    )
+                    .map_err(|err| UiError::UnableToConvertFrom(err.to_string()))?,
+            },
+            tooltip: UiBgFg {
+                background: basic
+                    .tooltip_background
+                    .map_or_else(
+                        || Ok(default.tooltip.background),
+                        |ref s| Color::new(s, None, None),
+                    )
+                    .map_err(|err| UiError::UnableToConvertFrom(err.to_string()))?,
+                foreground: basic
+                    .tooltip_foreground
+                    .map_or_else(
+                        || Ok(default.tooltip.foreground),
+                        |ref s| Color::new(s, None, None),
+                    )
+                    .map_err(|err| UiError::UnableToConvertFrom(err.to_string()))?,
+            },
+            whitespace: UiWhitespace {
+                foreground: basic
+                    .whitespace_foreground
+                    .map_or_else(
+                        || Ok(default.whitespace.foreground),
+                        |ref s| Color::new(s, None, None),
+                    )
+                    .map_err(|err| UiError::UnableToConvertFrom(err.to_string()))?,
+            },
         })
     }
 
     pub const fn get_color(&self, key: &UiKey) -> &Color {
         match key {
-            UiKey::BackgroundNormal => &self.background.normal,
-            UiKey::BackgroundDark => &self.background.dark,
-            UiKey::BackgroundLight => &self.background.light,
+            UiKey::GlobalBackgroundNormal => &self.global.background.normal,
+            UiKey::GlobalBackgroundDark => &self.global.background.dark,
+            UiKey::GlobalBackgroundLight => &self.global.background.light,
             UiKey::Deprecated => &self.deprecated,
-            UiKey::ForegroundNormal => &self.foreground.normal,
-            UiKey::ForegroundDark => &self.foreground.dark,
-            UiKey::ForegroundLight => &self.foreground.light,
-            UiKey::LineBackground => &self.line.background,
-            UiKey::LineForeground => &self.line.foreground,
-            UiKey::SearchBackground => &self.search.background,
-            UiKey::SearchForeground => &self.search.foreground,
+            UiKey::Accent => &self.accent,
+            UiKey::Border => &self.border,
+            UiKey::Cursor => &self.cursor,
+            UiKey::GlobalForegroundNormal => &self.global.foreground.normal,
+            UiKey::GlobalForegroundDark => &self.global.foreground.dark,
+            UiKey::GlobalForegroundLight => &self.global.foreground.light,
+            UiKey::GutterBackground => &self.gutter.background,
+            UiKey::GutterForeground => &self.gutter.foreground,
+            UiKey::HighlightLineBackground => &self.highlight.line.background,
+            UiKey::HighlightLineForeground => &self.highlight.line.foreground,
+            UiKey::HighlightSearchBackground => &self.highlight.search.background,
+            UiKey::HighlightSearchForeground => &self.highlight.search.foreground,
+            UiKey::HighlightTextBackground => &self.highlight.text.background,
+            UiKey::HighlightTextForeground => &self.highlight.text.foreground,
+            UiKey::HighlightTextActiveBackground => &self.highlight.text.active_background,
+            UiKey::HighlightTextActiveForeground => &self.highlight.text.active_foreground,
+            UiKey::HighlightButtonBackground => &self.highlight.button.background,
+            UiKey::HighlightButtonForeground => &self.highlight.button.foreground,
+            UiKey::IndentGuideBackground => &self.indent_guide.background,
+            UiKey::IndentGuideActiveBackground => &self.indent_guide.active_background,
+            UiKey::Link => &self.link,
             UiKey::SelectionForeground => &self.selection.foreground,
             UiKey::SelectionBackground => &self.selection.background,
+            UiKey::SelectionInactiveBackground => &self.selection.inactive_background,
+            UiKey::StatusError => &self.status.error,
+            UiKey::StatusWarning => &self.status.warning,
+            UiKey::StatusInfo => &self.status.info,
+            UiKey::TooltipBackground => &self.tooltip.background,
+            UiKey::TooltipForeground => &self.tooltip.foreground,
+            UiKey::WhitespaceForeground => &self.whitespace.foreground,
         }
     }
 }
@@ -267,29 +517,64 @@ pub enum UiError {
 }
 
 #[derive(Debug, Clone, Serialize)]
-pub struct UiBackground {
+pub struct UiGlobal {
+    pub background: UiGlobalBackground,
+    pub foreground: UiGlobalForeground,
+}
+#[derive(Debug, Clone, Serialize)]
+pub struct UiGlobalBackground {
     pub normal: Color,
     pub dark: Color,
     pub light: Color,
 }
 #[derive(Debug, Clone, Serialize)]
-pub struct UiForeground {
+pub struct UiGlobalForeground {
     pub normal: Color,
     pub dark: Color,
     pub light: Color,
 }
 #[derive(Debug, Clone, Serialize)]
-pub struct UiLine {
+pub struct UiHighlight {
+    pub button: UiBgFg,
+    pub line: UiBgFg,
+    pub search: UiBgFg,
+    pub text: UiHighlightText,
+}
+#[derive(Debug, Clone, Serialize)]
+pub struct UiHighlightText {
     pub background: Color,
     pub foreground: Color,
+    #[serde(rename = "active-background")]
+    pub active_background: Color,
+    #[serde(rename = "active-foreground")]
+    pub active_foreground: Color,
 }
 #[derive(Debug, Clone, Serialize)]
-pub struct UiSearch {
+pub struct UiIndentGuide {
+    pub background: Color,
+    #[serde(rename = "active-background")]
+    pub active_background: Color,
+}
+#[derive(Debug, Clone, Serialize)]
+pub struct UiBgFg {
     pub background: Color,
     pub foreground: Color,
 }
 #[derive(Debug, Clone, Serialize)]
 pub struct UiSelection {
     pub background: Color,
+    pub foreground: Color,
+    #[serde(rename = "inactive-background")]
+    pub inactive_background: Color,
+}
+#[derive(Debug, Clone, Serialize)]
+pub struct UiStatus {
+    pub error: Color,
+    pub info: Color,
+    pub success: Color,
+    pub warning: Color,
+}
+#[derive(Debug, Clone, Serialize)]
+pub struct UiWhitespace {
     pub foreground: Color,
 }
