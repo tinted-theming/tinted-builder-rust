@@ -124,36 +124,84 @@ fn flatten_mapping(prefix: Option<&str>, map: &Mapping) -> Mapping {
 }
 
 #[derive(Deserialize, Serialize, Default)]
-#[serde(rename_all = "kebab-case")]
+#[serde(deny_unknown_fields, rename_all = "kebab-case")]
 pub struct BasicUi {
-    #[serde(rename = "background.normal")]
-    pub background_normal: Option<String>,
-    #[serde(rename = "background.dark")]
-    pub background_dark: Option<String>,
-    #[serde(rename = "background.light")]
-    pub background_light: Option<String>,
+    #[serde(rename = "global.background.normal")]
+    pub global_background_normal: Option<String>,
+    #[serde(rename = "global.background.dark")]
+    pub global_background_dark: Option<String>,
+    #[serde(rename = "global.background.light")]
+    pub global_background_light: Option<String>,
     pub deprecated: Option<String>,
-    #[serde(rename = "foreground.normal")]
-    pub foreground_normal: Option<String>,
-    #[serde(rename = "foreground.dark")]
-    pub foreground_dark: Option<String>,
-    #[serde(rename = "foreground.light")]
-    pub foreground_light: Option<String>,
+    #[serde(rename = "accent")]
+    pub accent: Option<String>,
+    #[serde(rename = "border")]
+    pub border: Option<String>,
+    #[serde(rename = "cursor")]
+    pub cursor: Option<String>,
+    #[serde(rename = "global.foreground.normal")]
+    pub global_foreground_normal: Option<String>,
+    #[serde(rename = "global.foreground.dark")]
+    pub global_foreground_dark: Option<String>,
+    #[serde(rename = "global.foreground.light")]
+    pub global_foreground_light: Option<String>,
+    #[serde(rename = "gutter.background")]
+    pub gutter_background: Option<String>,
+    #[serde(rename = "gutter.foreground")]
+    pub gutter_foreground: Option<String>,
+    #[serde(rename = "highlight.line.background")]
+    pub highlight_line_background: Option<String>,
+    #[serde(rename = "highlight.line.foreground")]
+    pub highlight_line_foreground: Option<String>,
+    #[serde(rename = "highlight.search.background")]
+    pub highlight_search_background: Option<String>,
+    #[serde(rename = "highlight.search.foreground")]
+    pub highlight_search_foreground: Option<String>,
+    #[serde(rename = "highlight.text.background")]
+    pub highlight_text_background: Option<String>,
+    #[serde(rename = "highlight.text.foreground")]
+    pub highlight_text_foreground: Option<String>,
+    #[serde(rename = "highlight.text.active-background")]
+    pub highlight_text_active_background: Option<String>,
+    #[serde(rename = "highlight.text.active-foreground")]
+    pub highlight_text_active_foreground: Option<String>,
+    #[serde(rename = "highlight.button.background")]
+    pub highlight_button_background: Option<String>,
+    #[serde(rename = "highlight.button.foreground")]
+    pub highlight_button_foreground: Option<String>,
+    #[serde(rename = "indent-guide.background")]
+    pub indent_guide_background: Option<String>,
+    #[serde(rename = "indent-guide.active-background")]
+    pub indent_guide_active_background: Option<String>,
     #[serde(rename = "line.background")]
     pub line_background: Option<String>,
     #[serde(rename = "line.foreground")]
     pub line_foreground: Option<String>,
-    #[serde(rename = "search.background")]
-    pub search_background: Option<String>,
-    #[serde(rename = "search.foreground")]
-    pub search_foreground: Option<String>,
+    #[serde(rename = "link")]
+    pub link: Option<String>,
     #[serde(rename = "selection.background")]
     pub selection_background: Option<String>,
     #[serde(rename = "selection.foreground")]
     pub selection_foreground: Option<String>,
+    #[serde(rename = "selection.inactive-background")]
+    pub selection_inactive_background: Option<String>,
+    #[serde(rename = "status.error")]
+    pub status_error: Option<String>,
+    #[serde(rename = "status.info")]
+    pub status_info: Option<String>,
+    #[serde(rename = "status.success")]
+    pub status_success: Option<String>,
+    #[serde(rename = "status.warning")]
+    pub status_warning: Option<String>,
+    #[serde(rename = "tooltip.background")]
+    pub tooltip_background: Option<String>,
+    #[serde(rename = "tooltip.foreground")]
+    pub tooltip_foreground: Option<String>,
+    pub whitespace_foreground: Option<String>,
 }
 
 #[derive(Deserialize, Serialize)]
+#[serde(deny_unknown_fields)]
 pub struct BasicPalette {
     pub black: String,
     #[serde(rename = "black-dim")]

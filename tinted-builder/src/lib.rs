@@ -6,7 +6,7 @@ mod utils;
 
 pub use error::TintedBuilderError;
 pub use scheme::{
-    Base16Scheme, Color, ColorName, ColorVariant, Scheme, SchemeSystem, SchemeVariant,
+    Base16Scheme, Color, ColorName, ColorType, ColorVariant, Scheme, SchemeSystem, SchemeVariant,
 };
 pub use template::Template;
 

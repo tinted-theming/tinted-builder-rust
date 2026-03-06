@@ -29,9 +29,9 @@ fn deserialize_family_style_derives_name() -> Result<(), TintedBuilderError> {
 fn deserialize_ui_overrides() -> Result<(), TintedBuilderError> {
     let scheme: Tinted8Scheme = serde_yaml::from_str(SCHEME_WITH_UI)?;
 
-    assert_eq!(scheme.ui.background.normal.to_hex(), "111111");
-    assert_eq!(scheme.ui.foreground.normal.to_hex(), "eeeeee");
-    assert_eq!(scheme.ui.background.dark.to_hex(), "000000");
+    assert_eq!(scheme.ui.global.background.normal.to_hex(), "111111");
+    assert_eq!(scheme.ui.global.foreground.normal.to_hex(), "eeeeee");
+    assert_eq!(scheme.ui.global.background.dark.to_hex(), "000000");
 
     Ok(())
 }
@@ -57,17 +57,18 @@ palette:
   cyan:    "#00ffff"
   white:   "#ffffff"
 ui:
-  background:
-    normal: "#111111"
-    dark:   "#000000"
-  foreground:
-    normal: "#eeeeee"
+  global:
+    background:
+      normal: "#111111"
+      dark:   "#000000"
+    foreground:
+      normal: "#eeeeee"
 "##,
     )?;
 
-    assert_eq!(scheme.ui.background.normal.to_hex(), "111111");
-    assert_eq!(scheme.ui.foreground.normal.to_hex(), "eeeeee");
-    assert_eq!(scheme.ui.background.dark.to_hex(), "000000");
+    assert_eq!(scheme.ui.global.background.normal.to_hex(), "111111");
+    assert_eq!(scheme.ui.global.foreground.normal.to_hex(), "eeeeee");
+    assert_eq!(scheme.ui.global.background.dark.to_hex(), "000000");
 
     Ok(())
 }
@@ -77,15 +78,15 @@ fn deserialize_ui_normals_from_palette() -> Result<(), TintedBuilderError> {
     let scheme: Tinted8Scheme = serde_yaml::from_str(SCHEME_MINIMAL)?;
 
     assert_eq!(
-        scheme.ui.background.normal.to_hex(),
+        scheme.ui.global.background.normal.to_hex(),
         scheme.palette.black_normal.to_hex()
     );
     assert_eq!(
-        scheme.ui.foreground.normal.to_hex(),
+        scheme.ui.global.foreground.normal.to_hex(),
         scheme.palette.white_normal.to_hex()
     );
     assert_eq!(
-        scheme.ui.search.foreground.to_hex(),
+        scheme.ui.highlight.search.foreground.to_hex(),
         scheme.palette.yellow_normal.to_hex()
     );
 
@@ -169,7 +170,7 @@ fn deserialize_full_scheme() -> Result<(), TintedBuilderError> {
     assert_eq!(ts.syntax.comment.to_hex(), "565f89");
     assert_eq!(ts.syntax.entity.name.default.to_hex(), "7aa2f7");
     assert_eq!(ts.syntax.entity.other.attribute_name.to_hex(), "e0af68");
-    assert_eq!(ts.ui.background.normal.to_hex(), "ff0000");
+    assert_eq!(ts.ui.global.background.normal.to_hex(), "ff0000");
     assert_eq!(ts.ui.selection.background.to_hex(), "33467c");
 
     Ok(())
@@ -258,8 +259,9 @@ palette:
   cyan:    "#00ffff"
   white:   "#ffffff"
 ui:
-  background.normal: "#111111"
-  foreground.normal: "#eeeeee"
+  global.background.normal: "#111111"
+  global.foreground.normal: "#eeeeee"
+  global.background.dark: "#000000"
 "##;
 
 const SCHEME_WITH_SYNTAX: &str = r##"
@@ -315,8 +317,9 @@ syntax:
   diff.added: "#9ece6a"
   diff.deleted: "#f7768e"
 ui:
-  background:
-    normal: "#ff0000"
-  foreground: "#c0caf5"
+  global:
+    background:
+      normal: "#ff0000"
+    foreground.normal: "#c0caf5"
   selection.background: "#33467c"
 "##;

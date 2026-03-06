@@ -7,7 +7,7 @@ use std::{fmt, str::FromStr};
 
 pub use crate::scheme::base16::Base16Scheme;
 pub use crate::scheme::color::Color;
-pub use crate::scheme::color::{ColorName, ColorVariant};
+pub use crate::scheme::color::{ColorName, ColorType, ColorVariant};
 pub use crate::scheme::tinted8::Scheme as Tinted8Scheme;
 use crate::TintedBuilderError;
 
