@@ -25,7 +25,7 @@ fn test_get_scheme_files_recursive() -> Result<()> {
     // ---
     // Act
     // ---
-    let scheme_files = get_scheme_files(&[schemes_path], true)?;
+    let scheme_files = get_scheme_files(&schemes_path, &[], true)?;
     let mut scheme_names: Vec<String> = vec![];
     let mut scheme_authors: Vec<String> = vec![];
     let mut scheme_variants: Vec<SchemeVariant> = vec![];
@@ -141,7 +141,7 @@ palette:
     // ---
     // Act
     // ---
-    let scheme_files = get_scheme_files(&[data_path], false)?;
+    let scheme_files = get_scheme_files(&data_path, &[], false)?;
     let scheme_container = scheme_files
         .first()
         .expect("Unable to extract scheme_file")

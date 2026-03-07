@@ -60,7 +60,8 @@ The following is a table of the available subcommands for the CLI tool (tinted-b
 
 | Flag/Option | Description | Applicable Subcommands | Default Value | Example Usage |
 |-------------|-------------|------------------------|---------------|---------------|
-| `--schemes-dir` `-s` | Path to one or more local schemes directories. Repeat this flag to include multiple directories. Used by `build` to find schemes and by `sync` to clone/pull into those paths. | `build`, `sync` | Defaults to `<data-dir>/schemes` | `tinted-builder-rust build . -s /path/one -s /path/two` |
+| `--schemes-dir` `-s` | Path to local schemes directories.  Used by `build` to find schemes and by `sync` to clone/pull into those paths. | `build`, `sync` | Defaults to `<data-dir>/schemes` | `tinted-builder-rust build . -s /path/one -s /path/two` |
+| `--ignore` `-i`   | One or more glob patterns to skip when scanning schemes. Repeat this flag to add multiple ignores. | `build` | - | `tinted-builder-rust build . --ignore "**/LICENSE"` |
 | `--data-dir` `-d` | Specifies a custom path for the data directory. | All | Linux: `$XDG_DATA_HOME/tinted-theming/tinted-builder-rust`. macOS: `~/Library/Application\ Support/tinted-theming/tinted-builder-rust` | `tinted-builder-rust sync --data-dir /path/to/custom/data-dir` |
 | `--help` `-h` | Displays help information for the subcommand. | All | - | `tinted-builder-rust --help`, `tinted-builder-rust build --help`, etc |
 | `--version` `-V` | Shows the version of tinted-builder-rust. | All | - | `tinted-builder-rust --version` |
