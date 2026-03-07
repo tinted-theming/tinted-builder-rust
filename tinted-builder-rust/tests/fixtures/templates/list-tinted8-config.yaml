@@ -2,7 +2,7 @@ list:
   filename: "{{ scheme-system }}-list.txt"
   supported-systems: [tinted8]
   supports:
-    tinted8-builder: 0.1.0
-    tinted8-styling: 0.1.0
+    tinted8-builder: 0.2.0
+    tinted8-styling: 0.2.0
   options:
     list: true

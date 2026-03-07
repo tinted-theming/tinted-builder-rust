@@ -1,6 +1,6 @@
 scheme:
   system: "tinted8"
-  system-version: "0.1.0"
+  system-version: "0.2.0"
   name: "Catppuccin Mocha"
   author: "https://github.com/catppuccin/catppuccin"
 variant: "dark"

@@ -1,6 +1,6 @@
 scheme:
   system: "tinted8"
-  system-version: "0.1.0"
+  system-version: "0.2.0"
   name: "Gruvbox Dark"
   author: "Tinted Theming (https://github.com/tinted-theming), morhetz (https://github.com/morhetz/gruvbox)"
 variant: "dark"

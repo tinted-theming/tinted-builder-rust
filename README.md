@@ -92,7 +92,7 @@ In addition to Base16/Base24, this repository provides Tinted8 support in the
 library crate and CLI. Tinted8 simplifies schemes into a small, consistent set
 of keys and lets builders derive variants and supplemental colors.
 
-- Supported specs: Tinted8 Styling `~0.1.0`, Tinted8 Builder `~0.1.0`.
+- Supported specs: Tinted8 Styling `~0.2.0`, Tinted8 Builder `~0.2.0`.
 - UI keys use flat, kebab-case names (see below).
 
 Example minimal Tinted8 scheme (YAML):
@@ -100,7 +100,7 @@ Example minimal Tinted8 scheme (YAML):
 ```
 scheme:
   system: "tinted8"
-  system-version: "0.1.0"
+  system-version: "0.2.0"
   author: "User <user@example.com>"
   name: "Ayu Mirage"
   slug: "ayu-mirage"

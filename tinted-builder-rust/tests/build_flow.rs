@@ -31,7 +31,7 @@ fn e300_missing_supports_for_tinted8() -> Result<()> {
     let scheme_yaml = r##"
 scheme:
   system: "tinted8"
-  system-version: "0.1.0"
+  system-version: "0.2.0"
   name: "Test"
   author: "Me"
 variant: "dark"
@@ -74,7 +74,7 @@ fn e303_missing_mustache_template() -> Result<()> {
     let scheme_yaml = r##"
 scheme:
   system: "tinted8"
-  system-version: "0.1.0"
+  system-version: "0.2.0"
   name: "Test"
   author: "Me"
 variant: "dark"
@@ -93,8 +93,8 @@ default:
   filename: "out/{{ scheme-system }}-{{ scheme-slug }}.txt"
   supported-systems: [tinted8]
   supports:
-    tinted8-styling: ">=0.1.0"
-    tinted8-builder: ">=0.1.0"
+    tinted8-styling: ">=0.2.0"
+    tinted8-builder: ">=0.2.0"
 "#;
 
     create_dir_all(&schemes)?;
@@ -119,7 +119,7 @@ fn e002_styling_version_incompatible_template() -> Result<()> {
     let scheme_yaml = r##"
 scheme:
   system: "tinted8"
-  system-version: "0.1.0"
+  system-version: "0.2.0"
   name: "Test"
   author: "Me"
 variant: "dark"
@@ -163,7 +163,7 @@ fn e003_builder_version_incompatible() -> Result<()> {
     let scheme_yaml = r##"
 scheme:
   system: "tinted8"
-  system-version: "0.1.0"
+  system-version: "0.2.0"
   name: "Test"
   author: "Me"
 variant: "dark"
@@ -207,7 +207,7 @@ fn e301_missing_styling_entry() -> Result<()> {
     let scheme_yaml = r##"
 scheme:
   system: "tinted8"
-  system-version: "0.1.0"
+  system-version: "0.2.0"
   name: "Test"
   author: "Me"
 variant: "dark"
@@ -250,7 +250,7 @@ fn e302_missing_builder_entry() -> Result<()> {
     let scheme_yaml = r##"
 scheme:
   system: "tinted8"
-  system-version: "0.1.0"
+  system-version: "0.2.0"
   name: "Test"
   author: "Me"
 variant: "dark"
@@ -322,7 +322,7 @@ fn e110_unknown_scheme_system() -> Result<()> {
     let unknown_yaml = r##"
 scheme:
   system: "tinted9"
-  system-version: "0.1.0"
+  system-version: "0.2.0"
   name: "Bad"
   author: "Me"
 variant: "dark"
@@ -393,8 +393,8 @@ default:
   filename: "out/{{ scheme-system }}-{{ scheme-slug }}.txt"
   supported-systems: [tinted8]
   supports:
-    tinted8-styling: ">=0.1.0"
-    tinted8-builder: ">=0.1.0"
+    tinted8-styling: ">=0.2.0"
+    tinted8-builder: ">=0.2.0"
 "#;
 
     create_dir_all(&schemes)?;
@@ -423,7 +423,7 @@ fn happy_path_generates_output() -> Result<()> {
     let scheme_yaml = r##"
 scheme:
   system: "tinted8"
-  system-version: "0.1.0"
+  system-version: "0.2.0"
   name: "Test"
   author: "Me"
 variant: "dark"
@@ -442,8 +442,8 @@ default:
   filename: "out/{{ scheme-system }}-{{ scheme-slug }}.txt"
   supported-systems: [tinted8]
   supports:
-    tinted8-styling: ">=0.1.0"
-    tinted8-builder: ">=0.1.0"
+    tinted8-styling: ">=0.2.0"
+    tinted8-builder: ">=0.2.0"
 "#;
 
     create_dir_all(&schemes)?;

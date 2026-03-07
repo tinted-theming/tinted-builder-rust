@@ -84,7 +84,7 @@ mod tests {
         let yml = r##"
 scheme:
   system: "tinted8"
-  system-version: "0.1.0"
+  system-version: "0.2.0"
   author: "User <user@example.com>"
   name: "Test"
   slug: "test"
