@@ -107,12 +107,12 @@ impl Color {
     /// # Errors
     ///
     /// Returns an error when the requested conversion is unsupported.
-    pub fn try_to_color(&self, color_name: &ColorName) -> Result<Self, TintedBuilderError> {
-        let from_color_name = &self.name.clone();
-        let to_color_name = color_name.clone();
+    pub fn try_to_color(&self, target_color_name: &ColorName) -> Result<Self, TintedBuilderError> {
+        let from_target_color_name = &self.name.clone();
+        let to_target_color_name = target_color_name.clone();
         let to_color_variant = &self.variant.clone();
 
-        match (&from_color_name, &to_color_name) {
+        match (&from_target_color_name, &to_target_color_name) {
             (ColorName::Yellow, ColorName::Orange) => {
                 let from_rgb = Rgb::new(self.rgb.0, self.rgb.1, self.rgb.2);
                 let from_hsl: Hsl = Hsl::from_color(from_rgb.into_format::<f32>());
@@ -130,7 +130,7 @@ impl Color {
 
                 Self::new(
                     &to_hex,
-                    Some(to_color_name.clone()),
+                    Some(to_target_color_name.clone()),
                     Some(to_color_variant.clone()),
                 )
             }
@@ -155,14 +155,15 @@ impl Color {
 
                 Self::new(
                     &to_hex,
-                    Some(to_color_name.clone()),
+                    Some(to_target_color_name.clone()),
                     Some(to_color_variant.clone()),
                 )
             }
-            _ => Err(TintedBuilderError::ColorConversion(
-                from_color_name.to_string(),
-                to_color_name.to_string(),
-            )),
+            _ => Err(TintedBuilderError::UnsupportedColorDerivation {
+                from_color: self.name.to_string(),
+                target: target_color_name.to_string(),
+                supported_derivations: "yellow→orange, yellow→brown".to_string(),
+            }),
         }
     }
 }
