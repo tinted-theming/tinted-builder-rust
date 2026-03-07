@@ -4,6 +4,7 @@ use std::collections::HashMap;
 use std::fs::read_to_string;
 use std::path::{Path, PathBuf};
 use tinted_builder::{Scheme, SchemeSystem};
+use wax::{Glob, Program};
 
 /// Represents a path to a scheme file with a supported extension.
 #[derive(Debug, Clone)]
@@ -29,7 +30,10 @@ impl SchemeFile {
         match extension {
             "yaml" => Ok(Self::Yaml(path.as_ref().to_path_buf())),
             "yml" => Ok(Self::Yml(path.as_ref().to_path_buf())),
-            _ => Err(anyhow!("E111: Invalid scheme file extension: {extension}")),
+            _ => Err(anyhow!(
+                "E111: Invalid scheme file extension: {}",
+                path.as_ref().display()
+            )),
         }
     }
 
@@ -169,45 +173,43 @@ impl ParsedFilename {
 /// * If there is an issue creating a `SchemeFile` from a file path.
 ///   Recursively collects scheme files from a directory, skipping hidden files/dirs.
 pub fn get_scheme_files(
-    dirpaths: &[impl AsRef<Path>],
+    dirpath: impl AsRef<Path>,
+    ignores: &[String],
     is_recursive: bool,
 ) -> Result<Vec<SchemeFile>> {
+    let glob_ignores: Vec<Glob> = ignores
+        .iter()
+        .map(|s| Glob::new(s))
+        .collect::<Result<_, _>>()?;
+
     let mut scheme_paths: Vec<SchemeFile> = vec![];
 
-    for dirpath in dirpaths {
-        for item in dirpath.as_ref().read_dir()? {
-            let file_path = item?.path();
-            let file_stem = file_path
-                .file_stem()
-                .unwrap_or_default()
-                .to_str()
-                .unwrap_or_default();
+    for item in dirpath.as_ref().read_dir()? {
+        let file_path = item?.path();
+        // Skip hidden files and directories
+        if glob_ignores.iter().any(|g| g.is_match(file_path.as_path())) {
+            continue;
+        }
 
-            // Skip hidden files and directories
-            if file_stem.starts_with('.') {
-                continue;
+        if file_path.is_dir() && is_recursive {
+            let inner_scheme_paths_result = get_scheme_files(&file_path, ignores, true);
+
+            if let Ok(inner_scheme_paths) = inner_scheme_paths_result {
+                scheme_paths.extend(inner_scheme_paths);
             }
 
-            if file_path.is_dir() && is_recursive {
-                let inner_scheme_paths_result = get_scheme_files(&[&file_path], true);
+            continue;
+        }
 
-                if let Ok(inner_scheme_paths) = inner_scheme_paths_result {
-                    scheme_paths.extend(inner_scheme_paths);
-                }
+        // Only attempt to create a SchemeFile for regular files
+        if file_path.is_file() {
+            let scheme_file_type_result = SchemeFile::new(&file_path);
 
-                continue;
-            }
-
-            // Only attempt to create a SchemeFile for regular files
-            if file_path.is_file() {
-                let scheme_file_type_result = SchemeFile::new(&file_path);
-
-                match scheme_file_type_result {
-                    Ok(scheme_file_type) => scheme_paths.push(scheme_file_type),
-                    Err(err) => {
-                        // Be strict: surface invalid scheme files as intake errors
-                        return Err(err);
-                    }
+            match scheme_file_type_result {
+                Ok(scheme_file_type) => scheme_paths.push(scheme_file_type),
+                Err(err) => {
+                    // Be strict: surface invalid scheme files as intake errors
+                    return Err(err);
                 }
             }
         }

@@ -60,15 +60,14 @@ const REPO_NAME: &str = env!("CARGO_PKG_NAME");
 #[allow(clippy::too_many_lines)]
 pub fn build(
     theme_template_path: impl AsRef<Path>,
-    user_scheme_paths: &[impl AsRef<Path>],
+    user_schemes_path: impl AsRef<Path>,
+    ignores: &[String],
     is_quiet: bool,
 ) -> Result<()> {
-    for path in user_scheme_paths {
-        if !path.as_ref().exists() {
-            return Err(anyhow!(
-                "Schemes don't exist locally. First run `{REPO_NAME} sync` and try again",
-            ));
-        }
+    if !user_schemes_path.as_ref().exists() {
+        return Err(anyhow!(
+            "Schemes don't exist locally. First run `{REPO_NAME} sync` and try again",
+        ));
     }
 
     let template_config_path = {
@@ -104,10 +103,11 @@ pub fn build(
             )
         })?;
 
-    let scheme_files: Vec<(PathBuf, Result<Scheme>)> = get_scheme_files(user_scheme_paths, true)?
-        .iter()
-        .map(|item| (item.get_path(), item.get_scheme()))
-        .collect();
+    let scheme_files: Vec<(PathBuf, Result<Scheme>)> =
+        get_scheme_files(user_schemes_path, ignores, true)?
+            .iter()
+            .map(|item| (item.get_path(), item.get_scheme()))
+            .collect();
 
     let all_scheme_files: Vec<(PathBuf, Scheme)> = scheme_files
         .iter()

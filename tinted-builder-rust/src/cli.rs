@@ -15,8 +15,17 @@ fn build_cli() -> Command {
                 .action(ArgAction::Set),
         )
         .arg(
-            Arg::new("schemes-dir")
+            Arg::new("ignore")
                 .action(ArgAction::Append)
+                .global(true)
+                .help("Files to ignore in schemes directory")
+                .long("ignore")
+                .short('i')
+                .value_name("GLOB"),
+        )
+        .arg(
+            Arg::new("schemes-dir")
+                .action(ArgAction::Set)
                 .global(true)
                 .help("Path to the schemes directory")
                 .long("schemes-dir")

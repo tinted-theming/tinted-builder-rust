@@ -43,65 +43,52 @@ fn main() -> Result<()> {
         };
     let data_path = data_path_result?;
     let data_schemes_path = data_path.join("schemes");
-    let mut is_custom_scheme_path = false;
-    let scheme_paths_result: Result<Vec<PathBuf>> =
-        if let Some(schemes_dirs) = matches.get_many::<String>("schemes-dir") {
-            let mut paths = vec![];
 
-            for dir in schemes_dirs {
-                let schemes_path = PathBuf::from(dir);
-                if !schemes_path.exists() {
-                    return Err(anyhow!("The provided schemes path does not exist: {dir}"));
-                }
-
-                paths.push(replace_tilde_slash_with_home(dir)?);
+    let schemes_path_result: Result<PathBuf> =
+        if let Some(schemes_dir) = matches.get_one::<String>("schemes-dir") {
+            let schemes_path = PathBuf::from(schemes_dir);
+            if !schemes_path.exists() {
+                return Err(anyhow!(
+                    "The provided schemes path does not exist: {schemes_dir}"
+                ));
             }
 
-            is_custom_scheme_path = true;
-
-            Ok(paths)
+            replace_tilde_slash_with_home(schemes_dir)
         } else {
-            let paths = [
-                data_schemes_path.join("base16"),
-                data_schemes_path.join("base24"),
-                data_schemes_path.join("tinted8"),
-            ]
-            .iter()
-            .filter(|p| p.exists())
-            .cloned()
-            .collect::<Vec<PathBuf>>();
-
-            Ok(paths)
+            Ok(data_path.join("schemes"))
         };
-    let scheme_paths = scheme_paths_result?;
+    let schemes_path = schemes_path_result?;
 
     match matches.subcommand() {
         Some(("build", sub_matches)) => {
-            if let (Some(template_dir), Some(is_quiet), Some(sync)) = (
-                sub_matches.get_one::<String>("template-dir"),
-                sub_matches.get_one::<bool>("quiet"),
-                sub_matches.get_one::<bool>("sync"),
-            ) {
-                let template_path = PathBuf::from(template_dir);
+            let ignores = sub_matches
+                .get_many::<String>("ignore")
+                .unwrap_or_default()
+                .cloned()
+                .collect::<Vec<String>>();
+            let sync = sub_matches
+                .get_one::<bool>("sync")
+                .is_some_and(ToOwned::to_owned);
+            let is_quiet = sub_matches
+                .get_one::<bool>("quiet")
+                .is_some_and(ToOwned::to_owned);
+            let template_dir = sub_matches
+                .get_one::<String>("template-dir")
+                .cloned()
+                .ok_or_else(|| anyhow!("template-dir is required"))?;
 
-                if *sync {
-                    if is_custom_scheme_path {
-                        return Err(anyhow!("Unable to sync with a custom '--schemes-dir'"));
-                    }
-                    operations::sync::sync(&data_schemes_path, *is_quiet)?;
-                }
+            let template_path = PathBuf::from(template_dir);
 
-                operations::build::build(&template_path, &scheme_paths, *is_quiet)?;
+            if sync {
+                operations::sync::sync(&data_schemes_path, is_quiet)?;
             }
+
+            operations::build::build(&template_path, &schemes_path, &ignores, is_quiet)?;
         }
         Some(("sync", sub_matches)) => {
             let is_quiet: bool = sub_matches
                 .get_one::<bool>("quiet")
                 .is_some_and(borrow::ToOwned::to_owned);
-
-            if is_custom_scheme_path {
-                return Err(anyhow!("Unable to sync with a custom '--schemes-dir'"));
-            }
 
             operations::sync::sync(&data_schemes_path, is_quiet)?;
         }
