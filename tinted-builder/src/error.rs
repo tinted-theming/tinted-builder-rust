@@ -80,4 +80,15 @@ pub enum TintedBuilderError {
     /// This variant is used when a color is not able to convert from one color to another
     #[error("unable to convert Color from \"{0}\" to \"{1}\"")]
     ColorConversion(String, String),
+
+    /// Error indicating an unsupported color derivation was requested.
+    ///
+    /// This variant is used when attempting to derive a color from another color
+    /// using an unsupported conversion path (e.g., deriving orange from blue).
+    #[error("unsupported color derivation: cannot derive {target} from {from_color} (supported: {supported_derivations})")]
+    UnsupportedColorDerivation {
+        from_color: String,
+        target: String,
+        supported_derivations: String,
+    },
 }
