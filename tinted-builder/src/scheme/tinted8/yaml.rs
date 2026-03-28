@@ -197,6 +197,7 @@ pub struct BasicUi {
     pub tooltip_background: Option<String>,
     #[serde(rename = "tooltip.foreground")]
     pub tooltip_foreground: Option<String>,
+    #[serde(rename = "whitespace.foreground")]
     pub whitespace_foreground: Option<String>,
 }
 
