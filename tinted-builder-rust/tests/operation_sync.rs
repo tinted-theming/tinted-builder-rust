@@ -83,7 +83,7 @@ fn operation_sync_first_time_with_quiet_flag() -> Result<()> {
     Ok(())
 }
 
-/// Update - Install has already completed
+// Update - Install has already completed
 #[test]
 fn operation_sync_update() -> Result<()> {
     // -------
@@ -92,7 +92,51 @@ fn operation_sync_update() -> Result<()> {
     let name = "test_operation_sync_update";
     let expected_output = "schemes up to date";
     let expected_schemes_path = PathBuf::from(format!("./{name}/schemes"));
-    let command_vec = vec![format!("--data-dir={}", name), "sync".to_string()];
+    let command_vec = vec![format!("--data-dir={name}"), "sync".to_string()];
+
+    // ---
+    // Act
+    // ---
+    run_command(&command_vec).expect("Unable to run command");
+    let (stdout, stderr) = run_command(&command_vec).expect("Unable to run command");
+    let is_schemes_dir_empty = fs::read_dir(&expected_schemes_path)?.next().is_none();
+
+    // ------
+    // Assert
+    // ------
+    assert!(
+        stdout.contains(expected_output),
+        "stdout does not contain the expected output"
+    );
+    assert!(
+        stderr.is_empty(),
+        "stderr does not contain the expected output"
+    );
+    assert!(expected_schemes_path.exists() && !is_schemes_dir_empty,);
+
+    Ok(())
+}
+
+#[test]
+fn operation_sync_update_with_custom_schemes_dir() -> Result<()> {
+    // -------
+    // Arrange
+    // -------
+    let name = "test_operation_sync_update_with_custom_schemes_dir";
+    let expected_output = "schemes up to date";
+    let expected_schemes_path = PathBuf::from(format!("./{name}/schemes"));
+    let template_theme_path = PathBuf::from(format!("./template-{name}"));
+    let schemes_path = template_theme_path.join("schemes");
+    let command_vec = vec![
+        format!("--data-dir={}", name),
+        format!("--schemes-dir={}", schemes_path.display()),
+        "sync".to_string(),
+    ];
+    if template_theme_path.is_dir() {
+        fs::remove_dir_all(&template_theme_path)?;
+    }
+    fs::create_dir(&template_theme_path)?;
+    fs::create_dir(&schemes_path)?;
 
     // ---
     // Act

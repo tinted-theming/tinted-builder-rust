@@ -173,10 +173,6 @@ pub struct BasicUi {
     pub indent_guide_background: Option<String>,
     #[serde(rename = "indent-guide.active-background")]
     pub indent_guide_active_background: Option<String>,
-    #[serde(rename = "line.background")]
-    pub line_background: Option<String>,
-    #[serde(rename = "line.foreground")]
-    pub line_foreground: Option<String>,
     #[serde(rename = "link")]
     pub link: Option<String>,
     #[serde(rename = "selection.background")]

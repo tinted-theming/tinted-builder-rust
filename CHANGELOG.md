@@ -21,10 +21,10 @@
   `supports.styling-spec` as per spec `0.2.0-beta2`
 - **BREAKING**: Tinted8 scheme `family`, `style`, and `variant` now live under
   the `meta` object, aligning with spec 0.2.0.
+- **BREAKING**: `--schemes-dir` is no longer repeatable; use `--ignore` to skip files
+  instead.
 - Improve errors and messages around missing/invalid template config and
   tinted8 compatibility.
-- `--schemes-dir` is no longer repeatable; use `--ignore` to skip files
-  instead.
 
 ### Fixed
 
