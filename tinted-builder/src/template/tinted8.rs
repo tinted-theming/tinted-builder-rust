@@ -32,6 +32,8 @@ struct SchemeMetaCtx {
     supports: SchemeSupports,
     family: String,
     style: String,
+    #[serde(rename = "is-dark-variant")]
+    is_dark_variant: bool,
 }
 
 #[derive(Serialize)]
@@ -40,8 +42,6 @@ struct TemplateCtx<'a> {
     palette: &'a crate::scheme::tinted8::structure::Palette,
     syntax: &'a crate::scheme::tinted8::structure::Syntax,
     ui: &'a crate::scheme::tinted8::structure::Ui,
-    #[serde(rename = "is-dark")]
-    is_dark_variant: bool,
 }
 
 /// Builds a structured YAML context for Tinted8 templates.
@@ -66,15 +66,14 @@ pub fn to_template_context(
         },
         family: meta.family.clone().unwrap_or_default(),
         style: meta.style.clone().unwrap_or_default(),
+        is_dark_variant: SchemeVariant::from_str(meta.variant.as_str())? == SchemeVariant::Dark,
     };
-    let is_dark_variant = SchemeVariant::from_str(&scheme_ctx.variant)? == SchemeVariant::Dark;
 
     let ctx = TemplateCtx {
         scheme: scheme_ctx,
         palette: &scheme.palette,
         syntax: &scheme.syntax,
         ui: &scheme.ui,
-        is_dark_variant,
     };
 
     Ok(serde_yaml::to_value(&ctx)?)

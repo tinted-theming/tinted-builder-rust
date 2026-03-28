@@ -1,55 +1,6 @@
 use anyhow::Result;
 use tinted_builder::{Scheme, Template, TintedBuilderError};
 
-const SCHEME_SILK_LIGHT: &str = r##"
-system: "base16"
-name: "Silk Light"
-slug: "siłk light"
-author: "Gabriel Fontes (https://github.com/Misterio77)"
-variant: "light"
-palette:
-  base00: "#E9F1EF"
-  base01: "#CCD4D3"
-  base02: "#90B7B6"
-  base03: "#5C787B"
-  base04: "#4B5B5F"
-  base05: "#385156"
-  base06: "#0e3c46"
-  base07: "#D2FAFF"
-  base08: "#CF432E"
-  base09: "#D27F46"
-  base0A: "#CFAD25"
-  base0B: "#6CA38C"
-  base0C: "#329CA2"
-  base0D: "#39AAC9"
-  base0E: "#6E6582"
-  base0F: "#865369"
-"##;
-
-const SCHEME_CRAZY: &str = r#"
-system: "base16"
-name: "Silk Light"
-author: <a href="https://github.com/Misterio77">Gabriel Fontes</a>
-variant: "light"
-palette:
-  base00: "E9F1EF"
-  base01: "CCD4D3"
-  base02: "90B7B6"
-  base03: "5C787B"
-  base04: "4B5B5F"
-  base05: "385156"
-  base06: "0e3c46"
-  base07: "D2FAFF"
-  base08: "CF432E"
-  base09: "D27F46"
-  base0A: "CFAD25"
-  base0B: "6CA38C"
-  base0C: "329CA2"
-  base0D: "39AAC9"
-  base0E: "6E6582"
-  base0F: "865369"
-"#;
-
 #[test]
 fn render_without_content() -> Result<(), TintedBuilderError> {
     let template_source = "Hello!".to_string();
@@ -162,3 +113,84 @@ fn render_dec() -> Result<()> {
     assert_eq!(output, "0.81176471 0.67843137 0.14509804");
     Ok(())
 }
+
+#[test]
+fn render_is_dark_variant() -> Result<()> {
+    let template_source =
+        "{{#scheme.is-dark-variant}}it is a dark variant!{{/scheme.is-dark-variant}}";
+    let scheme = Scheme::Tinted8(serde_yaml::from_str(SCHEME_TINTED_CATPPUCCIN_MOCHA)?);
+    let template = Template::new(template_source.to_string(), scheme);
+
+    let output = template.render()?;
+
+    assert_eq!(output, "it is a dark variant!");
+    Ok(())
+}
+
+const SCHEME_SILK_LIGHT: &str = r##"
+system: "base16"
+name: "Silk Light"
+slug: "siłk light"
+author: "Gabriel Fontes (https://github.com/Misterio77)"
+variant: "light"
+palette:
+  base00: "#E9F1EF"
+  base01: "#CCD4D3"
+  base02: "#90B7B6"
+  base03: "#5C787B"
+  base04: "#4B5B5F"
+  base05: "#385156"
+  base06: "#0e3c46"
+  base07: "#D2FAFF"
+  base08: "#CF432E"
+  base09: "#D27F46"
+  base0A: "#CFAD25"
+  base0B: "#6CA38C"
+  base0C: "#329CA2"
+  base0D: "#39AAC9"
+  base0E: "#6E6582"
+  base0F: "#865369"
+"##;
+
+const SCHEME_CRAZY: &str = r#"
+system: "base16"
+name: "Silk Light"
+author: <a href="https://github.com/Misterio77">Gabriel Fontes</a>
+variant: "light"
+palette:
+  base00: "E9F1EF"
+  base01: "CCD4D3"
+  base02: "90B7B6"
+  base03: "5C787B"
+  base04: "4B5B5F"
+  base05: "385156"
+  base06: "0e3c46"
+  base07: "D2FAFF"
+  base08: "CF432E"
+  base09: "D27F46"
+  base0A: "CFAD25"
+  base0B: "6CA38C"
+  base0C: "329CA2"
+  base0D: "39AAC9"
+  base0E: "6E6582"
+  base0F: "865369"
+"#;
+
+const SCHEME_TINTED_CATPPUCCIN_MOCHA: &str = r##"
+scheme:
+  system: "tinted8"
+  supports:
+    styling-spec: "0.2.0"
+  name: "Catppuccin Mocha"
+  author: "https://github.com/catppuccin/catppuccin"
+variant: "dark"
+palette:
+  black: "#1e1e2e"
+  white: "#cdd6f4"
+  red: "#f38ba8"
+  yellow: "#f9e2af"
+  green: "#a6e3a1"
+  cyan: "#94e2d5"
+  blue: "#89b4fa"
+  magenta: "#cba6f7"
+"##;
