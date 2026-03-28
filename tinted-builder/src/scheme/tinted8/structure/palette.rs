@@ -349,13 +349,34 @@ impl Palette {
             white_normal,
 
             orange_normal: orange_normal.clone(),
-            orange_bright: orange_normal
-                .clone()
-                .try_to_variant(&ColorVariant::Bright)
-                .map_err(|err| PaletteError::UnableToConvertFrom(err.to_string()))?,
-            orange_dim: orange_normal
-                .try_to_variant(&ColorVariant::Dim)
-                .map_err(|err| PaletteError::UnableToConvertFrom(err.to_string()))?,
+            orange_bright: basic_palette
+                .orange_bright
+                .as_ref()
+                .map_or_else(
+                    || orange_normal.try_to_variant(&ColorVariant::Bright),
+                    |orange_hex| {
+                        Color::new(
+                            orange_hex,
+                            Some(ColorName::Orange),
+                            Some(ColorVariant::Bright),
+                        )
+                    },
+                )
+                .map_err(|err| PaletteError::UnableToCreateColor(err.to_string()))?,
+            orange_dim: basic_palette
+                .orange_bright
+                .as_ref()
+                .map_or_else(
+                    || orange_normal.try_to_variant(&ColorVariant::Bright),
+                    |orange_hex| {
+                        Color::new(
+                            orange_hex,
+                            Some(ColorName::Orange),
+                            Some(ColorVariant::Bright),
+                        )
+                    },
+                )
+                .map_err(|err| PaletteError::UnableToCreateColor(err.to_string()))?,
 
             gray_normal: Color::new(
                 basic_palette.gray.as_ref().unwrap_or(&generated_gray_hex),
