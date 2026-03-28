@@ -4,18 +4,12 @@
 
 ### Added
 
-- Library: Initial Tinted8 support (`tinted_builder::tinted8`) with `Scheme`
-  type and spec version constants (`SUPPORTED_BUILDER_SPEC_VERSION`,
-  `SUPPORTED_STYLING_SPEC_VERSION`).
-- Library: Tinted8 template rendering with nested `scheme`, `palette`, `ui`,
-  and `syntax` contexts; color objects expose `hex`, `hex-r/g/b`, `hex-bgr`,
-  `rgb`, `rgb16`, and `dec` fields.
-- Library: Tinted8 palette expansion and derivation rules (normal/dim/bright
-  variants; derive `orange`/`brown`; auto-generate `gray` when missing).
-- CLI: Build support for Tinted8 schemes, including semver validation of
+- Build support for Tinted8 schemes, including semver validation of
   `supports.tinted8-styling` and `supports.tinted8-builder` in
   `templates/config.yaml`.
-- CLI: List generation for Base16/Base24 and Tinted8 via yaml template config
+- Add repeatable `--ignore/-i` globs to skip scheme files in the schemes
+  directory.
+- List generation for Base16/Base24 and Tinted8 via yaml template config
   `options.list` with `schemes` array provided to mustache.
 - Docs: Add `specs/builder.md` and `specs/styling.md` references; expand
   READMEs with Tinted8 usage and template variables.
@@ -23,25 +17,21 @@
 
 ### Changed
 
-- **BREAKING**: Library: Color API updated — `Color::new` now takes `(hex,
-  Option<ColorName>, Option<ColorVariant>)`; `Color` struct gained
-  `name` and `variant` fields. Pass `None` for backward-compatible behavior.
-  Also enhances color handling to accept 3‑digit hex, adds `hex-bgr`, and
-  provides 16‑bit `rgb16` plus normalized `dec` channel serialization.
-- **BREAKING**: Using the CLI to `sync` with a custom `--schemes-dir` is not
-  supported anymore. `sync` only syncs to the default
-  `$XDG_DATA_DIR/tinted-theming/tinted-builder-rust/schemes` directory.
-- Library: Extend `Template` to render Tinted8 schemes; update Base16/Base24
-  code paths for consistency.
-- CLI: Improve errors and messages around missing/invalid template config and
+- **BREAKING**: Tinted8 scheme `family`, `style`, and `variant` now live under
+  the `meta` object, aligning with spec 0.2.0.
+- Improve errors and messages around missing/invalid template config and
   tinted8 compatibility.
+- `--schemes-dir` is no longer repeatable; use `--ignore` to skip files
+  instead.
 
 ### Fixed
 
-- CLI: Add explicit error codes and validations for Tinted8 flows:
+- Add explicit error codes and validations for Tinted8 flows:
   `E300`/`E301`/`E302` (missing `supports` entries), `E303` (missing mustache),
   `E305` (missing/invalid config), `E400` (no schemes), plus `E110`/`E111` for
   unknown systems/invalid files.
+- Library: Improve error detail when deriving colors for Tinted8 palettes.
+- Library: Fix `attribute_name` syntax key mapping to `attribute-name`.
 
 ### Removed
 
