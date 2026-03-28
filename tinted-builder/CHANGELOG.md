@@ -1,5 +1,52 @@
 # Changelog
 
+## Unreleased
+
+### Added
+
+- Generate Tinted8 syntax keys from a schema file and expand available syntax
+  properties.
+- Expand Tinted8 UI properties, including `ui.markup.text`, plus additional UI
+  key coverage.
+- Initial Tinted8 support (`tinted_builder::tinted8`) with `Scheme` type and
+  spec version constants (`SUPPORTED_BUILDER_SPEC_VERSION`,
+  `SUPPORTED_STYLING_SPEC_VERSION`).
+- Tinted8 template rendering with nested `scheme`, `palette`, `ui`, and
+  `syntax` contexts; color objects expose `hex`, `hex-r/g/b`, `hex-bgr`, `rgb`,
+  `rgb16`, and `dec` fields.
+- Tinted8 palette expansion and derivation rules (normal/dim/bright variants;
+  derive `orange`/`brown`; auto-generate `gray` when missing).
+- Generate Tinted8 syntax keys from a schema file and expand available syntax
+  properties.
+- Expand Tinted8 UI properties, including `ui.markup.text`, plus additional UI
+  key coverage.
+
+### Changed
+
+- **BREAKING**: Tinted8 scheme `family`, `style`, and `variant` now live under
+  the `meta` object, aligning with spec 0.2.0.
+- **BREAKING**: Library: Color API updated — `Color::new` now takes `(hex,
+  Option<ColorName>, Option<ColorVariant>)`; `Color` struct gained `name` and
+  `variant` fields. Pass `None` for backward-compatible behavior. Also enhances
+  color handling to accept 3‑digit hex, adds `hex-bgr`, and provides 16‑bit
+  `rgb16` plus normalized `dec` channel serialization.
+- Update to support Tinted8 styling spec 0.2.0.
+- Treat the syntax schema as the source of truth for Tinted8 syntax keys.
+- Rename Tinted8 UI keys from `highlight.search-background` and
+  `highlight.search-foreground` to `highlight.search.background` and
+  `highlight.search.foreground`.
+- Extend `Template` to render Tinted8 schemes.
+- Update to Tinted8 styling spec 0.2.0 and treat the syntax schema as the
+  source of truth for syntax keys.
+- Rename Tinted8 UI keys from `highlight.search-background` and
+  `highlight.search-foreground` to `highlight.search.background` and
+  `highlight.search.foreground`.
+
+### Fixed
+
+- Improve error detail when deriving colors for Tinted8 palettes.
+- Fix `attribute_name` syntax key mapping to `attribute-name`.
+
 ## 0.10.1 - 2026-01-30
 
 ### Fixed
