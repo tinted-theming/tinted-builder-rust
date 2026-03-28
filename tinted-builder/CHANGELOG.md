@@ -44,6 +44,7 @@
 
 ### Fixed
 
+- Fix bug where `scheme.is-dark-variant` is missing from template context
 - Improve error detail when deriving colors for Tinted8 palettes.
 - Fix `attribute_name` syntax key mapping to `attribute-name`.
 
