@@ -406,7 +406,7 @@ fn generate_themes_for_config(
                 println!("→ system: {}", s.scheme.system);
             }
 
-            let scheme_styling_version = Version::parse(&s.scheme.supported_styling_version)?;
+            let scheme_styling_version = Version::parse(&s.scheme.supports.styling_spec)?;
             if !req.matches(&scheme_styling_version) {
                 return Err(anyhow!(
                     "E002: Scheme requires Styling v{scheme_styling_version} but tinted8-builder supports only {req}",

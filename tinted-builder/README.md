@@ -24,7 +24,8 @@ use tinted_builder::tinted8::Scheme as T8Scheme;
 let yml = r##"
 scheme:
   system: "tinted8"
-  system-version: "0.2.0"
+  supports:
+    styling-spec: "0.2.0"
   author: "User <user@example.com>"
   name: "Ayu Mirage"
   slug: "ayu-mirage"

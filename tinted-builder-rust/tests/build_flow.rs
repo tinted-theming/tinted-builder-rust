@@ -31,7 +31,8 @@ fn e300_missing_supports_for_tinted8() -> Result<()> {
     let scheme_yaml = r##"
 scheme:
   system: "tinted8"
-  system-version: "0.2.0"
+  supports:
+    styling-spec: "0.2.0"
   name: "Test"
   author: "Me"
 variant: "dark"
@@ -74,7 +75,8 @@ fn e303_missing_mustache_template() -> Result<()> {
     let scheme_yaml = r##"
 scheme:
   system: "tinted8"
-  system-version: "0.2.0"
+  supports:
+    styling-spec: "0.2.0"
   name: "Test"
   author: "Me"
 variant: "dark"
@@ -119,7 +121,8 @@ fn e002_styling_version_incompatible_template() -> Result<()> {
     let scheme_yaml = r##"
 scheme:
   system: "tinted8"
-  system-version: "0.2.0"
+  supports:
+    styling-spec: "0.2.0"
   name: "Test"
   author: "Me"
 variant: "dark"
@@ -163,7 +166,8 @@ fn e003_builder_version_incompatible() -> Result<()> {
     let scheme_yaml = r##"
 scheme:
   system: "tinted8"
-  system-version: "0.2.0"
+  supports:
+    styling-spec: "0.2.0"
   name: "Test"
   author: "Me"
 variant: "dark"
@@ -207,7 +211,8 @@ fn e301_missing_styling_entry() -> Result<()> {
     let scheme_yaml = r##"
 scheme:
   system: "tinted8"
-  system-version: "0.2.0"
+  supports:
+    styling-spec: "0.2.0"
   name: "Test"
   author: "Me"
 variant: "dark"
@@ -250,7 +255,8 @@ fn e302_missing_builder_entry() -> Result<()> {
     let scheme_yaml = r##"
 scheme:
   system: "tinted8"
-  system-version: "0.2.0"
+  supports:
+    styling-spec: "0.2.0"
   name: "Test"
   author: "Me"
 variant: "dark"
@@ -322,7 +328,8 @@ fn e110_unknown_scheme_system() -> Result<()> {
     let unknown_yaml = r##"
 scheme:
   system: "tinted9"
-  system-version: "0.2.0"
+  supports:
+    styling-spec: "0.2.0"
   name: "Bad"
   author: "Me"
 variant: "dark"
@@ -423,7 +430,8 @@ fn happy_path_generates_output() -> Result<()> {
     let scheme_yaml = r##"
 scheme:
   system: "tinted8"
-  system-version: "0.2.0"
+  supports:
+    styling-spec: "0.2.0"
   name: "Test"
   author: "Me"
 variant: "dark"

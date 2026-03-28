@@ -8,9 +8,11 @@ pub use crate::scheme::tinted8::structure::palette::Palette;
 pub use crate::scheme::tinted8::structure::syntax::{Syntax, SyntaxKey};
 pub use crate::scheme::tinted8::structure::ui::Ui;
 use crate::scheme::tinted8::yaml::Tinted8Scheme as YamlTinted8Scheme;
-use crate::tinted8::SUPPORTED_BUILDER_SPEC_VERSION;
+use crate::tinted8::SUPPORTED_STYLING_SPEC_VERSION;
 use crate::utils::slugify;
 use crate::utils::titlecasify;
+use crate::SchemeSupports;
+use semver::{Version, VersionReq};
 use serde::{Deserialize, Deserializer, Serialize};
 use std::fmt;
 
@@ -32,13 +34,8 @@ impl fmt::Display for Scheme {
         writeln!(f, "  system: \"{}\"", self.scheme.system)?;
         writeln!(
             f,
-            "  supported-builder-version: \"{}\"",
-            self.scheme.supported_builder_version
-        )?;
-        writeln!(
-            f,
-            "  supported-styling-version: \"{}\"",
-            self.scheme.supported_styling_version
+            "    supports: \n        \"{}\"",
+            self.scheme.supports.styling_spec
         )?;
         writeln!(f, "  name: \"{}\"", self.scheme.name)?;
         writeln!(f, "  author: \"{}\"", self.scheme.author)?;
@@ -116,8 +113,22 @@ impl<'de> Deserialize<'de> for Scheme {
             .map_err(serde::de::Error::custom)?;
         let syntax = Syntax::try_from_basic(&wrapper.syntax.unwrap_or_default(), &palette)
             .map_err(serde::de::Error::custom)?;
-        let builder_spec_version = SUPPORTED_BUILDER_SPEC_VERSION.to_string();
-        let styling_spec_version = wrapper.scheme.system_version.clone();
+
+        let styling_spec = VersionReq::parse(&wrapper.scheme.supports.styling_spec)
+            .map_err(serde::de::Error::custom)?;
+        let styling_req =
+            Version::parse(SUPPORTED_STYLING_SPEC_VERSION).map_err(serde::de::Error::custom)?;
+        if !styling_spec.matches(&styling_req) {
+            return Err(serde::de::Error::custom(
+                format!("E002: Unsupported Tinted8 Styling Spec (requires {styling_req}, supported v{styling_spec})")
+            ));
+        }
+        let styling_spec = styling_spec
+            .to_string()
+            .strip_prefix("^")
+            .unwrap_or(&styling_spec.to_string())
+            .to_string();
+
         let scheme_meta = SchemeMeta {
             name,
             slug,
@@ -125,8 +136,7 @@ impl<'de> Deserialize<'de> for Scheme {
             author: wrapper.scheme.author.clone(),
             description: wrapper.scheme.description,
             theme_author: wrapper.scheme.theme_author.unwrap_or(wrapper.scheme.author),
-            supported_builder_version: builder_spec_version,
-            supported_styling_version: styling_spec_version,
+            supports: SchemeSupports { styling_spec },
             family: wrapper.family,
             style: wrapper.style,
             variant: wrapper.variant,

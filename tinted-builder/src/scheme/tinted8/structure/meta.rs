@@ -1,4 +1,4 @@
-use crate::SchemeVariant;
+use crate::{SchemeSupports, SchemeVariant};
 use serde::Serialize;
 
 use crate::SchemeSystem;
@@ -10,8 +10,7 @@ pub struct SchemeMeta {
     pub author: String,
     pub theme_author: String,
     pub slug: String,
-    pub supported_styling_version: String,
-    pub supported_builder_version: String,
+    pub supports: SchemeSupports,
     pub variant: SchemeVariant,
     pub family: Option<String>,
     pub style: Option<String>,

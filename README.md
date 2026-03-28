@@ -101,7 +101,8 @@ Example minimal Tinted8 scheme (YAML):
 ```
 scheme:
   system: "tinted8"
-  system-version: "0.2.0"
+  supports:
+    styling-spec: "0.2.0"
   author: "User <user@example.com>"
   name: "Ayu Mirage"
   slug: "ayu-mirage"

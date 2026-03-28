@@ -44,7 +44,8 @@ scheme:
   system: "tinted8"
   author: "Test Author"
   name: "UI Test"
-  system-version: "0.2.0"
+  supports:
+    styling-spec: "0.2.0"
   slug: "with-ui-nested"
 variant: "dark"
 palette:
@@ -158,7 +159,7 @@ fn deserialize_full_scheme() -> Result<(), TintedBuilderError> {
         ts.scheme.description,
         Some("A complete test scheme".to_string())
     );
-    assert_eq!(ts.scheme.supported_styling_version, "0.2.0".to_string());
+    assert_eq!(ts.scheme.supports.styling_spec, "0.2.0".to_string());
     assert_eq!(ts.syntax.comment.default.to_hex(), "565f89");
     assert_eq!(ts.syntax.entity.name.default.to_hex(), "7aa2f7");
     assert_eq!(ts.syntax.entity.other.attribute_name.to_hex(), "e0af68");
@@ -199,7 +200,8 @@ scheme:
   name: "Test Scheme"
   system: "tinted8"
   author: "Test Author <test@example.com>"
-  system-version: "0.2.0"
+  supports:
+    styling-spec: "0.2.0"
   slug: "test-scheme"
 variant: "dark"
 palette:
@@ -218,7 +220,8 @@ const SCHEME_WITH_FAMILY_STYLE: &str = r##"
 scheme:
   system: "tinted8"
   author: "Test Author"
-  system-version: "0.2.0"
+  supports:
+    styling-spec: "0.2.0"
 variant: "light"
 family: "Ayu"
 style: "Mirage"
@@ -238,7 +241,8 @@ scheme:
   system: "tinted8"
   author: "Test Author"
   name: "UI Test"
-  system-version: "0.2.0"
+  supports:
+    styling-spec: "0.2.0"
   slug: "with-ui"
 variant: "dark"
 palette:
@@ -261,7 +265,8 @@ scheme:
   system: "tinted8"
   author: "Test Author"
   slug: "with-syntax"
-  system-version: 0.2.0
+  supports:
+    styling-spec: 0.2.0
 variant: "dark"
 palette:
   black:   "#000000"
@@ -283,7 +288,8 @@ syntax:
 const SCHEME_FULL: &str = r##"
 scheme:
   system: "tinted8"
-  system-version: "0.2.0"
+  supports:
+    styling-spec: "0.2.0"
   author: "Full Author <full@example.com>"
   theme-author: "Original Theme Author"
   name: "Full Test Scheme"
@@ -409,7 +415,8 @@ scheme:
   system: "tinted8"
   author: "Test"
   slug: "new-scopes"
-  system-version: "0.2.0"
+  supports:
+    styling-spec: "0.2.0"
 variant: "dark"
 palette:
   black:   "#000000"
@@ -448,7 +455,8 @@ scheme:
   system: "tinted8"
   author: "Test"
   slug: "inheritance"
-  system-version: "0.2.0"
+  supports:
+    styling-spec: "0.2.0"
 variant: "dark"
 palette:
   black:   "#000000"
@@ -469,7 +477,8 @@ scheme:
   system: "tinted8"
   author: "Test"
   slug: "partial-inheritance"
-  system-version: "0.2.0"
+  supports:
+    styling-spec: "0.2.0"
 variant: "dark"
 palette:
   black:   "#000000"
@@ -491,7 +500,8 @@ scheme:
   system: "tinted8"
   author: "Test"
   slug: "grandchild"
-  system-version: "0.2.0"
+  supports:
+    styling-spec: "0.2.0"
 variant: "dark"
 palette:
   black:   "#000000"

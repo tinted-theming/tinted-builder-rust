@@ -94,6 +94,12 @@ pub enum SchemeSystem {
     /// Tinted8 scheme system.
     Tinted8,
 }
+#[derive(Debug, Clone, Default, Eq, PartialEq, Deserialize, Serialize)]
+#[serde(rename_all = "lowercase")]
+pub struct SchemeSupports {
+    #[serde(rename = "styling-spec")]
+    pub styling_spec: String,
+}
 
 impl SchemeSystem {
     /// Returns the string representation of the `SchemeSystem`.
