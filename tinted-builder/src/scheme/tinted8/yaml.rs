@@ -1,5 +1,5 @@
-use crate::scheme::tinted8::SchemeSystem;
 use crate::scheme::SchemeVariant;
+use crate::{scheme::tinted8::SchemeSystem, SchemeSupports};
 use serde::{Deserialize, Deserializer, Serialize};
 use serde_yaml::{Mapping, Value};
 use std::fmt;
@@ -305,10 +305,8 @@ impl fmt::Display for BasicPalette {
 #[derive(Deserialize, Serialize)]
 pub struct Meta {
     pub system: SchemeSystem,
-    #[serde(rename = "system-version")]
-    pub system_version: String,
+    pub supports: SchemeSupports,
     pub author: String,
-
     pub name: Option<String>,
     #[serde(rename = "theme-author")]
     pub theme_author: Option<String>,

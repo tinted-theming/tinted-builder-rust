@@ -1,4 +1,6 @@
-use crate::{error::TintedBuilderError, tinted8::Scheme as Tinted8Scheme};
+use crate::{
+    error::TintedBuilderError, tinted8::Scheme as Tinted8Scheme, SchemeSupports, SchemeVariant,
+};
 use serde::Serialize;
 
 /// Render a template with any serializable context.
@@ -26,10 +28,7 @@ struct SchemeMetaCtx {
     slug_underscored: String,
     system: String,
     variant: String,
-    #[serde(rename = "builder-version")]
-    builder_version: String,
-    #[serde(rename = "system-version")]
-    system_version: String,
+    supports: SchemeSupports,
     family: String,
     style: String,
 }
@@ -59,8 +58,9 @@ pub fn to_template_context(
         slug: meta.slug.clone(),
         slug_underscored: meta.slug.replace('-', "_"),
         system: meta.system.to_string(),
-        builder_version: meta.supported_builder_version.clone(),
-        system_version: meta.supported_styling_version.clone(),
+        supports: SchemeSupports {
+            styling_spec: meta.supports.styling_spec.clone(),
+        },
         family: meta.family.clone().unwrap_or_default(),
         style: meta.style.clone().unwrap_or_default(),
     };
@@ -84,7 +84,8 @@ mod tests {
         let yml = r##"
 scheme:
   system: "tinted8"
-  system-version: "0.2.0"
+  supports:
+    styling-spec: "0.2.0"
   author: "User <user@example.com>"
   name: "Test"
   slug: "test"
