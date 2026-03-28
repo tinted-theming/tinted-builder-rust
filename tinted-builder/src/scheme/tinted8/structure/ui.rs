@@ -112,7 +112,7 @@ impl Ui {
         };
         let gutter = UiBgFg {
             background: background.normal.clone(),
-            foreground: foreground.normal.clone(),
+            foreground: foreground.dark.clone(),
         };
         let highlight = UiHighlight {
             button: UiBgFg {
@@ -143,7 +143,7 @@ impl Ui {
             foreground: palette.white_normal.clone(),
             inactive_background: palette.black_bright.clone(),
         };
-        let accent = palette.blue_normal.clone();
+        let accent = palette.cyan_normal.clone();
         let border = palette.gray_dim.clone();
         let cursor = foreground.normal.clone();
         let link = palette.cyan_normal.clone();
