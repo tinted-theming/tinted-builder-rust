@@ -8,12 +8,9 @@ use std::fmt;
 pub struct Tinted8Scheme {
     pub scheme: Meta,
     pub palette: BasicPalette,
-    pub variant: SchemeVariant,
-
     pub syntax: Option<BasicSyntax>,
     pub ui: Option<BasicUi>,
-    pub family: Option<String>,
-    pub style: Option<String>,
+    pub variant: SchemeVariant,
 }
 
 // Helper type that mirrors `Tinted8Scheme` for inner deserialization.
@@ -21,12 +18,9 @@ pub struct Tinted8Scheme {
 struct Tinted8SchemeHelper {
     pub scheme: Meta,
     pub palette: BasicPalette,
-    pub variant: SchemeVariant,
-
     pub syntax: Option<BasicSyntax>,
     pub ui: Option<BasicUi>,
-    pub family: Option<String>,
-    pub style: Option<String>,
+    pub variant: SchemeVariant,
 }
 
 impl From<Tinted8SchemeHelper> for Tinted8Scheme {
@@ -34,11 +28,9 @@ impl From<Tinted8SchemeHelper> for Tinted8Scheme {
         Self {
             scheme: h.scheme,
             palette: h.palette,
-            variant: h.variant,
             syntax: h.syntax,
             ui: h.ui,
-            family: h.family,
-            style: h.style,
+            variant: h.variant,
         }
     }
 }
@@ -137,8 +129,10 @@ pub struct BasicUi {
     pub accent: Option<String>,
     #[serde(rename = "border")]
     pub border: Option<String>,
-    #[serde(rename = "cursor")]
-    pub cursor: Option<String>,
+    #[serde(rename = "cursor.normal")]
+    pub cursor_normal: Option<String>,
+    #[serde(rename = "cursor.muted")]
+    pub cursor_muted: Option<String>,
     #[serde(rename = "global.foreground.normal")]
     pub global_foreground_normal: Option<String>,
     #[serde(rename = "global.foreground.dark")]
@@ -309,4 +303,6 @@ pub struct Meta {
     pub theme_author: Option<String>,
     pub slug: Option<String>,
     pub description: Option<String>,
+    pub family: Option<String>,
+    pub style: Option<String>,
 }

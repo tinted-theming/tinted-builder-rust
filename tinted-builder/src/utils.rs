@@ -1,6 +1,8 @@
 use regex::Regex;
 use std::collections::HashMap;
 
+use crate::{Color, TintedBuilderError};
+
 /// Slugifies a string using ASCII-only, kebab-case output.
 ///
 /// Examples:
@@ -97,6 +99,37 @@ pub fn titlecasify(input: &str) -> String {
         })
         .collect::<Vec<String>>()
         .join(" ")
+}
+
+/// Parse a color with parent inheritance semantics.
+///
+/// Resolution order:
+/// 1. Use and parse `value` if provided.
+/// 2. Otherwise, use `parent` if provided (parsed via `parse_or_inherit`).
+/// 3. Otherwise, fall back to `default`.
+///
+/// This supports cases like `string.quoted` inheriting from `string` when the
+/// child value is omitted.
+///
+/// Errors
+/// Returns `SyntaxError::UnableToConvertFrom` if a provided string cannot be
+/// parsed into a `Color`.
+pub fn parse_or_inherit(
+    value_list: &[Option<&str>],
+    default: &Color,
+) -> Result<Color, TintedBuilderError> {
+    let value_list: Vec<String> = value_list
+        .iter()
+        .filter_map(|s| s.map(std::string::ToString::to_string))
+        .collect();
+
+    value_list.first().map_or_else(
+        || Ok(default.clone()),
+        |val| {
+            Color::new(val, None, None)
+                .map_err(|e| TintedBuilderError::UnableToConvertFrom(e.to_string()))
+        },
+    )
 }
 
 #[cfg(test)]

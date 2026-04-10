@@ -20,11 +20,14 @@
   properties.
 - Expand Tinted8 UI properties, including `ui.markup.text`, plus additional UI
   key coverage.
+- Add tinted8 0.2.0-beta3 feature where the default colour values of grayscale
+  colors are different based on whether a dark or light scheme variant is active
+- Add `ui.cursor_muted`
 
 ### Changed
 
-- **BREAKING**: Tinted8 scheme `family`, `style`, and `variant` now live under
-  the `meta` object, aligning with spec 0.2.0.
+- **BREAKING**: Tinted8 scheme `family`, `style` now live under the `meta`
+  object, aligning with spec 0.2.0.
 - **BREAKING**: Library: Color API updated — `Color::new` now takes `(hex,
   Option<ColorName>, Option<ColorVariant>)`; `Color` struct gained `name` and
   `variant` fields. Pass `None` for backward-compatible behavior. Also enhances
@@ -41,6 +44,7 @@
 - Rename Tinted8 UI keys from `highlight.search-background` and
   `highlight.search-foreground` to `highlight.search.background` and
   `highlight.search.foreground`.
+- Change `ui.cursor` to `ui.cursor_normal`
 
 ### Fixed
 
@@ -48,6 +52,8 @@
 - Fix bug where `ui.whitespace.foreground` is disallowed in scheme
 - Improve error detail when deriving colors for Tinted8 palettes.
 - Fix `attribute_name` syntax key mapping to `attribute-name`.
+- Fix bug where tinted8 scheme.name isn't correctly titlecasified
+- Fix bug where `FromStr` is not implemented for `tinted8`
 
 ## 0.10.1 - 2026-01-30
 

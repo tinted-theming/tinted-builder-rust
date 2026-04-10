@@ -211,6 +211,18 @@ syntax:
       - key: section
         scope: punctuation.section
         default: orange_normal
+      - key: brackets
+        scope: punctuation.brackets
+        default: orange_normal
+        children:
+          - key: angle
+            scope: punctuation.brackets.angle
+          - key: curly
+            scope: punctuation.brackets.curly
+          - key: round
+            scope: punctuation.brackets.round
+          - key: square
+            scope: punctuation.brackets.square
 
   - key: markup
     scope: markup
