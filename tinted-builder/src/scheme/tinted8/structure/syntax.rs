@@ -1,14 +1,18 @@
 use crate::scheme::tinted8::structure::Palette;
-use crate::{Color, ColorName, ColorType, ColorVariant, TintedBuilderError};
+use crate::utils::parse_or_inherit;
+use crate::{Color, ColorName, ColorType, ColorVariant, SchemeVariant, TintedBuilderError};
 use serde::Serialize;
 use std::fmt;
 use std::str::FromStr;
-use thiserror::Error;
 include!(concat!(env!("OUT_DIR"), "/syntax_generated.rs"));
 
 impl Syntax {
-    pub fn try_from_basic(basic: &BasicSyntax, palette: &Palette) -> Result<Self, SyntaxError> {
-        generated_try_from_basic(basic, palette)
+    pub fn try_from_basic(
+        basic: &BasicSyntax,
+        palette: &Palette,
+        variant: &SchemeVariant,
+    ) -> Result<Self, TintedBuilderError> {
+        generated_try_from_basic(basic, palette, variant)
     }
 
     pub const fn get_property_list() -> &'static [SyntaxKey] {
@@ -91,6 +95,11 @@ impl Syntax {
             SyntaxKey::PunctuationDefinitionString => &self.punctuation.definition.string,
             SyntaxKey::PunctuationDefinitionComment => &self.punctuation.definition.comment,
             SyntaxKey::PunctuationSection => &self.punctuation.section,
+            SyntaxKey::PunctuationBrackets => &self.punctuation.brackets.default,
+            SyntaxKey::PunctuationBracketsAngle => &self.punctuation.brackets.angle,
+            SyntaxKey::PunctuationBracketsCurly => &self.punctuation.brackets.curly,
+            SyntaxKey::PunctuationBracketsRound => &self.punctuation.brackets.round,
+            SyntaxKey::PunctuationBracketsSquare => &self.punctuation.brackets.square,
             SyntaxKey::Markup => &self.markup.default,
             SyntaxKey::MarkupBold => &self.markup.bold,
             SyntaxKey::MarkupItalic => &self.markup.italic,
@@ -304,9 +313,19 @@ pub struct SyntaxSupportFunction {
 #[derive(Debug, Clone, Serialize)]
 pub struct SyntaxPunctuation {
     pub default: Color,
+    pub brackets: SyntaxPunctuationBrackets,
     pub separator: Color,
     pub definition: SyntaxPunctuationDefinition,
     pub section: Color,
+}
+
+#[derive(Debug, Clone, Serialize)]
+pub struct SyntaxPunctuationBrackets {
+    pub default: Color,
+    pub angle: Color,
+    pub curly: Color,
+    pub round: Color,
+    pub square: Color,
 }
 
 #[derive(Debug, Clone, Serialize)]
@@ -359,43 +378,4 @@ pub struct SyntaxMeta {
     pub preprocessor: Color,
     pub embedded: Color,
     pub object: Color,
-}
-
-#[derive(Error, Debug)]
-pub enum SyntaxError {
-    #[error("unable to convert from type: {0}")]
-    UnableToConvertFrom(String),
-}
-
-impl From<TintedBuilderError> for SyntaxError {
-    fn from(error: TintedBuilderError) -> Self {
-        Self::UnableToConvertFrom(error.to_string())
-    }
-}
-
-/// Parse a color with parent inheritance semantics.
-///
-/// Resolution order:
-/// 1. Use and parse `value` if provided.
-/// 2. Otherwise, use `parent` if provided (parsed via `parse_or_inherit`).
-/// 3. Otherwise, fall back to `default`.
-///
-/// This supports cases like `string.quoted` inheriting from `string` when the
-/// child value is omitted.
-///
-/// Errors
-/// Returns `SyntaxError::UnableToConvertFrom` if a provided string cannot be
-/// parsed into a `Color`.
-fn parse_or_inherit(value_list: &[Option<&str>], default: &Color) -> Result<Color, SyntaxError> {
-    let value_list: Vec<String> = value_list
-        .iter()
-        .filter_map(|s| s.map(std::string::ToString::to_string))
-        .collect();
-
-    value_list.first().map_or_else(
-        || Ok(default.clone()),
-        |val| {
-            Color::new(val, None, None).map_err(|e| SyntaxError::UnableToConvertFrom(e.to_string()))
-        },
-    )
 }

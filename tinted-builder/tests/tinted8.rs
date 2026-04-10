@@ -17,7 +17,7 @@ fn deserialize_minimal_scheme() -> Result<(), TintedBuilderError> {
 fn deserialize_family_style_derives_name() -> Result<(), TintedBuilderError> {
     let ts: Tinted8Scheme = serde_yaml::from_str(SCHEME_WITH_FAMILY_STYLE)?;
 
-    assert_eq!(ts.scheme.name, "Ayu-Mirage");
+    assert_eq!(ts.scheme.name, "Ayu Mirage");
     assert_eq!(ts.scheme.slug, "ayu-mirage");
     assert_eq!(ts.scheme.family, Some("Ayu".to_string()));
     assert_eq!(ts.scheme.style, Some("Mirage".to_string()));
@@ -222,9 +222,9 @@ scheme:
   author: "Test Author"
   supports:
     styling-spec: "0.2.0"
+  family: "Ayu"
+  style: "Mirage"
 variant: "light"
-family: "Ayu"
-style: "Mirage"
 palette:
   black:   "#131721"
   red:     "#f07178"

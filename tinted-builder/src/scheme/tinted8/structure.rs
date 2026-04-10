@@ -11,7 +11,7 @@ use crate::scheme::tinted8::yaml::Tinted8Scheme as YamlTinted8Scheme;
 use crate::tinted8::SUPPORTED_STYLING_SPEC_VERSION;
 use crate::utils::slugify;
 use crate::utils::titlecasify;
-use crate::SchemeSupports;
+use crate::{SchemeSupports, SchemeVariant};
 use semver::{Version, VersionReq};
 use serde::{Deserialize, Deserializer, Serialize};
 use std::fmt;
@@ -26,6 +26,7 @@ pub struct Scheme {
     pub palette: Palette,
     pub syntax: Syntax,
     pub ui: Ui,
+    pub variant: SchemeVariant,
 }
 
 impl fmt::Display for Scheme {
@@ -46,7 +47,7 @@ impl fmt::Display for Scheme {
         }
         #[allow(clippy::writeln_empty_string)]
         writeln!(f, "")?;
-        writeln!(f, "variant: \"{}\"", self.scheme.variant)?;
+        writeln!(f, "variant: \"{}\"", self.variant)?;
         if let Some(ref family) = self.scheme.family {
             writeln!(f, "family: \"{family}\"")?;
         }
@@ -84,21 +85,23 @@ impl<'de> Deserialize<'de> for Scheme {
         let (name, slug): (String, String) = match (
             &wrapper.scheme.name,
             &wrapper.scheme.slug,
-            &wrapper.family,
-            &wrapper.style,
+            &wrapper.scheme.family,
+            &wrapper.scheme.style,
         ) {
             (Some(name), Some(slug), _, _) => (name.to_owned(), slug.to_owned()),
             (Some(name), None, _, _) => (name.to_owned(), slugify(name)),
             (None, Some(slug), _, _) => (titlecasify(slug), slug.to_owned()),
             (None, None, Some(family), Some(style)) => {
-                let name = format!("{family}-{style}");
+                let display_family = titlecasify(family);
+                let display_style = titlecasify(style);
+                let name = format!("{display_family} {display_style}");
 
                 (name.clone(), slugify(&name))
             }
             (None, None, Some(family), None) => {
-                let name = family.clone();
+                let name = titlecasify(&family.clone());
 
-                (name.clone(), slugify(&name))
+                (name, slugify(&family.clone()))
             }
             _ => {
                 return Err(serde::de::Error::custom(
@@ -109,10 +112,14 @@ impl<'de> Deserialize<'de> for Scheme {
 
         let palette =
             Palette::try_from_basic(&wrapper.palette).map_err(serde::de::Error::custom)?;
-        let ui = Ui::try_from_basic(wrapper.ui.unwrap_or_default(), &palette)
+        let ui = Ui::try_from_basic(&wrapper.ui.unwrap_or_default(), &palette, &wrapper.variant)
             .map_err(serde::de::Error::custom)?;
-        let syntax = Syntax::try_from_basic(&wrapper.syntax.unwrap_or_default(), &palette)
-            .map_err(serde::de::Error::custom)?;
+        let syntax = Syntax::try_from_basic(
+            &wrapper.syntax.unwrap_or_default(),
+            &palette,
+            &wrapper.variant,
+        )
+        .map_err(serde::de::Error::custom)?;
 
         let styling_spec = VersionReq::parse(&wrapper.scheme.supports.styling_spec)
             .map_err(serde::de::Error::custom)?;
@@ -137,13 +144,13 @@ impl<'de> Deserialize<'de> for Scheme {
             description: wrapper.scheme.description,
             theme_author: wrapper.scheme.theme_author.unwrap_or(wrapper.scheme.author),
             supports: SchemeSupports { styling_spec },
-            family: wrapper.family,
-            style: wrapper.style,
-            variant: wrapper.variant,
+            family: wrapper.scheme.family,
+            style: wrapper.scheme.style,
         };
 
         Ok(Self {
             scheme: scheme_meta,
+            variant: wrapper.variant,
             syntax,
             ui,
             palette,

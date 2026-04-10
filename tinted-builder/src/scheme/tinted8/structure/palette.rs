@@ -12,43 +12,6 @@ use serde::Serialize;
 use std::fmt;
 use thiserror::Error;
 
-impl fmt::Display for ColorName {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self {
-            Self::Black => write!(f, "black"),
-            Self::Red => write!(f, "red"),
-            Self::Green => write!(f, "green"),
-            Self::Yellow => write!(f, "yellow"),
-            Self::Blue => write!(f, "blue"),
-            Self::Magenta => write!(f, "magenta"),
-            Self::Cyan => write!(f, "cyan"),
-            Self::White => write!(f, "white"),
-            Self::Orange => write!(f, "orange"),
-            Self::Gray => write!(f, "gray"),
-            Self::Brown => write!(f, "brown"),
-            Self::Other => write!(f, "other"),
-        }
-    }
-}
-
-impl ColorName {
-    #[must_use]
-    pub const fn get_list<'a>() -> &'a [Self] {
-        &[
-            Self::Black,
-            Self::Red,
-            Self::Green,
-            Self::Yellow,
-            Self::Blue,
-            Self::Magenta,
-            Self::Cyan,
-            Self::White,
-            Self::Orange,
-            Self::Gray,
-            Self::Brown,
-        ]
-    }
-}
 #[derive(Debug, Clone)]
 pub struct Palette {
     pub black_normal: Color,

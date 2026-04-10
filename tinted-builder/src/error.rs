@@ -91,4 +91,11 @@ pub enum TintedBuilderError {
         target: String,
         supported_derivations: String,
     },
+
+    /// Error indicating an inability to convert from type
+    ///
+    /// This variant is used when attempting to derive a color from another color
+    /// using an unsupported conversion path (e.g., deriving orange from blue).
+    #[error("unable to convert from type: {0}")]
+    UnableToConvertFrom(String),
 }

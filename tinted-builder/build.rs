@@ -319,9 +319,24 @@ fn generate_valid_syntax_keys(code: &mut String, nodes: &[FlattenedNode]) {
 /// # Returns
 /// - `()` after appending to `code`.
 fn generate_get_palette_color(code: &mut String) {
-    code.push_str("fn get_palette_color(palette: &Palette, color_type: &ColorType) -> Result<Color, TintedBuilderError> {\n");
+    code.push_str("fn get_palette_color(palette: &Palette, color_type: &ColorType, variant: &SchemeVariant) -> Result<Color, TintedBuilderError> {\n");
+    code.push_str(
+        "    // For light variant, swap white↔black to handle foreground/background inversion\n",
+    );
+    code.push_str("    let color_type = match variant {\n");
+    code.push_str("        SchemeVariant::Light => match &color_type.0 {\n");
+    code.push_str(
+        "            ColorName::White => ColorType(ColorName::Black, color_type.1.clone()),\n",
+    );
+    code.push_str(
+        "            ColorName::Black => ColorType(ColorName::White, color_type.1.clone()),\n",
+    );
+    code.push_str("            _ => ColorType(color_type.0.clone(), color_type.1.clone()),\n");
+    code.push_str("        },\n");
+    code.push_str("        _ => ColorType(color_type.0.clone(), color_type.1.clone()),\n");
+    code.push_str("    };\n");
     code.push_str("    #[allow(clippy::match_same_arms)]\n");
-    code.push_str("    match color_type {\n");
+    code.push_str("    match &color_type {\n");
 
     let colors = [
         "black", "red", "green", "yellow", "blue", "magenta", "cyan", "white", "orange", "gray",
@@ -331,28 +346,8 @@ fn generate_get_palette_color(code: &mut String) {
 
     for color in &colors {
         for variant in &variants {
-            let color_name: String = color
-                .chars()
-                .enumerate()
-                .map(|(index, char)| {
-                    if index == 0 {
-                        char.to_uppercase().collect::<String>()
-                    } else {
-                        char.to_string()
-                    }
-                })
-                .collect();
-            let variant_name: String = variant
-                .chars()
-                .enumerate()
-                .map(|(index, char)| {
-                    if index == 0 {
-                        char.to_uppercase().collect::<String>()
-                    } else {
-                        char.to_string()
-                    }
-                })
-                .collect();
+            let color_name = capitalize(color);
+            let variant_name = capitalize(variant);
             let _ = writeln!(
                 code,
                 r"        ColorType(ColorName::{color_name}, ColorVariant::{variant_name}) => Color::new(&palette.{color}_{variant}.to_hex(), Some(ColorName::{color_name}), Some(ColorVariant::{variant_name})),"
@@ -375,7 +370,7 @@ fn generate_get_palette_color(code: &mut String) {
 fn generate_try_from_basic(code: &mut String, nodes: &[SyntaxNode]) {
     code.push_str("#[allow(clippy::too_many_lines)]\n");
     code.push_str(
-        "pub fn generated_try_from_basic(basic: &BasicSyntax, palette: &Palette) -> Result<Syntax, SyntaxError> {\n",
+        "pub fn generated_try_from_basic(basic: &BasicSyntax, palette: &Palette, variant: &SchemeVariant) -> Result<Syntax, TintedBuilderError> {\n",
     );
 
     generate_syntax_construction(code, nodes, "    ", None);
@@ -419,7 +414,7 @@ fn generate_syntax_construction(
         if node.children.is_empty() {
             let _ = writeln!(
                 code,
-                "{indent}let {variant_name} = parse_or_inherit(&[{}], &get_palette_color(palette, &ColorType::from_str(\"{default_color}\")?)?)?;",
+                "{indent}let {variant_name} = parse_or_inherit(&[{}], &get_palette_color(palette, &ColorType::from_str(\"{default_color}\")?, variant)?)?;",
                 format_parent_chain(&basic_field, &parent_chain)
             );
         } else {
@@ -429,7 +424,7 @@ fn generate_syntax_construction(
             let _ = writeln!(code, "{indent}let {variant_name} = {struct_name} {{");
             let _ = writeln!(
                 code,
-                "{indent}    default: parse_or_inherit(&[{}], &get_palette_color(palette, &ColorType::from_str(\"{default_color}\")?)?)?,",
+                "{indent}    default: parse_or_inherit(&[{}], &get_palette_color(palette, &ColorType::from_str(\"{default_color}\")?, variant)?)?,",
                 format_parent_chain(&basic_field, &parent_chain)
             );
 

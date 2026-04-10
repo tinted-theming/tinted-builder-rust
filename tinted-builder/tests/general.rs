@@ -117,7 +117,7 @@ fn render_dec() -> Result<()> {
 #[test]
 fn render_is_dark_variant() -> Result<()> {
     let template_source =
-        "{{#scheme.is-dark-variant}}it is a dark variant!{{/scheme.is-dark-variant}}";
+        "{{#option.is-dark-variant}}it is a dark variant!{{/option.is-dark-variant}}";
     let scheme = Scheme::Tinted8(serde_yaml::from_str(SCHEME_TINTED_CATPPUCCIN_MOCHA)?);
     let template = Template::new(template_source.to_string(), scheme);
 

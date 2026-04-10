@@ -75,7 +75,7 @@ impl Scheme {
     pub fn get_scheme_variant(&self) -> SchemeVariant {
         match self {
             Self::Base16(scheme) | Self::Base24(scheme) => scheme.variant.clone(),
-            Self::Tinted8(scheme) => scheme.scheme.variant.clone(),
+            Self::Tinted8(scheme) => scheme.variant.clone(),
         }
     }
 }
@@ -138,6 +138,7 @@ impl FromStr for SchemeSystem {
         match system_str {
             "base16" => Ok(Self::Base16),
             "base24" => Ok(Self::Base24),
+            "tinted8" => Ok(Self::Tinted8),
             _ => Err(TintedBuilderError::InvalidSchemeSystem(
                 system_str.to_string(),
             )),

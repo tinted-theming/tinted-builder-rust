@@ -2,7 +2,6 @@ use crate::{
     error::TintedBuilderError, tinted8::Scheme as Tinted8Scheme, SchemeSupports, SchemeVariant,
 };
 use serde::Serialize;
-use std::str::FromStr;
 
 /// Render a template with any serializable context.
 ///
@@ -28,10 +27,13 @@ struct SchemeMetaCtx {
     #[serde(rename = "slug-underscored")]
     slug_underscored: String,
     system: String,
-    variant: String,
     supports: SchemeSupports,
     family: String,
     style: String,
+}
+
+#[derive(Serialize)]
+struct OptionCtx {
     #[serde(rename = "is-dark-variant")]
     is_dark_variant: bool,
 }
@@ -42,6 +44,8 @@ struct TemplateCtx<'a> {
     palette: &'a crate::scheme::tinted8::structure::Palette,
     syntax: &'a crate::scheme::tinted8::structure::Syntax,
     ui: &'a crate::scheme::tinted8::structure::Ui,
+    variant: &'a SchemeVariant,
+    option: &'a OptionCtx,
 }
 
 /// Builds a structured YAML context for Tinted8 templates.
@@ -57,7 +61,6 @@ pub fn to_template_context(
         name: meta.name.clone(),
         author: meta.author.clone(),
         description: meta.description.clone().unwrap_or_default(),
-        variant: meta.variant.to_string(),
         slug: meta.slug.clone(),
         slug_underscored: meta.slug.replace('-', "_"),
         system: meta.system.to_string(),
@@ -66,7 +69,10 @@ pub fn to_template_context(
         },
         family: meta.family.clone().unwrap_or_default(),
         style: meta.style.clone().unwrap_or_default(),
-        is_dark_variant: SchemeVariant::from_str(meta.variant.as_str())? == SchemeVariant::Dark,
+    };
+    let variant = &scheme.variant;
+    let option = &OptionCtx {
+        is_dark_variant: *variant == SchemeVariant::Dark,
     };
 
     let ctx = TemplateCtx {
@@ -74,6 +80,8 @@ pub fn to_template_context(
         palette: &scheme.palette,
         syntax: &scheme.syntax,
         ui: &scheme.ui,
+        variant,
+        option,
     };
 
     Ok(serde_yaml::to_value(&ctx)?)
