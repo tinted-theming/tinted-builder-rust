@@ -24,6 +24,7 @@ your own Rust application.
 - [Library](#library)
   - [Library installation](#library-installation)
   - [Library usage](#library-usage)
+- [Development](#development)
 - [Contributing](#contributing)
 - [License](#license)
 
@@ -234,6 +235,18 @@ The `Template` struct simply sets the content provided to it via
 `template.render_to_file(&scheme)` takes the scheme and generates the
 variables defined in the `0.11.1` [builder specification].
 
+## Development
+
+A [justfile] is provided for common development tasks. Run `just` to
+list available recipes.
+
+| Recipe | Description | Example |
+|--------|-------------|---------|
+| `test` | Run tests for all crates, or a specific crate | `just test`, `just test tinted-builder` |
+| `fmt` | Format Rust and Nix files | `just fmt` |
+| `lint` | Run clippy | `just lint` |
+| `clean` | Remove build artifacts | `just clean` |
+
 ## Contributing
 
 Contributions are welcome! Have a look at [CONTRIBUTING.md] for more
@@ -256,5 +269,6 @@ tinted-builder-rust falls under the [GPL-3.0] license. Have a look at the
 [ribboncurls]: https://github.com/tinted-theming/ribboncurls
 [CONTRIBUTING.md]: CONTRIBUTING.md
 [repository releases]: https://github.com/tinted-theming/tinted-builder-rust/releases/latest
+[justfile]: https://just.systems/
 [GPL-3.0]: https://github.com/IQAndreas/markdown-licenses/blob/master/gnu-gpl-v3.0.md
 [LICENSE]: ./LICENSE
