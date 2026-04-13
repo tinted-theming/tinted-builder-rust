@@ -3,6 +3,21 @@ mod error;
 mod scheme;
 mod template;
 mod utils;
+#[cfg(target_arch = "wasm32")]
+mod bindings {
+    #![allow(clippy::same_length_and_capacity)]
+    wit_bindgen::generate!({
+        path: "wit/world.wit",
+    });
+}
+#[cfg(target_arch = "wasm32")]
+mod wasm;
+
+#[cfg(target_arch = "wasm32")]
+use wasm::Component;
+
+#[cfg(target_arch = "wasm32")]
+bindings::export!(Component with_types_in bindings);
 
 pub use error::TintedBuilderError;
 pub use scheme::{

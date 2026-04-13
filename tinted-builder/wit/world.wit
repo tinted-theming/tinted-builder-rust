@@ -1,0 +1,198 @@
+package tinted-theming:tinted-builder;
+
+/// Core color and scheme types used throughout the library.
+interface types {
+    /// The scheme system: base16, base24, or tinted8.
+    enum scheme-system {
+        base16,
+        base24,
+        tinted8,
+    }
+
+    /// Whether the scheme is a dark or light variant.
+    enum scheme-variant {
+        dark,
+        light,
+    }
+
+    /// Canonical color names used by the palette.
+    enum color-name {
+        black,
+        red,
+        green,
+        yellow,
+        blue,
+        magenta,
+        cyan,
+        white,
+        orange,
+        gray,
+        brown,
+        other,
+    }
+
+    /// Intensity variants for a color token.
+    enum color-variant {
+        dim,
+        normal,
+        bright,
+    }
+
+    /// A normalized color with multiple representations.
+    record color {
+        /// 6-digit hex string (lowercase, no leading #), e.g. "aabbcc"
+        hex: string,
+        /// Per-channel hex strings
+        hex-r: string,
+        hex-g: string,
+        hex-b: string,
+        /// BGR-ordered hex string
+        hex-bgr: string,
+        /// 8-bit RGB channels
+        rgb-r: u8,
+        rgb-g: u8,
+        rgb-b: u8,
+        /// 16-bit RGB channels (8-bit * 257)
+        rgb16-r: u16,
+        rgb16-g: u16,
+        rgb16-b: u16,
+        /// Normalized decimal channels in [0.0, 1.0]
+        dec-r: f32,
+        dec-g: f32,
+        dec-b: f32,
+        /// The color's canonical name
+        name: color-name,
+        /// The color's intensity variant
+        %variant: color-variant,
+    }
+
+    /// Metadata common to all scheme types.
+    record scheme-metadata {
+        system: scheme-system,
+        name: string,
+        slug: string,
+        author: string,
+        description: option<string>,
+        %variant: scheme-variant,
+    }
+
+    /// Extended metadata for Tinted8 schemes.
+    record tinted8-scheme-metadata {
+        system: scheme-system,
+        name: string,
+        slug: string,
+        author: string,
+        theme-author: string,
+        description: option<string>,
+        %variant: scheme-variant,
+        /// The styling-spec version the scheme supports.
+        supports-styling-spec: string,
+        family: option<string>,
+        style: option<string>,
+    }
+
+    /// A key-value pair mapping a palette key (e.g. "base00") to a color.
+    record palette-entry {
+        key: string,
+        color: color,
+    }
+}
+
+/// Color construction and derivation functions.
+interface colors {
+    use types.{color, color-name, color-variant};
+
+    /// Create a color from a hex string (e.g. "ff00ff" or "#ffcc00").
+    create: func(
+        hex: string,
+        name: option<color-name>,
+        %variant: option<color-variant>,
+    ) -> result<color, string>;
+
+    /// Derive a dim or bright variant from a normal color.
+    to-variant: func(color: color, target-variant: color-variant) -> result<color, string>;
+
+    /// Derive a supplemental color (e.g. orange or brown from yellow).
+    to-color: func(color: color, target-name: color-name) -> result<color, string>;
+}
+
+/// Parse YAML scheme strings into scheme handles.
+interface schemes {
+    use types.{scheme-metadata, palette-entry};
+
+    /// An opaque handle to a parsed scheme (Base16, Base24, or Tinted8).
+    resource scheme {
+        /// Parse a YAML string into a scheme.
+        parse: static func(yaml: string) -> result<scheme, string>;
+
+        /// Get the scheme's metadata.
+        metadata: func() -> scheme-metadata;
+
+        /// Get the Base16/Base24 palette entries.
+        ///
+        /// Returns the palette as a list of key-color pairs (e.g. "base00" -> color).
+        /// For Tinted8 schemes, returns palette colors keyed as "black-normal",
+        /// "red-bright", etc.
+        palette: func() -> list<palette-entry>;
+    }
+}
+
+/// Template rendering using Mustache-style templates and color schemes.
+interface renderer {
+    use schemes.{scheme};
+
+    /// Render a Mustache template string with the given scheme.
+    render: func(scheme: borrow<scheme>, template-content: string) -> result<string, string>;
+}
+
+/// Tinted8-specific types, introspection, and version constants.
+interface tinted8 {
+    use types.{color, tinted8-scheme-metadata, palette-entry};
+
+    /// A syntax scope key (e.g. "comment", "keyword.control.import").
+    type syntax-key = string;
+
+    /// A UI property key (e.g. "global.background.normal", "status.error").
+    type ui-key = string;
+
+    /// An opaque handle to a parsed Tinted8 scheme with full palette, syntax,
+    /// and UI data.
+    resource tinted8-scheme {
+        /// Parse a Tinted8 YAML string into a scheme.
+        parse: static func(yaml: string) -> result<tinted8-scheme, string>;
+
+        /// Get the Tinted8-specific metadata (includes theme-author, family, style, etc.)
+        metadata: func() -> tinted8-scheme-metadata;
+
+        palette: func() -> list<palette-entry>;
+
+        /// Look up a syntax color by its scope key.
+        syntax-color: func(key: syntax-key) -> result<color, string>;
+
+        /// Look up a UI color by its property key.
+        ui-color: func(key: ui-key) -> result<color, string>;
+
+        /// List all valid syntax scope keys.
+        syntax-keys: static func() -> list<syntax-key>;
+
+        /// List all valid UI property keys.
+        ui-keys: static func() -> list<ui-key>;
+
+        /// Render a Mustache template string with this Tinted8 scheme.
+        render: func(template-content: string) -> result<string, string>;
+    }
+
+    /// The builder spec version this library targets.
+    supported-builder-spec-version: func() -> string;
+
+    /// The styling spec version this library targets.
+    supported-styling-spec-version: func() -> string;
+}
+
+world tinted-builder {
+    export types;
+    export colors;
+    export schemes;
+    export renderer;
+    export tinted8;
+}

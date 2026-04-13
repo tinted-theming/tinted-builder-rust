@@ -10,6 +10,9 @@ build-wasm:
 test project="" *args:
     {{ if project == "" { "cargo test --workspace" } else { "cargo test -p " + project } }} {{args}}
 
+test-wasm *args:
+    cargo test -p tinted-builder {{args}}
+
 fmt:
     cargo fmt
     alejandra .

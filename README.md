@@ -251,9 +251,21 @@ list available recipes.
 | Recipe | Description | Example |
 |--------|-------------|---------|
 | `test` | Run tests for all crates, or a specific crate | `just test`, `just test tinted-builder` |
+| `test-wasm` | Run wasm-specific tests (requires `nix develop`) | `just test-wasm` |
 | `fmt` | Format Rust and Nix files | `just fmt` |
 | `lint` | Run clippy | `just lint` |
 | `clean` | Remove build artifacts | `just clean` |
+
+### WASM tests
+
+The `tinted-builder` crate includes WASM-specific unit tests that run
+under wasmtime. These require the `wasm32-wasip2` target, which is
+provided by the Nix dev shell:
+
+```sh
+nix develop
+just test-wasm --target wasm32-wasip2
+```
 
 ## Contributing
 

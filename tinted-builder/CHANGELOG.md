@@ -23,6 +23,7 @@
 - Add tinted8 0.2.0-beta3 feature where the default colour values of grayscale
   colors are different based on whether a dark or light scheme variant is active
 - Add `ui.cursor_muted`
+- Add wasm target build
 
 ### Changed
 

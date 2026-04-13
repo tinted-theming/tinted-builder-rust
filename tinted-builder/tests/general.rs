@@ -1,5 +1,5 @@
 use anyhow::Result;
-use tinted_builder::{Scheme, Template, TintedBuilderError};
+use tinted_builder::{Scheme, SchemeSystem, SchemeVariant, Template, TintedBuilderError};
 
 #[test]
 fn render_without_content() -> Result<(), TintedBuilderError> {
@@ -127,6 +127,92 @@ fn render_is_dark_variant() -> Result<()> {
     Ok(())
 }
 
+// ---------------------------------------------------------------------------
+// Scheme::from_yaml() tests
+// ---------------------------------------------------------------------------
+
+#[test]
+fn from_yaml_base16() -> Result<()> {
+    let scheme = Scheme::from_yaml(SCHEME_SILK_LIGHT)?;
+    assert_eq!(scheme.get_scheme_system(), SchemeSystem::Base16);
+    assert_eq!(scheme.get_scheme_name(), "Silk Light");
+    assert_eq!(scheme.get_scheme_variant(), SchemeVariant::Light);
+
+    let template = Template::new("{{base0A-hex}}".to_string(), scheme);
+    assert_eq!(template.render()?, "cfad25");
+    Ok(())
+}
+
+#[test]
+fn from_yaml_base24() -> Result<()> {
+    let scheme = Scheme::from_yaml(SCHEME_BASE24)?;
+    assert_eq!(scheme.get_scheme_system(), SchemeSystem::Base24);
+    assert_eq!(scheme.get_scheme_name(), "Base24 Test");
+    assert_eq!(scheme.get_scheme_variant(), SchemeVariant::Dark);
+
+    let template = Template::new("{{base00-hex}}".to_string(), scheme);
+    assert_eq!(template.render()?, "1a1b26");
+    Ok(())
+}
+
+#[test]
+fn from_yaml_tinted8() -> Result<()> {
+    let scheme = Scheme::from_yaml(SCHEME_TINTED_CATPPUCCIN_MOCHA)?;
+    assert_eq!(scheme.get_scheme_system(), SchemeSystem::Tinted8);
+    assert_eq!(scheme.get_scheme_name(), "Catppuccin Mocha");
+    assert_eq!(scheme.get_scheme_variant(), SchemeVariant::Dark);
+
+    let template = Template::new("{{scheme.name}}".to_string(), scheme);
+    assert_eq!(template.render()?, "Catppuccin Mocha");
+    Ok(())
+}
+
+#[test]
+fn from_yaml_tinted8_palette_render() -> Result<()> {
+    let scheme = Scheme::from_yaml(SCHEME_TINTED_CATPPUCCIN_MOCHA)?;
+    let template = Template::new("{{palette.red.normal.hex}}".to_string(), scheme);
+    assert_eq!(template.render()?, "f38ba8");
+    Ok(())
+}
+
+#[test]
+fn from_yaml_tinted8_is_dark_variant() -> Result<()> {
+    let scheme = Scheme::from_yaml(SCHEME_TINTED_CATPPUCCIN_MOCHA)?;
+    let template = Template::new(
+        "{{#option.is-dark-variant}}dark{{/option.is-dark-variant}}".to_string(),
+        scheme,
+    );
+    assert_eq!(template.render()?, "dark");
+    Ok(())
+}
+
+#[test]
+fn from_yaml_missing_system() {
+    let yaml = r#"
+name: "No System"
+author: "Test"
+variant: "dark"
+palette:
+  base00: "000000"
+"#;
+    let result = Scheme::from_yaml(yaml);
+    assert!(result.is_err());
+}
+
+#[test]
+fn from_yaml_invalid_system() {
+    let yaml = r#"
+system: "unknown"
+name: "Bad System"
+author: "Test"
+variant: "dark"
+palette:
+  base00: "000000"
+"#;
+    let result = Scheme::from_yaml(yaml);
+    assert!(result.is_err());
+}
+
 const SCHEME_SILK_LIGHT: &str = r##"
 system: "base16"
 name: "Silk Light"
@@ -175,6 +261,38 @@ palette:
   base0E: "6E6582"
   base0F: "865369"
 "#;
+
+const SCHEME_BASE24: &str = r##"
+system: "base24"
+name: "Base24 Test"
+author: "Test Author"
+variant: "dark"
+palette:
+  base00: "#1a1b26"
+  base01: "#16161e"
+  base02: "#2f3549"
+  base03: "#444b6a"
+  base04: "#787c99"
+  base05: "#a9b1d6"
+  base06: "#cbccd1"
+  base07: "#d5d6db"
+  base08: "#c0caf5"
+  base09: "#a9b1d6"
+  base0A: "#0db9d7"
+  base0B: "#9ece6a"
+  base0C: "#b4f9f8"
+  base0D: "#2ac3de"
+  base0E: "#bb9af7"
+  base0F: "#f7768e"
+  base10: "#0a0e14"
+  base11: "#06080a"
+  base12: "#ff7733"
+  base13: "#ff9e64"
+  base14: "#73daca"
+  base15: "#7dcfff"
+  base16: "#7aa2f7"
+  base17: "#c0caf5"
+"##;
 
 const SCHEME_TINTED_CATPPUCCIN_MOCHA: &str = r##"
 scheme:
