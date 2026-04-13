@@ -69,7 +69,7 @@ impl Template {
     /// "#;
     /// let template = Template::new(
     ///     r#"{{scheme-system}} scheme name is "{{scheme-name}}" and first color is #{{base00-hex}}"#.to_string(),
-    ///     Scheme::Base16(serde_yaml::from_str(scheme_yaml).unwrap())
+    ///     Scheme::from_yaml(scheme_yaml).unwrap()
     /// );
     /// let rendered = template.render().unwrap();
     ///
@@ -80,16 +80,19 @@ impl Template {
     /// ```
     pub fn render(&self) -> Result<String, TintedBuilderError> {
         match self.scheme {
-            Scheme::Base16(ref scheme) | Scheme::Base24(ref scheme) => {
-                let ctx = base16::to_template_context(scheme);
+            Scheme::Base16(ref scheme) => {
+                let ctx = base16::to_template_context(&scheme.into());
                 let rendered = base16::render(&self.content, &ctx)?;
-
+                Ok(rendered)
+            }
+            Scheme::Base24(ref scheme) => {
+                let ctx = base16::to_template_context(&scheme.into());
+                let rendered = base16::render(&self.content, &ctx)?;
                 Ok(rendered)
             }
             Scheme::Tinted8(ref scheme) => {
                 let ctx = tinted8::to_template_context(scheme)?;
                 let rendered = tinted8::render(&self.content, &ctx)?;
-
                 Ok(rendered)
             }
         }

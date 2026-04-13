@@ -4,12 +4,12 @@
 [![Crates.io](https://img.shields.io/crates/v/tinted-builder.svg)](https://crates.io/crates/tinted-builder)
 [![Tests](https://github.com/tinted-theming/tinted-builder-rust/actions/workflows/ci.yml/badge.svg)](https://github.com/tinted-theming/tinted-builder-rust/actions/workflows/ci.yml)
 
-A Rust library to generate [base16] and [base24] templates using the
-`0.11.1` [builder specification].
+A Rust library to generate [base16], [base24], and Tinted8 templates
+using the `0.11.1` [builder specification].
 
-This library exposes a `Scheme` and `Template` struct which you can use
-to generate your own themes using [base16] and [base24] templates and
-`0.11.1` compliant base16 and base24 scheme files.
+This library exposes a `Scheme` enum and `Template` struct which you can
+use to generate your own themes using base16, base24, and Tinted8
+templates and scheme files.
 
 Internally tinted-builder uses [ribboncurls] to render the templates.
 
@@ -99,7 +99,7 @@ palette:
   base0D: "#6a9eb5"
   base0E: "#78a38f"
   base0F: "#a3a079""##;
-let scheme = Scheme::Base16(serde_yaml::from_str(scheme_str).unwrap());
+let scheme = Scheme::from_yaml(scheme_str).unwrap();
 let template = Template::new(template, scheme);
 let output = template
   .render()
@@ -110,18 +110,14 @@ let output = template
 .someOtherCssSelector { background-color: #a3a079 }"#);
 ```
 
-1. Create a scheme (`Scheme`) enum variant while providing the
-   deserialized data into into the variant:
-   `Scheme::Base16(serde_yaml::from_str(&scheme_str).unwrap())` in this
-   case
-2. Create a template by passing the serialized mustache text and the
-   `Scheme` variant in step 1 into the `Template` struct:
-   `Template::new(mustache_text, scheme)`. The `template.render()`
-   method takes the scheme, generates the variables defined in the 
-   `0.11.1` [builder specification] and returns a new string.
-3. Render the template by running a method which returns a
-   `Result<String, TintedBuilderError>` type: 
-   `let output = template.render().unwrap();`
+1. Parse the scheme YAML using `Scheme::from_yaml(&scheme_str)`, which
+   auto-detects the system (base16, base24, or tinted8). You can also
+   construct variants directly, e.g.
+   `Scheme::Base16(serde_yaml::from_str(&scheme_str).unwrap())`.
+2. Create a template by passing the mustache text and the `Scheme` into
+   `Template::new(mustache_text, scheme)`.
+3. Render the template with `template.render()`, which returns a
+   `Result<String, TintedBuilderError>`.
 
 ## Contributing
 

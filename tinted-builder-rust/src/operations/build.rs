@@ -9,7 +9,7 @@ use std::path::{Path, PathBuf};
 use tinted_builder::tinted8::{
     Scheme as Tinted8Scheme, SUPPORTED_BUILDER_SPEC_VERSION, SUPPORTED_STYLING_SPEC_VERSION,
 };
-use tinted_builder::{Base16Scheme, Scheme, SchemeSystem, Template};
+use tinted_builder::{Scheme, SchemeSystem, Template};
 use utils::{get_scheme_files, parse_filename, ParsedFilename, TemplateConfig};
 
 pub use utils::SchemeFile;
@@ -243,19 +243,17 @@ fn render_list(
     for scheme_system in supported_systems {
         match &scheme_system {
             SchemeSystem::Base16 | SchemeSystem::Base24 => {
-                let mut data: HashMap<&str, Vec<Base16Scheme>> = HashMap::new();
+                let schemes: Vec<serde_yaml::Value> = all_scheme_files
+                    .iter()
+                    .filter_map(|(_, scheme)| match scheme {
+                        Scheme::Base16(s) => serde_yaml::to_value(s).ok(),
+                        Scheme::Base24(s) => serde_yaml::to_value(s).ok(),
+                        _ => None,
+                    })
+                    .collect();
 
-                data.insert(
-                    "schemes",
-                    all_scheme_files
-                        .iter()
-                        .cloned()
-                        .filter_map(|(_, scheme)| match scheme {
-                            Scheme::Base16(scheme) | Scheme::Base24(scheme) => Some(scheme),
-                            _ => None,
-                        })
-                        .collect::<Vec<Base16Scheme>>(),
-                );
+                let mut data: HashMap<&str, Vec<serde_yaml::Value>> = HashMap::new();
+                data.insert("schemes", schemes);
 
                 *data_yaml = serde_yaml::to_string(&data).unwrap_or_default();
             }
@@ -391,8 +389,9 @@ fn generate_themes_for_config(
 
     for (scheme_path, scheme) in scheme_files {
         let (scheme_slug, scheme_system) = match scheme {
-            Scheme::Base16(scheme) | Scheme::Base24(scheme) => Ok((&scheme.slug, &scheme.system)),
-            Scheme::Tinted8(scheme) => Ok((&scheme.scheme.slug, &scheme.scheme.system)),
+            Scheme::Base16(s) => Ok((&s.slug, &s.system)),
+            Scheme::Base24(s) => Ok((&s.slug, &s.system)),
+            Scheme::Tinted8(s) => Ok((&s.scheme.slug, &s.scheme.system)),
             scheme => Err(anyhow!(
                 "E110: Unknown or unsupported scheme system: {}",
                 scheme.get_scheme_system()
@@ -490,7 +489,7 @@ fn generate_themes_for_config(
 /// This function can return an error in several scenarios:
 ///
 /// * If the scheme file cannot be read from the specified path.
-/// * If the scheme file content cannot be parsed into a `Base16Scheme`.
+/// * If the scheme file content cannot be parsed into a scheme.
 /// * If the output directory cannot be created.
 /// * If the template cannot be rendered with the provided scheme.
 /// * If there is an issue writing the generated output to the file.
@@ -519,7 +518,22 @@ fn generate_theme(
     let scheme = scheme_file_type.get_scheme()?;
 
     match &scheme {
-        Scheme::Base16(scheme_inner) | Scheme::Base24(scheme_inner) => {
+        Scheme::Base16(scheme_inner) => {
+            if scheme_inner.system != *system {
+                return Err(anyhow!("E001: Invalid system"));
+            }
+
+            let template = Template::new(template_content.to_string(), scheme.clone());
+            let output = template.render()?;
+            let output_path = parsed_filename.get_path();
+
+            if !parsed_filename.directory.exists() {
+                fs::create_dir_all(parsed_filename.directory)?;
+            }
+
+            write_to_file(&output_path, &output)?;
+        }
+        Scheme::Base24(scheme_inner) => {
             if scheme_inner.system != *system {
                 return Err(anyhow!("E001: Invalid system"));
             }

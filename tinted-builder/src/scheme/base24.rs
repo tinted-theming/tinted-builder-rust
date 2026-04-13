@@ -5,9 +5,10 @@ use std::{collections::HashMap, fmt};
 
 pub use crate::scheme::color::Color;
 
-pub const REQUIRED_BASE16_PALETTE_KEYS: [&str; 16] = [
+pub const REQUIRED_BASE24_PALETTE_KEYS: [&str; 24] = [
     "base00", "base01", "base02", "base03", "base04", "base05", "base06", "base07", "base08",
-    "base09", "base0A", "base0B", "base0C", "base0D", "base0E", "base0F",
+    "base09", "base0A", "base0B", "base0C", "base0D", "base0E", "base0F", "base10", "base11",
+    "base12", "base13", "base14", "base15", "base16", "base17",
 ];
 
 #[derive(Deserialize, Serialize)]
@@ -21,9 +22,9 @@ struct SchemeWrapper {
     pub(crate) palette: HashMap<String, String>,
 }
 
-/// Deserialized Base16 scheme with normalized palette and metadata.
+/// Deserialized Base24 scheme with normalized palette and metadata.
 ///
-/// The `palette` map contains Base16 color keys (`base00` through `base0F`) mapped to
+/// The `palette` map contains Base24 color keys (`base00` through `base17`) mapped to
 /// normalized `Color` values. Serialization preserves sorted palette keys and hex values
 /// with a leading `#`.
 #[derive(Debug, Clone)]
@@ -75,20 +76,20 @@ impl<'de> Deserialize<'de> for Scheme {
             .map_or_else(|| slugify(&wrapper.name), |slug| slugify(&slug));
         let variant = wrapper.variant.unwrap_or(SchemeVariant::Dark);
 
-        if wrapper.system != SchemeSystem::Base16 {
+        if wrapper.system != SchemeSystem::Base24 {
             return Err(serde::de::Error::custom(format!(
-                "{} is not a valid system for a Base16 scheme",
+                "{} is not a valid system for a Base24 scheme",
                 wrapper.system
             )));
         }
 
-        let contains_all_keys = REQUIRED_BASE16_PALETTE_KEYS
+        let contains_all_keys = REQUIRED_BASE24_PALETTE_KEYS
             .iter()
             .all(|&key| wrapper.palette.contains_key(key));
 
         if !contains_all_keys {
             return Err(serde::de::Error::custom(
-                "base16 scheme does not contain the required palette properties",
+                "base24 scheme does not contain the required palette properties",
             ));
         }
 

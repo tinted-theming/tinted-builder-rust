@@ -6,10 +6,25 @@ mod utils;
 
 pub use error::TintedBuilderError;
 pub use scheme::{
-    Base16Scheme, Color, ColorName, ColorType, ColorVariant, Scheme, SchemeSupports, SchemeSystem,
-    SchemeVariant,
+    Color, ColorName, ColorType, ColorVariant, Scheme, SchemeSupports, SchemeSystem, SchemeVariant,
 };
 pub use template::Template;
+
+pub mod base16 {
+    /// Base16 support for the library.
+    ///
+    /// - `Scheme`: deserialize Base16 YAML into this type and wrap in `Scheme::Base16` to render
+    ///   templates.
+    pub use crate::scheme::base16::Scheme;
+}
+
+pub mod base24 {
+    /// Base24 support for the library.
+    ///
+    /// - `Scheme`: deserialize Base24 YAML into this type and wrap in `Scheme::Base24` to render
+    ///   templates.
+    pub use crate::scheme::base24::Scheme;
+}
 
 pub mod tinted8 {
     /// Tinted8 support for the library.

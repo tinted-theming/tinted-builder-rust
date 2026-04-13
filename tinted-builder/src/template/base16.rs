@@ -1,6 +1,7 @@
 use std::collections::HashMap;
 
-use crate::{error::TintedBuilderError, Base16Scheme};
+use crate::error::TintedBuilderError;
+use crate::scheme::{Color, SchemeSystem, SchemeVariant};
 
 /// Renders a mustache template using a flat string context (Base16/Base24 variables).
 pub fn render(content: &str, ctx: &HashMap<String, String>) -> Result<String, TintedBuilderError> {
@@ -10,19 +11,58 @@ pub fn render(content: &str, ctx: &HashMap<String, String>) -> Result<String, Ti
     Ok(rendered)
 }
 
+/// Common fields shared by Base16 and Base24 schemes, used to build template context.
+pub(crate) struct SchemeContext<'a> {
+    pub name: &'a str,
+    pub author: &'a str,
+    pub description: Option<&'a str>,
+    pub slug: &'a str,
+    pub system: &'a SchemeSystem,
+    pub variant: &'a SchemeVariant,
+    pub palette: &'a HashMap<String, Color>,
+}
+
+impl<'a> From<&'a crate::scheme::base16::Scheme> for SchemeContext<'a> {
+    fn from(s: &'a crate::scheme::base16::Scheme) -> Self {
+        Self {
+            name: &s.name,
+            author: &s.author,
+            description: s.description.as_deref(),
+            slug: &s.slug,
+            system: &s.system,
+            variant: &s.variant,
+            palette: &s.palette,
+        }
+    }
+}
+
+impl<'a> From<&'a crate::scheme::base24::Scheme> for SchemeContext<'a> {
+    fn from(s: &'a crate::scheme::base24::Scheme) -> Self {
+        Self {
+            name: &s.name,
+            author: &s.author,
+            description: s.description.as_deref(),
+            slug: &s.slug,
+            system: &s.system,
+            variant: &s.variant,
+            palette: &s.palette,
+        }
+    }
+}
+
 /// Builds the flat Base16/Base24 variable context expected by templates.
 ///
 /// Provides keys like `scheme-name`, `base0A-hex`, `base0A-hex-bgr`, `base0A-rgb-r`, etc.
-pub fn to_template_context(scheme: &Base16Scheme) -> HashMap<String, String> {
+pub fn to_template_context(scheme: &SchemeContext<'_>) -> HashMap<String, String> {
     let mut context = HashMap::new();
 
-    context.insert("scheme-name".to_string(), scheme.name.clone());
-    context.insert("scheme-author".to_string(), scheme.author.clone());
+    context.insert("scheme-name".to_string(), scheme.name.to_string());
+    context.insert("scheme-author".to_string(), scheme.author.to_string());
     context.insert(
         "scheme-description".to_string(),
-        scheme.description.clone().unwrap_or_default(),
+        scheme.description.unwrap_or_default().to_string(),
     );
-    context.insert("scheme-slug".to_string(), scheme.slug.clone());
+    context.insert("scheme-slug".to_string(), scheme.slug.to_string());
     context.insert(
         "scheme-slug-underscored".to_string(),
         scheme.slug.replace('-', "_"),
@@ -37,7 +77,7 @@ pub fn to_template_context(scheme: &Base16Scheme) -> HashMap<String, String> {
         "true".to_string(),
     );
 
-    for (name, color) in &scheme.palette {
+    for (name, color) in scheme.palette {
         let hex = color.hex.clone();
         let rgb = color.rgb;
 
