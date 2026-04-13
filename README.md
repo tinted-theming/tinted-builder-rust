@@ -158,32 +158,47 @@ The CLI returns structured error codes grouped by stage. See `specs/tinted8/buil
 
 ## Library
 
-This library exposes a `Scheme` and `Template` struct which you can
-use to generate your own themes using [base16] and [base24] templates and
-`0.11.1` compliant base16 and base24 scheme files.
+This library exposes a `Scheme` enum and `Template` struct which you can
+use to generate your own themes using [base16], [base24], and Tinted8
+templates and scheme files.
 
 Internally tinted-builder-rust uses [ribboncurls] to render the templates.
 
 ### Library installation
 
 ```sh
-cargo add tinted-builder-rust
+cargo add tinted-builder
 ```
 
 ### Library Usage
 
 ```rust
-use tinted_builder_rust::{Scheme, Template};
+use tinted_builder::{Scheme, Template};
 use std::fs::read_to_string;
 
 let template_str = read_to_string("path/to/template.mustache").unwrap();
 let scheme_str = read_to_string("path/to/scheme.yml").unwrap();
-let scheme = Scheme::Base16(serde_yaml::from_str(&scheme_str).unwrap());
-let template = Template::new(template_str, scheme);
 
-template
-    .render()
-    .unwrap();
+// Auto-detect the scheme system from the YAML
+let scheme = Scheme::from_yaml(&scheme_str).unwrap();
+let template = Template::new(template_str, scheme);
+let output = template.render().unwrap();
+```
+
+You can also construct scheme variants directly:
+
+```rust
+use tinted_builder::Scheme;
+
+// Base16
+let scheme = Scheme::Base16(serde_yaml::from_str(&scheme_str).unwrap());
+
+// Base24
+let scheme = Scheme::Base24(serde_yaml::from_str(&scheme_str).unwrap());
+
+// Tinted8
+let scheme = Scheme::Tinted8(Box::new(serde_yaml::from_str(&scheme_str).unwrap()));
+```
 
 ### Programmatic CLI usage (build helper)
 
@@ -203,37 +218,30 @@ if let Err(err) = tinted_builder_rust::build(&template_dir, &schemes_dir, true) 
 
 Common errors include E300/E301/E302 (missing tinted8 supports), E303 (missing mustache),
 E304 (invalid filename config), E305 (missing/invalid template config), and E400 (no schemes found).
-```
 
-The Scheme struct is as follows:
+### Scheme types
+
+Each scheme system has its own type under a dedicated module:
+
+- `base16::Scheme` — 16-color palette (`base00` through `base0F`)
+- `base24::Scheme` — 24-color palette (`base00` through `base17`)
+- `tinted8::Scheme` — palette, syntax, and UI colors
+
+All three share the same struct shape for `Color`:
 
 ```rust
-use std::collections::HashMap;
-use tinted_builder::{SchemeSystem, SchemeVariant};
-
-pub struct Scheme {
-    pub system: SchemeSystem,
-    pub name: String,
-    pub slug: String,
-    pub author: String,
-    pub description: Option<String>,
-    pub variant: SchemeVariant,
-    pub palette: HashMap<String, Color>,
-}
-
 pub struct Color {
-    pub hex: (String, String, String),
+    pub hex: (String, String, String),  // (rr, gg, bb) lowercase
     pub rgb: (u8, u8, u8),
-    pub dec: (f32, f32, f32),
+    pub dec: (f32, f32, f32),           // [0.0, 1.0]
+    pub name: ColorName,
+    pub variant: ColorVariant,
 }
 ```
 
-`Template::new`
-The `Template` struct simply sets the content provided to it via
-`Template::new`.
-
-`template.render_to_file(&scheme)` takes the scheme and generates the
-variables defined in the `0.11.1` [builder specification].
+`Template::new` takes a `Scheme` enum and template content string.
+`template.render()` replaces placeholders with values from the scheme
+as defined in the [builder specification].
 
 ## Development
 

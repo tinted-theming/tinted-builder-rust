@@ -1,14 +1,13 @@
-mod base16;
+pub mod base16;
+pub mod base24;
 mod color;
 pub mod tinted8;
 
 use serde::{Deserialize, Serialize};
 use std::{fmt, str::FromStr};
 
-pub use crate::scheme::base16::Base16Scheme;
 pub use crate::scheme::color::Color;
 pub use crate::scheme::color::{ColorName, ColorType, ColorVariant};
-pub use crate::scheme::tinted8::Scheme as Tinted8Scheme;
 use crate::TintedBuilderError;
 
 /// Enum representing schemes for different scheme systems. This enum is non-exhaustive, meaning
@@ -17,21 +16,61 @@ use crate::TintedBuilderError;
 #[non_exhaustive]
 #[derive(Debug, Clone)]
 pub enum Scheme {
-    /// Base16 variant with `Base16Scheme` deserialized content.
-    Base16(Base16Scheme),
-    /// Base24 variant with `Base16Scheme` deserialized content. `Base16Scheme` is built to support
-    /// basic supersets of Base16 schemes.
-    Base24(Base16Scheme),
-    /// Tinted8 scheme system with `Tinted8Scheme` deserialized content.
-    Tinted8(Box<Tinted8Scheme>),
+    /// Base16 variant with `base16::Scheme` deserialized content.
+    Base16(base16::Scheme),
+    /// Base24 variant with `base24::Scheme` deserialized content.
+    Base24(base24::Scheme),
+    /// Tinted8 scheme system with `tinted8::Scheme` deserialized content.
+    Tinted8(Box<tinted8::Scheme>),
 }
 
 impl Scheme {
+    /// Parse a YAML string into a `Scheme`, auto-detecting the system.
+    ///
+    /// Inspects the `system` field (top-level or nested under `scheme`) to
+    /// determine which variant to deserialize. Defaults to Base16 if no
+    /// `system` field is found.
+    ///
+    /// # Errors
+    ///
+    /// Returns a `TintedBuilderError` if the YAML is malformed, the system
+    /// is unrecognised, or the scheme fails validation.
+    pub fn from_yaml(yaml: &str) -> Result<Self, TintedBuilderError> {
+        let raw: serde_yaml::Value =
+            serde_yaml::from_str(yaml).map_err(TintedBuilderError::YamlDeserialize)?;
+
+        let system = raw
+            .get("system")
+            .or_else(|| raw.get("scheme").and_then(|s| s.get("system")))
+            .and_then(serde_yaml::Value::as_str)
+            .ok_or_else(|| TintedBuilderError::SchemeMissingProperty("system".to_string()))?
+            .parse::<SchemeSystem>()?;
+
+        match system {
+            SchemeSystem::Base16 => {
+                let scheme: base16::Scheme =
+                    serde_yaml::from_str(yaml).map_err(TintedBuilderError::YamlDeserialize)?;
+                Ok(Self::Base16(scheme))
+            }
+            SchemeSystem::Base24 => {
+                let scheme: base24::Scheme =
+                    serde_yaml::from_str(yaml).map_err(TintedBuilderError::YamlDeserialize)?;
+                Ok(Self::Base24(scheme))
+            }
+            SchemeSystem::Tinted8 => {
+                let scheme: tinted8::Scheme =
+                    serde_yaml::from_str(yaml).map_err(TintedBuilderError::YamlDeserialize)?;
+                Ok(Self::Tinted8(Box::new(scheme)))
+            }
+        }
+    }
+
     /// Returns the author of the scheme.
     #[must_use]
     pub fn get_scheme_author(&self) -> String {
         match self {
-            Self::Base16(scheme) | Self::Base24(scheme) => scheme.author.clone(),
+            Self::Base16(scheme) => scheme.author.clone(),
+            Self::Base24(scheme) => scheme.author.clone(),
             Self::Tinted8(scheme) => scheme.scheme.author.clone(),
         }
     }
@@ -39,9 +78,8 @@ impl Scheme {
     #[must_use]
     pub fn get_scheme_description(&self) -> String {
         match self {
-            Self::Base16(scheme) | Self::Base24(scheme) => {
-                scheme.description.clone().unwrap_or_default()
-            }
+            Self::Base16(scheme) => scheme.description.clone().unwrap_or_default(),
+            Self::Base24(scheme) => scheme.description.clone().unwrap_or_default(),
             Self::Tinted8(scheme) => scheme.scheme.description.clone().unwrap_or_default(),
         }
     }
@@ -49,7 +87,8 @@ impl Scheme {
     #[must_use]
     pub fn get_scheme_name(&self) -> String {
         match self {
-            Self::Base16(scheme) | Self::Base24(scheme) => scheme.name.clone(),
+            Self::Base16(scheme) => scheme.name.clone(),
+            Self::Base24(scheme) => scheme.name.clone(),
             Self::Tinted8(scheme) => scheme.scheme.name.clone(),
         }
     }
@@ -57,7 +96,8 @@ impl Scheme {
     #[must_use]
     pub fn get_scheme_slug(&self) -> String {
         match self {
-            Self::Base16(scheme) | Self::Base24(scheme) => scheme.slug.clone(),
+            Self::Base16(scheme) => scheme.slug.clone(),
+            Self::Base24(scheme) => scheme.slug.clone(),
             Self::Tinted8(scheme) => scheme.scheme.slug.clone(),
         }
     }
@@ -74,7 +114,8 @@ impl Scheme {
     #[must_use]
     pub fn get_scheme_variant(&self) -> SchemeVariant {
         match self {
-            Self::Base16(scheme) | Self::Base24(scheme) => scheme.variant.clone(),
+            Self::Base16(scheme) => scheme.variant.clone(),
+            Self::Base24(scheme) => scheme.variant.clone(),
             Self::Tinted8(scheme) => scheme.variant.clone(),
         }
     }

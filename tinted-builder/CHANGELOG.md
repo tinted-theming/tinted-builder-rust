@@ -26,13 +26,15 @@
 
 ### Changed
 
-- **BREAKING**: Tinted8 scheme `family`, `style` now live under the `meta`
-  object, aligning with spec 0.2.0.
+- **BREAKING**: Restructure scheme public API to access system `Scheme` structs
+  under `tinted_builder::{{system}}::Scheme`
 - **BREAKING**: Library: Color API updated — `Color::new` now takes `(hex,
   Option<ColorName>, Option<ColorVariant>)`; `Color` struct gained `name` and
   `variant` fields. Pass `None` for backward-compatible behavior. Also enhances
   color handling to accept 3‑digit hex, adds `hex-bgr`, and provides 16‑bit
   `rgb16` plus normalized `dec` channel serialization.
+- Tinted8 scheme `family`, `style` now live under the `meta`
+  object, aligning with spec 0.2.0.
 - Update to support Tinted8 styling spec 0.2.0.
 - Treat the syntax schema as the source of truth for Tinted8 syntax keys.
 - Rename Tinted8 UI keys from `highlight.search-background` and
