@@ -245,6 +245,14 @@ as defined in the [builder specification].
 
 ## Development
 
+A [Nix flake](flake.nix) is provided for a reproducible development
+environment. It includes the Rust toolchain with `wasm32-wasip2` target,
+wasmtime, wasm-tools, and other dev dependencies. Enter the shell with:
+
+```sh
+nix develop
+```
+
 A [justfile] is provided for common development tasks. Run `just` to
 list available recipes.
 
