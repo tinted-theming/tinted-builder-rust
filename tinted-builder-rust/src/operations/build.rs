@@ -427,7 +427,9 @@ fn generate_themes_for_config(
             .replace("{{ scheme-slug }}", &scheme_slug.clone())
             .replace("{{scheme-slug}}", &scheme_slug.clone())
             .replace("{{ scheme-system }}", &scheme_system.to_string())
-            .replace("{{scheme-system}}", &scheme_system.to_string());
+            .replace("{{scheme-system}}", &scheme_system.to_string())
+            .replace("{{ scheme.system }}", &scheme_system.to_string())
+            .replace("{{scheme.system}}", &scheme_system.to_string());
 
         let parsed_filename = parse_filename(&theme_template_path, &filepath);
         if !parsed_filename.directory.exists() {
