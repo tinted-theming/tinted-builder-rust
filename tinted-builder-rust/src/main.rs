@@ -61,11 +61,24 @@ fn main() -> Result<()> {
 
     match matches.subcommand() {
         Some(("build", sub_matches)) => {
-            let ignores = sub_matches
-                .get_many::<String>("ignore")
-                .unwrap_or_default()
-                .cloned()
-                .collect::<Vec<String>>();
+            let ignores = {
+                let mut matches = sub_matches
+                    .get_many::<String>("ignore")
+                    .unwrap_or_default()
+                    .cloned()
+                    .collect::<Vec<String>>();
+
+                // Ignore common repo files by default
+                if matches.is_empty() {
+                    matches = vec![
+                        "**/*.md".to_string(),
+                        "**/.*".to_string(),
+                        "**/LICENSE".to_string(),
+                    ];
+                }
+
+                matches
+            };
             let sync = sub_matches
                 .get_one::<bool>("sync")
                 .is_some_and(ToOwned::to_owned);
