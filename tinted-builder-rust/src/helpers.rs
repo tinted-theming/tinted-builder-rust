@@ -3,7 +3,6 @@ use std::fs::{remove_file, File};
 use std::io::Write;
 use std::path::Path;
 
-#[allow(dead_code)]
 pub fn write_to_file(path: impl AsRef<Path>, contents: &str) -> Result<()> {
     if path.as_ref().exists() {
         remove_file(path.as_ref())

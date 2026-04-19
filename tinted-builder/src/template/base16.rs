@@ -12,7 +12,7 @@ pub fn render(content: &str, ctx: &HashMap<String, String>) -> Result<String, Ti
 }
 
 /// Common fields shared by Base16 and Base24 schemes, used to build template context.
-pub(crate) struct SchemeContext<'a> {
+pub struct SchemeContext<'a> {
     pub name: &'a str,
     pub author: &'a str,
     pub description: Option<&'a str>,

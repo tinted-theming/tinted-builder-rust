@@ -3,7 +3,7 @@ mod test_utils;
 use anyhow::{Context, Result};
 use std::fs;
 use std::path::PathBuf;
-use test_utils::{copy_dir_all, run_command, write_to_file};
+use test_utils::{copy_dir_all, run_command, unique_tmp_dir, write_to_file};
 
 fn setup(system: &str, scheme_name: &str) -> Result<(String, String, String, String)> {
     let config_file_path: PathBuf =
@@ -46,12 +46,12 @@ fn test_operation_build_quiet_flag() -> Result<()> {
     // -------
     let scheme_name = "silk-light";
     let system = "base16";
-    let name = "operation_build_quiet_flag";
-    let template_theme_path = PathBuf::from(format!("./template-{name}"));
+    let tmp_dir = unique_tmp_dir("operation_build_quiet_flag")?;
+    let template_theme_path = tmp_dir.join("template");
     let template_templates_path = template_theme_path.join("templates");
     let template_config_path = template_templates_path.join("config.yaml");
     let template_mustache_path = template_templates_path.join("base16-template.mustache");
-    let schemes_path = template_theme_path.join("schemes");
+    let schemes_path = tmp_dir.join("schemes");
     let scheme_file_path = schemes_path.join(format!("{}.yaml", &scheme_name));
     let themes_path = template_theme_path.join("output-themes");
     let rendered_theme_path = themes_path.join(format!("base16-{}.md", &scheme_name));
@@ -62,15 +62,8 @@ fn test_operation_build_quiet_flag() -> Result<()> {
         template_rendered_content_fixture,
     ) = setup(system, scheme_name)?;
 
-    if themes_path.is_dir() {
-        fs::remove_dir_all(&themes_path)?;
-    }
-    if template_theme_path.is_dir() {
-        fs::remove_dir_all(&template_theme_path)?;
-    }
-    fs::create_dir(&template_theme_path)?;
-    fs::create_dir(&schemes_path)?;
-    fs::create_dir(&template_templates_path)?;
+    fs::create_dir_all(&template_templates_path)?;
+    fs::create_dir_all(&schemes_path)?;
     write_to_file(&scheme_file_path, &scheme_file_content)?;
     write_to_file(&template_config_path, &config_file_content)?;
     write_to_file(&template_mustache_path, &template_file_content)?;
@@ -108,27 +101,20 @@ fn test_operation_build_with_sync() -> Result<()> {
     // -------
     // Arrange
     // -------
-    let name = "operation_build_with_sync";
-    let template_theme_path = PathBuf::from(format!("./template-{name}"));
+    let tmp_dir = unique_tmp_dir("operation_build_with_sync")?;
     let expected_output = "schemes installed";
-    let expected_schemes_path =
-        PathBuf::from(format!("./{}/schemes", template_theme_path.display()));
-    let expected_data_path = PathBuf::from(&template_theme_path);
-    let expected_git_clone_str =
-        format!("Cloning into '{}/schemes'", template_theme_path.display());
-    if expected_data_path.exists() {
-        fs::remove_dir_all(&expected_data_path)?;
-    }
-    fs::create_dir(expected_data_path)?;
+    let expected_schemes_path = tmp_dir.join("schemes");
+    let expected_git_clone_str = format!("Cloning into '{}/schemes'", tmp_dir.display());
+    fs::create_dir_all(&tmp_dir)?;
 
     // ---
     // Act
     // ---
     // Build act
     let (stdout, stderr) = run_command(&[
-        format!("--data-dir={}", template_theme_path.display()),
+        format!("--data-dir={}", tmp_dir.display()),
         "build".to_string(),
-        name.to_string(),
+        "nonexistent-template".to_string(),
         "--sync".to_string(),
     ])
     .expect("Unable to run command");
@@ -160,12 +146,12 @@ fn test_operation_build_base16() -> Result<()> {
     // -------
     let scheme_name = "silk-light";
     let system = "base16";
-    let name = "operation_build_base16";
-    let template_theme_path = PathBuf::from(format!("./template-{name}"));
+    let tmp_dir = unique_tmp_dir("operation_build_base16")?;
+    let template_theme_path = tmp_dir.join("template");
     let template_templates_path = template_theme_path.join("templates");
     let template_config_path = template_templates_path.join("config.yaml");
     let template_mustache_path = template_templates_path.join("base16-template.mustache");
-    let schemes_path = template_theme_path.join("schemes");
+    let schemes_path = tmp_dir.join("schemes");
     let scheme_file_path = schemes_path.join(format!("{}.yaml", &scheme_name));
     let themes_path = template_theme_path.join("output-themes");
     let rendered_theme_path = themes_path.join(format!("base16-{}.md", &scheme_name));
@@ -186,16 +172,9 @@ fn test_operation_build_base16() -> Result<()> {
         base16_template_rendered_content_fixture,
     ) = setup(system, scheme_name)?;
 
-    if themes_path.is_dir() {
-        fs::remove_dir_all(&themes_path)?;
-    }
-    if template_theme_path.is_dir() {
-        fs::remove_dir_all(&template_theme_path)?;
-    }
-    fs::create_dir(&template_theme_path)?;
-    fs::create_dir(&schemes_path)?;
-    fs::create_dir(&template_templates_path)?;
-    fs::create_dir(base24_schemes_path)?;
+    fs::create_dir_all(&template_templates_path)?;
+    fs::create_dir_all(&schemes_path)?;
+    fs::create_dir_all(&base24_schemes_path)?;
     write_to_file(&scheme_file_path, &base16_scheme_file_content)?;
     write_to_file(&base24_scheme_file_path, &base24_scheme_content)?;
     write_to_file(&hidden_yaml_path, "content: invalid")?;
@@ -248,12 +227,12 @@ fn test_operation_build_base24() -> Result<()> {
     // -------
     let scheme_name = "dracula";
     let system = "base24";
-    let name = "operation_build_base24";
-    let template_theme_path = PathBuf::from(format!("./template-{name}"));
+    let tmp_dir = unique_tmp_dir("operation_build_base24")?;
+    let template_theme_path = tmp_dir.join("template");
     let template_templates_path = template_theme_path.join("templates");
     let template_config_path = template_templates_path.join("config.yaml");
     let template_mustache_path = template_templates_path.join("base24-template.mustache");
-    let schemes_path = template_theme_path.join("schemes");
+    let schemes_path = tmp_dir.join("schemes");
     let scheme_file_path = schemes_path.join(format!("{}.yaml", &scheme_name));
     let themes_path = template_theme_path.join("output-themes");
     let output_extension = "-custom-extension";
@@ -266,12 +245,8 @@ fn test_operation_build_base24() -> Result<()> {
         base24_template_rendered_content_fixture,
     ) = setup(system, scheme_name)?;
 
-    if template_theme_path.is_dir() {
-        fs::remove_dir_all(&template_theme_path)?;
-    }
-    fs::create_dir(&template_theme_path)?;
-    fs::create_dir(&schemes_path)?;
-    fs::create_dir(&template_templates_path)?;
+    fs::create_dir_all(&template_templates_path)?;
+    fs::create_dir_all(&schemes_path)?;
     write_to_file(&scheme_file_path, &base24_scheme_file_content)?;
     write_to_file(&template_config_path, &base24_config_file_content)?;
     write_to_file(&template_mustache_path, &base24_template_file_content)?;
@@ -309,14 +284,14 @@ fn test_operation_build_mixed() -> Result<()> {
     // -------
     // Arrange
     // -------
-    let name = "operation_build_mixed";
     let base16_scheme_name = "silk-light";
     let base24_scheme_name = "dracula";
-    let template_theme_path = PathBuf::from(format!("./template-{name}"));
+    let tmp_dir = unique_tmp_dir("operation_build_mixed")?;
+    let template_theme_path = tmp_dir.join("template");
     let template_templates_path = template_theme_path.join("templates");
     let template_config_path = template_templates_path.join("config.yaml");
     let base24_template_mustache_path = template_templates_path.join("mixed-template.mustache");
-    let schemes_path = template_theme_path.join("schemes");
+    let schemes_path = tmp_dir.join("schemes");
     let base16_schemes_path = schemes_path.join("base16");
     let base24_schemes_path = schemes_path.join("base24");
     let base16_scheme_file_path = base16_schemes_path.join(format!("{}.yaml", &base16_scheme_name));
@@ -335,14 +310,9 @@ fn test_operation_build_mixed() -> Result<()> {
         base24_template_rendered_content_fixture,
     ) = setup("base24", base24_scheme_name)?;
 
-    if template_theme_path.is_dir() {
-        fs::remove_dir_all(&template_theme_path)?;
-    }
-    fs::create_dir(&template_theme_path)?;
-    fs::create_dir(&schemes_path)?;
-    fs::create_dir(&base16_schemes_path)?;
-    fs::create_dir(&base24_schemes_path)?;
-    fs::create_dir(&template_templates_path)?;
+    fs::create_dir_all(&template_templates_path)?;
+    fs::create_dir_all(&base16_schemes_path)?;
+    fs::create_dir_all(&base24_schemes_path)?;
     write_to_file(&base16_scheme_file_path, &base16_scheme_file_content)?;
     write_to_file(&base24_scheme_file_path, &base24_scheme_file_content)?;
     write_to_file(
@@ -398,12 +368,12 @@ fn test_operation_build_multi_ignore_input() -> Result<()> {
     // -------
     let scheme_name = "silk-light";
     let system = "base16";
-    let name = "operation_build_multi_ignore_input";
-    let template_theme_path = PathBuf::from(format!("./template-{name}"));
+    let tmp_dir = unique_tmp_dir("operation_build_multi_ignore_input")?;
+    let template_theme_path = tmp_dir.join("template");
     let template_templates_path = template_theme_path.join("templates");
     let template_config_path = template_templates_path.join("config.yaml");
     let template_mustache_path = template_templates_path.join("base16-template.mustache");
-    let schemes_path = template_theme_path.join("schemes");
+    let schemes_path = tmp_dir.join("schemes");
     let scheme_file_path = schemes_path.join(format!("{}.yaml", &scheme_name));
     let themes_path = template_theme_path.join("output-themes");
     let rendered_theme_path = themes_path.join(format!("base16-{}.md", &scheme_name));
@@ -419,15 +389,8 @@ fn test_operation_build_multi_ignore_input() -> Result<()> {
         base16_template_rendered_content_fixture,
     ) = setup(system, scheme_name)?;
 
-    if themes_path.is_dir() {
-        fs::remove_dir_all(&themes_path)?;
-    }
-    if template_theme_path.is_dir() {
-        fs::remove_dir_all(&template_theme_path)?;
-    }
-    fs::create_dir(&template_theme_path)?;
-    fs::create_dir(&schemes_path)?;
-    fs::create_dir(&template_templates_path)?;
+    fs::create_dir_all(&template_templates_path)?;
+    fs::create_dir_all(&schemes_path)?;
     write_to_file(&scheme_file_path, &base16_scheme_file_content)?;
     write_to_file(&hidden_yaml_path, "content: invalid")?;
     write_to_file(&readme_path, "Some readme content")?;
@@ -484,17 +447,14 @@ fn test_operation_build_listbase16() -> Result<()> {
     // -------
     // Arrange
     // -------
-    let name = "operation_build_listbase16";
-    let template_theme_path = PathBuf::from(format!("./template-{name}"));
+    let tmp_dir = unique_tmp_dir("operation_build_listbase16")?;
+    let template_theme_path = tmp_dir.join("template");
     let template_templates_path = template_theme_path.join("templates");
-    let schemes_path = template_theme_path.join("schemes");
+    let schemes_path = tmp_dir.join("schemes");
     let rendered_list_theme_path = PathBuf::from("./tests/fixtures/rendered/list.md");
     let rendered_listbase16_theme_path = PathBuf::from("./tests/fixtures/rendered/listbase16.md");
     let rendered_listbase24_theme_path = PathBuf::from("./tests/fixtures/rendered/listbase24.md");
 
-    if template_theme_path.is_dir() {
-        fs::remove_dir_all(&template_theme_path)?;
-    }
     fs::create_dir_all(&template_templates_path)?;
     fs::copy(
         "./tests/fixtures/templates/list-config.yaml",
@@ -551,15 +511,12 @@ fn test_operation_build_listtinted8() -> Result<()> {
     // -------
     // Arrange
     // -------
-    let name = "operation_build_listtinted8";
-    let template_theme_path = PathBuf::from(format!("./template-{name}"));
+    let tmp_dir = unique_tmp_dir("operation_build_listtinted8")?;
+    let template_theme_path = tmp_dir.join("template");
     let template_templates_path = template_theme_path.join("templates");
-    let schemes_path = template_theme_path.join("schemes");
+    let schemes_path = tmp_dir.join("schemes");
     let rendered_list_theme_path = PathBuf::from("./tests/fixtures/rendered/list-tinted8.md");
 
-    if template_theme_path.is_dir() {
-        fs::remove_dir_all(&template_theme_path)?;
-    }
     fs::create_dir_all(&template_templates_path)?;
     fs::copy(
         "./tests/fixtures/templates/list-tinted8-config.yaml",
@@ -610,11 +567,11 @@ fn test_operation_build_invalid_system() -> Result<()> {
     // Arrange
     // -------
     let system = "invalid-system";
-    let name = "operation_build_invalid_system";
-    let template_theme_path = PathBuf::from(format!("./template-{name}"));
+    let tmp_dir = unique_tmp_dir("operation_build_invalid_system")?;
+    let template_theme_path = tmp_dir.join("template");
     let template_templates_path = template_theme_path.join("templates");
     let template_config_path = template_templates_path.join("config.yaml");
-    let schemes_path = template_theme_path.join("schemes");
+    let schemes_path = tmp_dir.join("schemes");
     let base16_config_file_content = format!(
         r"
 invalid:
@@ -622,12 +579,8 @@ invalid:
   supported-systems: [{system}]",
     );
 
-    if template_theme_path.is_dir() {
-        fs::remove_dir_all(&template_theme_path)?;
-    }
-    fs::create_dir(&template_theme_path)?;
-    fs::create_dir(&schemes_path)?;
-    fs::create_dir(&template_templates_path)?;
+    fs::create_dir_all(&template_templates_path)?;
+    fs::create_dir_all(&schemes_path)?;
     write_to_file(&template_config_path, &base16_config_file_content)?;
 
     // ---
@@ -663,14 +616,13 @@ fn test_operation_build_base16_missing_base00() -> Result<()> {
     // -------
     let scheme_name = "invalid";
     let system = "base16";
-    let name = "operation_build_base16_missing_base00";
-    let template_theme_path = PathBuf::from(format!("./template-{name}"));
+    let tmp_dir = unique_tmp_dir("operation_build_base16_missing_base00")?;
+    let template_theme_path = tmp_dir.join("template");
     let template_templates_path = template_theme_path.join("templates");
     let template_config_path = template_templates_path.join("config.yaml");
     let template_mustache_path = template_templates_path.join("base16-template.mustache");
-    let schemes_path = template_theme_path.join("schemes");
+    let schemes_path = tmp_dir.join("schemes");
     let scheme_file_path = schemes_path.join(format!("{}.yaml", &scheme_name));
-    let themes_path = template_theme_path.join("output-themes");
     let scheme_file_content = r#"
 system: "base16"
 name: "UwUnicorn"
@@ -694,15 +646,8 @@ palette:
   base0F: "a3a079"
 "#;
 
-    if themes_path.is_dir() {
-        fs::remove_dir_all(&themes_path)?;
-    }
-    if template_theme_path.is_dir() {
-        fs::remove_dir_all(&template_theme_path)?;
-    }
-    fs::create_dir(&template_theme_path)?;
-    fs::create_dir(&schemes_path)?;
-    fs::create_dir(&template_templates_path)?;
+    fs::create_dir_all(&template_templates_path)?;
+    fs::create_dir_all(&schemes_path)?;
     write_to_file(&scheme_file_path, scheme_file_content)?;
 
     let base16_config_file_content = fs::read_to_string(PathBuf::from(format!(
@@ -747,24 +692,16 @@ fn test_operation_build_invalid_base16() -> Result<()> {
     // -------
     let scheme_name = "invalid";
     let system = "base16";
-    let name = "operation_build_invalid_base16";
-    let template_theme_path = PathBuf::from(format!("./template-{name}"));
+    let tmp_dir = unique_tmp_dir("operation_build_invalid_base16")?;
+    let template_theme_path = tmp_dir.join("template");
     let template_templates_path = template_theme_path.join("templates");
     let template_config_path = template_templates_path.join("config.yaml");
     let template_mustache_path = template_templates_path.join("base16-template.mustache");
-    let schemes_path = template_theme_path.join("schemes");
+    let schemes_path = tmp_dir.join("schemes");
     let scheme_file_path = schemes_path.join(format!("{}.yaml", &scheme_name));
-    let themes_path = template_theme_path.join("output-themes");
 
-    if themes_path.is_dir() {
-        fs::remove_dir_all(&themes_path)?;
-    }
-    if template_theme_path.is_dir() {
-        fs::remove_dir_all(&template_theme_path)?;
-    }
-    fs::create_dir(&template_theme_path)?;
-    fs::create_dir(&schemes_path)?;
-    fs::create_dir(&template_templates_path)?;
+    fs::create_dir_all(&template_templates_path)?;
+    fs::create_dir_all(&schemes_path)?;
     write_to_file(&scheme_file_path, "content: invalid")?;
 
     let base16_config_file_content = fs::read_to_string(PathBuf::from(format!(
@@ -809,11 +746,11 @@ fn test_operation_build_with_deprecated_config_properties() -> Result<()> {
     // -------
     let system = "base16";
     let scheme_name = "silk-light";
-    let name = "operation_build_with_deprecated_config_properties";
-    let template_theme_path = PathBuf::from(format!("./template-{name}"));
+    let tmp_dir = unique_tmp_dir("operation_build_with_deprecated_config_properties")?;
+    let template_theme_path = tmp_dir.join("template");
     let template_templates_path = template_theme_path.join("templates");
     let template_config_path = template_templates_path.join("config.yaml");
-    let schemes_path = template_theme_path.join("schemes");
+    let schemes_path = tmp_dir.join("schemes");
     let scheme_file_path = schemes_path.join(format!("{}.yaml", &scheme_name));
     let template_mustache_path = template_templates_path.join("base16-template.mustache");
     let themes_path = template_theme_path.join("output-themes");
@@ -825,12 +762,8 @@ base16-template:
     let (_, scheme_file_content, template_file_content, base16_template_rendered_content_fixture) =
         setup(system, scheme_name)?;
 
-    if template_theme_path.is_dir() {
-        fs::remove_dir_all(&template_theme_path)?;
-    }
-    fs::create_dir(&template_theme_path)?;
-    fs::create_dir(&schemes_path)?;
-    fs::create_dir(&template_templates_path)?;
+    fs::create_dir_all(&template_templates_path)?;
+    fs::create_dir_all(&schemes_path)?;
     write_to_file(&template_config_path, base16_config_file_content)?;
     write_to_file(&template_mustache_path, &template_file_content)?;
     write_to_file(&scheme_file_path, &scheme_file_content)?;

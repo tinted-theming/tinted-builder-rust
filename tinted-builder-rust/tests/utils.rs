@@ -2,8 +2,7 @@ mod test_utils;
 
 use anyhow::Result;
 use std::fs;
-use std::path::PathBuf;
-use test_utils::{copy_dir_all, write_to_file};
+use test_utils::{copy_dir_all, unique_tmp_dir, write_to_file};
 use tinted_builder::{SchemeSystem, SchemeVariant};
 use tinted_builder_rust::operations::build::utils::get_scheme_files;
 
@@ -12,14 +11,10 @@ fn test_get_scheme_files_recursive() -> Result<()> {
     // -------
     // Arrange
     // -------
-    let name = "test_get_scheme_files_recursive";
-    let data_path = PathBuf::from(name);
-    let schemes_path = data_path.join("schemes");
-    let fixtures_schemes_path = PathBuf::from("./tests/fixtures/schemes");
-    if data_path.exists() {
-        fs::remove_dir_all(&data_path)?;
-    }
-    fs::create_dir(&data_path)?;
+    let tmp_dir = unique_tmp_dir("get_scheme_files_recursive")?;
+    let schemes_path = tmp_dir.join("schemes");
+    let fixtures_schemes_path = std::path::PathBuf::from("./tests/fixtures/schemes");
+    fs::create_dir_all(&tmp_dir)?;
     copy_dir_all(fixtures_schemes_path, &schemes_path)?;
 
     // ---
@@ -32,7 +27,6 @@ fn test_get_scheme_files_recursive() -> Result<()> {
     let mut scheme_systems: Vec<SchemeSystem> = vec![];
 
     for scheme_file in scheme_files {
-        // match  scheme_file.get_scheme()? {}
         let scheme = scheme_file.get_scheme()?;
         let name = scheme.get_scheme_name();
         let author = scheme.get_scheme_author();
@@ -92,11 +86,10 @@ fn test_get_scheme_files_flat() -> Result<()> {
     // -------
     // Arrange
     // -------
-    let name = "test_get_scheme_files_flat";
-    let data_path = PathBuf::from(name);
-    let schemes_dir_path = data_path.join("schemes");
-    let schemes_file_path = data_path.join("test-scheme.yaml");
-    let fixtures_schemes_path = PathBuf::from("./tests/fixtures/schemes");
+    let tmp_dir = unique_tmp_dir("get_scheme_files_flat")?;
+    let schemes_dir_path = tmp_dir.join("schemes");
+    let schemes_file_path = tmp_dir.join("test-scheme.yaml");
+    let fixtures_schemes_path = std::path::PathBuf::from("./tests/fixtures/schemes");
     let scheme_name = "Test scheme";
     let scheme_description = "some fancy description";
     let scheme_author = "test author (some url)";
@@ -131,17 +124,14 @@ palette:
 
 "#
     );
-    if data_path.exists() {
-        fs::remove_dir_all(&data_path)?;
-    }
-    fs::create_dir(&data_path)?;
+    fs::create_dir_all(&tmp_dir)?;
     copy_dir_all(fixtures_schemes_path, schemes_dir_path)?;
     write_to_file(&schemes_file_path, &scheme_content)?;
 
     // ---
     // Act
     // ---
-    let scheme_files = get_scheme_files(&data_path, &[], false)?;
+    let scheme_files = get_scheme_files(&tmp_dir, &[], false)?;
     let scheme_container = scheme_files
         .first()
         .expect("Unable to extract scheme_file")

@@ -11,26 +11,6 @@ use std::{borrow, path::PathBuf};
 
 const REPO_NAME: &str = env!("CARGO_PKG_NAME");
 
-/// Expands a leading `~/` to the current user's home directory.
-///
-/// Returns the original input as a `PathBuf` if not prefixed with `~/`.
-fn replace_tilde_slash_with_home(path_str: &str) -> Result<PathBuf> {
-    let trimmed_path_str = path_str.trim();
-    if trimmed_path_str.starts_with("~/") {
-        dirs::home_dir().map_or_else(
-            || Err(anyhow!("Unable to determine a home directory for \"{trimmed_path_str}\", please use an absolute path instead")),
-            |home_dir|
-                Ok(PathBuf::from(trimmed_path_str.replacen(
-                    "~/",
-                    format!("{}/", home_dir.display()).as_str(),
-                    1,
-                )))
-        )
-    } else {
-        Ok(PathBuf::from(trimmed_path_str))
-    }
-}
-
 fn main() -> Result<()> {
     let matches = get_matches();
     let data_path_result: Result<PathBuf> =
@@ -112,4 +92,61 @@ fn main() -> Result<()> {
     }
 
     Ok(())
+}
+
+/// Expands a leading `~/` to the current user's home directory.
+///
+/// Returns the original input as a `PathBuf` if not prefixed with `~/`.
+fn replace_tilde_slash_with_home(path_str: &str) -> Result<PathBuf> {
+    let trimmed_path_str = path_str.trim();
+    if trimmed_path_str.starts_with("~/") {
+        dirs::home_dir().map_or_else(
+            || Err(anyhow!("Unable to determine a home directory for \"{trimmed_path_str}\", please use an absolute path instead")),
+            |home_dir|
+                Ok(PathBuf::from(trimmed_path_str.replacen(
+                    "~/",
+                    format!("{}/", home_dir.display()).as_str(),
+                    1,
+                )))
+        )
+    } else {
+        Ok(PathBuf::from(trimmed_path_str))
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_replace_tilde_slash_with_home_expands_tilde() {
+        let result = replace_tilde_slash_with_home("~/some/path").unwrap();
+        let home = dirs::home_dir().unwrap();
+        assert_eq!(result, home.join("some/path"));
+    }
+
+    #[test]
+    fn test_replace_tilde_slash_with_home_absolute_path() {
+        let result = replace_tilde_slash_with_home("/absolute/path").unwrap();
+        assert_eq!(result, PathBuf::from("/absolute/path"));
+    }
+
+    #[test]
+    fn test_replace_tilde_slash_with_home_relative_path() {
+        let result = replace_tilde_slash_with_home("relative/path").unwrap();
+        assert_eq!(result, PathBuf::from("relative/path"));
+    }
+
+    #[test]
+    fn test_replace_tilde_slash_with_home_trims_whitespace() {
+        let result = replace_tilde_slash_with_home("  ~/some/path  ").unwrap();
+        let home = dirs::home_dir().unwrap();
+        assert_eq!(result, home.join("some/path"));
+    }
+
+    #[test]
+    fn test_replace_tilde_slash_with_home_tilde_only_no_slash() {
+        let result = replace_tilde_slash_with_home("~notapath").unwrap();
+        assert_eq!(result, PathBuf::from("~notapath"));
+    }
 }
