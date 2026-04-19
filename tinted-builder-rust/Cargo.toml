@@ -29,7 +29,7 @@ strip-ansi-escapes = "0.2.1"
 
 [dependencies.tinted-builder]
 path = "../tinted-builder"
-version = "0.11.0"
+version = "0.12.0"
 
 [[bin]]
 name = "tinted-builder-rust"

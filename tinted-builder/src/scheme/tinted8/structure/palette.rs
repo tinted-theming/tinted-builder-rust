@@ -63,6 +63,10 @@ impl Palette {
     /// Converts a basic YAML palette into a fully expanded palette with `normal`, `dim`, and `bright` variants.
     ///
     /// Derives missing variants and supplemental colors according to Tinted8 builder rules.
+    ///
+    /// # Errors
+    ///
+    /// Returns `PaletteError` if any color hex value is invalid or a color variant conversion fails.
     #[allow(clippy::too_many_lines)]
     pub fn try_from_basic(basic_palette: &BasicPalette) -> Result<Self, PaletteError> {
         let variant_bright = &ColorVariant::Bright;
@@ -376,6 +380,7 @@ impl Palette {
     }
 
     /// Returns all `(ColorName, ColorVariant)` tuples in canonical order.
+    #[must_use]
     pub fn get_color_list() -> Vec<(ColorName, ColorVariant)> {
         let mut keys = vec![];
 
@@ -389,6 +394,7 @@ impl Palette {
     }
 
     /// Returns a reference to a color by its name and variant, if present.
+    #[must_use]
     pub const fn get_color(
         &self,
         color_name: &ColorName,
@@ -442,6 +448,7 @@ impl Palette {
         }
     }
 
+    #[must_use]
     pub fn to_basic_palette(&self) -> BasicPalette {
         BasicPalette {
             black: self.black_normal.to_hex(),

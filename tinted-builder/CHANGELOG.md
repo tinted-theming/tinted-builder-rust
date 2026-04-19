@@ -1,28 +1,16 @@
 # Changelog
 
-## Unreleased
+## [0.12.0] - 19-04-2026
 
 ### Added
 
-- Generate Tinted8 syntax keys from a schema file and expand available syntax
-  properties.
-- Expand Tinted8 UI properties, including `ui.markup.text`, plus additional UI
-  key coverage.
-- Initial Tinted8 support (`tinted_builder::tinted8`) with `Scheme` type and
-  spec version constants (`SUPPORTED_BUILDER_SPEC_VERSION`,
-  `SUPPORTED_STYLING_SPEC_VERSION`).
-- Tinted8 template rendering with nested `scheme`, `palette`, `ui`, and
-  `syntax` contexts; color objects expose `hex`, `hex-r/g/b`, `hex-bgr`, `rgb`,
-  `rgb16`, and `dec` fields.
-- Tinted8 palette expansion and derivation rules (normal/dim/bright variants;
-  derive `orange`/`brown`; auto-generate `gray` when missing).
-- Generate Tinted8 syntax keys from a schema file and expand available syntax
-  properties.
-- Expand Tinted8 UI properties, including `ui.markup.text`, plus additional UI
-  key coverage.
-- Add tinted8 0.2.0-beta3 feature where the default colour values of grayscale
-  colors are different based on whether a dark or light scheme variant is active
-- Add `ui.cursor_muted`
+- Add `tinted_builder::schemes::tinted8::Palette` as a public export
+
+## [0.11.0] - 19-04-2026
+
+### Added
+
+- Add support for Tinted8 schemes
 
 ### Changed
 
@@ -33,29 +21,6 @@
   `variant` fields. Pass `None` for backward-compatible behavior. Also enhances
   color handling to accept 3‑digit hex, adds `hex-bgr`, and provides 16‑bit
   `rgb16` plus normalized `dec` channel serialization.
-- Tinted8 scheme `family`, `style` now live under the `meta`
-  object, aligning with spec 0.2.0.
-- Update to support Tinted8 styling spec 0.2.0.
-- Treat the syntax schema as the source of truth for Tinted8 syntax keys.
-- Rename Tinted8 UI keys from `highlight.search-background` and
-  `highlight.search-foreground` to `highlight.search.background` and
-  `highlight.search.foreground`.
-- Extend `Template` to render Tinted8 schemes.
-- Update to Tinted8 styling spec 0.2.0 and treat the syntax schema as the
-  source of truth for syntax keys.
-- Rename Tinted8 UI keys from `highlight.search-background` and
-  `highlight.search-foreground` to `highlight.search.background` and
-  `highlight.search.foreground`.
-- Change `ui.cursor` to `ui.cursor_normal`
-
-### Fixed
-
-- Fix bug where `scheme.is-dark-variant` is missing from template context
-- Fix bug where `ui.whitespace.foreground` is disallowed in scheme
-- Improve error detail when deriving colors for Tinted8 palettes.
-- Fix `attribute_name` syntax key mapping to `attribute-name`.
-- Fix bug where tinted8 scheme.name isn't correctly titlecasified
-- Fix bug where `FromStr` is not implemented for `tinted8`
 
 ## 0.10.1 - 2026-01-30
 
