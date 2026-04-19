@@ -428,6 +428,8 @@ fn generate_themes_for_config(
             .replace("{{scheme-slug}}", &scheme_slug.clone())
             .replace("{{ scheme-system }}", &scheme_system.to_string())
             .replace("{{scheme-system}}", &scheme_system.to_string())
+            .replace("{{ scheme.slug }}", &scheme_slug.clone())
+            .replace("{{scheme.slug}}", &scheme_slug.clone())
             .replace("{{ scheme.system }}", &scheme_system.to_string())
             .replace("{{scheme.system}}", &scheme_system.to_string());
 

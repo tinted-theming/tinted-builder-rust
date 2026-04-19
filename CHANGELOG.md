@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.15.3] - 2026-04-19
+
+### Fixed
+
+- Fix missing `scheme.slug` support in `templates/config.yaml` file
+
 ## [0.15.2] - 2026-04-19
 
 ### Fixed
