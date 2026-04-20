@@ -3,7 +3,7 @@ use anyhow::Result;
 use std::fs::{self, create_dir_all};
 use test_utils::write_to_file;
 
-use crate::test_utils::unique_tmp_dir;
+use crate::test_utils::{run_command, unique_tmp_dir};
 
 #[test]
 fn e305_missing_template_config() -> Result<()> {
@@ -366,11 +366,10 @@ default:
 }
 
 #[test]
-fn e400_no_schemes_found() -> Result<()> {
+fn w001_no_schemes_found() -> Result<()> {
     let tmp_dir = unique_tmp_dir("e400")?;
-    let template = tmp_dir.join("template");
-    let templates_dir = template.join("templates");
-    let schemes = tmp_dir.join("schemes");
+    let templates_dir = tmp_dir.join("templates");
+    let schemes_path = tmp_dir.join("schemes");
     let base16 = r##"
 system: "base16"
 name: "Test"
@@ -404,8 +403,8 @@ default:
     tinted8-builder: ">=0.2.0"
 "#;
 
-    create_dir_all(&schemes)?;
-    write_to_file(schemes.join("base16.yaml"), base16)?;
+    create_dir_all(&schemes_path)?;
+    write_to_file(schemes_path.join("base16.yaml"), base16)?;
     create_dir_all(&templates_dir)?;
     write_to_file(templates_dir.join("config.yaml"), config)?;
     write_to_file(
@@ -413,11 +412,15 @@ default:
         "Hello {{scheme-name}}\n",
     )?;
 
-    #[allow(clippy::unwrap_used)]
-    let err = tinted_builder_rust::build(&template, &schemes, &[], true).unwrap_err();
-    let msg = err.to_string();
+    let (_, stderr) = run_command(&[
+        format!("--data-dir={}", tmp_dir.display()),
+        format!("--schemes-dir={}", schemes_path.display()),
+        "build".to_string(),
+        format!("{}", tmp_dir.display()),
+    ])
+    .expect("Unable to run command");
 
-    assert!(msg.contains("E400"), "expected E400, got: {msg}");
+    assert!(stderr.contains("W001"), "expected W001, got: {stderr}");
     Ok(())
 }
 

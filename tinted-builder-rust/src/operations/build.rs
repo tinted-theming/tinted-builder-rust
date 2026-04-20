@@ -360,9 +360,9 @@ fn generate_themes_for_config(
     is_quiet: bool,
 ) -> Result<()> {
     if scheme_files.is_empty() {
-        return Err(anyhow!(
-            "E400: No schemes found for a template config entry \"{config_name}\"",
-        ));
+        eprintln!("W001: No schemes found for a template config entry \"{config_name}\"");
+
+        return Ok(());
     }
 
     let filename = get_filename(config_value, is_quiet)?;

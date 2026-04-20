@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.13.0] - 19-04-2026
+
+### Changed
+
+- **BREAKING**: Updated to Tinted8 `0.2.0-beta5` builder spec. Change `E400` to
+  `E001` and make errors print to stdout but continue execution
+
 ## [0.12.0] - 19-04-2026
 
 ### Added
