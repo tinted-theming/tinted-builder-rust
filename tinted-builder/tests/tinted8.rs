@@ -64,12 +64,26 @@ ui:
       dark:   "#000000"
     foreground:
       normal: "#eeeeee"
+  cursor.normal.background: "#333333"
+  cursor.normal.foreground: "#f1f1f1"
+  cursor.muted.background: "#666666"
+  accent.normal: "#aaaaaa"
+  border.normal: "#bbbbbb"
+  link.normal.background: "#cccccc"
+  link.normal.foreground: "#dddddd"
 "##,
     )?;
 
     assert_eq!(scheme.ui.global.background.normal.to_hex(), "111111");
     assert_eq!(scheme.ui.global.foreground.normal.to_hex(), "eeeeee");
     assert_eq!(scheme.ui.global.background.dark.to_hex(), "000000");
+    assert_eq!(scheme.ui.cursor.normal.background.to_hex(), "333333");
+    assert_eq!(scheme.ui.cursor.normal.foreground.to_hex(), "f1f1f1");
+    assert_eq!(scheme.ui.cursor.muted.background.to_hex(), "666666");
+    assert_eq!(scheme.ui.accent.normal.to_hex(), "aaaaaa");
+    assert_eq!(scheme.ui.border.normal.to_hex(), "bbbbbb");
+    assert_eq!(scheme.ui.link.normal.background.to_hex(), "cccccc");
+    assert_eq!(scheme.ui.link.normal.foreground.to_hex(), "dddddd");
 
     Ok(())
 }

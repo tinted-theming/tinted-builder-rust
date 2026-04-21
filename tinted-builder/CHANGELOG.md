@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.14.0] - 21-04-2026
+
+### Changed
+
+- **BREAKING**: Add `background` and `foreground` properties to
+  `ui.cursor.normal` and `ui.cursor.muted` which breaks previous usage.
+- **BREAKING**: Add `.normal` suffix to `ui.accent` `ui.border` and `ui.link`
+  to allow for expansion of properties without breaking public api in future
+
 ## [0.13.0] - 19-04-2026
 
 ### Changed

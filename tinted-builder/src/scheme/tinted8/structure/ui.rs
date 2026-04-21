@@ -35,10 +35,12 @@ define_ui_keys! {
     GlobalBackgroundDark => "global.background.dark",
     GlobalBackgroundLight => "global.background.light",
     Deprecated => "deprecated",
-    Accent => "accent",
-    Border => "border",
-    CursorNormal => "cursor.normal",
-    CursorMuted => "cursor.muted",
+    AccentNormal => "accent.normal",
+    BorderNormal => "border.normal",
+    CursorNormalBackground => "cursor.normal.background",
+    CursorNormalForeground => "cursor.normal.foreground",
+    CursorMutedBackground => "cursor.muted.background",
+    CursorMutedForeground => "cursor.muted.foreground",
     GlobalForegroundNormal => "global.foreground.normal",
     GlobalForegroundDark => "global.foreground.dark",
     GlobalForegroundLight => "global.foreground.light",
@@ -52,7 +54,8 @@ define_ui_keys! {
     HighlightLineForeground => "highlight.line.foreground",
     IndentGuideBackground => "indent-guide.background",
     IndentGuideActiveBackground => "indent-guide.active-background",
-    Link => "link",
+    LinkNormalBackground => "link.normal.background",
+    LinkNormalForeground => "link.normal.foreground",
     HighlightSearchBackground => "highlight.search.background",
     HighlightSearchForeground => "highlight.search.foreground",
     HighlightButtonBackground => "highlight.button.background",
@@ -80,15 +83,15 @@ impl fmt::Display for UiKey {
 #[derive(Debug, Clone, Serialize)]
 pub struct Ui {
     pub deprecated: Color,
-    pub accent: Color,
-    pub border: Color,
+    pub accent: UiAccent,
+    pub border: UiBorder,
     pub cursor: UiCursor,
     pub global: UiGlobal,
     pub gutter: UiBgFg,
     pub highlight: UiHighlight,
     #[serde(rename = "indent-guide")]
     pub indent_guide: UiIndentGuide,
-    pub link: Color,
+    pub link: UiLink,
     pub selection: UiSelection,
     pub status: UiStatus,
     pub tooltip: UiBgFg,
@@ -194,19 +197,40 @@ impl Ui {
                 inactive_background: palette.white_dim.clone(),
             },
         };
-        let accent = palette.cyan_normal.clone();
-        let border = palette.gray_dim.clone();
+        let accent = UiAccent {
+            normal: palette.cyan_normal.clone(),
+        };
+        let border = UiBorder {
+            normal: palette.gray_dim.clone(),
+        };
         let cursor = match variant {
             SchemeVariant::Dark => UiCursor {
-                normal: foreground.normal.clone(),
-                muted: palette.gray_bright.clone(),
+                normal: UiBgFg {
+                    background: foreground.normal.clone(),
+                    foreground: background.normal.clone(),
+                },
+                muted: UiBgFg {
+                    background: palette.gray_bright.clone(),
+                    foreground: palette.gray_dim.clone(),
+                },
             },
             SchemeVariant::Light => UiCursor {
-                normal: foreground.normal.clone(),
-                muted: palette.gray_dim.clone(),
+                normal: UiBgFg {
+                    background: foreground.normal.clone(),
+                    foreground: background.normal.clone(),
+                },
+                muted: UiBgFg {
+                    background: palette.gray_dim.clone(),
+                    foreground: palette.gray_bright.clone(),
+                },
             },
         };
-        let link = palette.cyan_normal.clone();
+        let link = UiLink {
+            normal: UiBgFg {
+                background: background.normal,
+                foreground: palette.cyan_normal.clone(),
+            },
+        };
         let status = UiStatus {
             error: palette.red_normal.clone(),
             info: palette.orange_normal.clone(),
@@ -381,19 +405,55 @@ impl Ui {
         Ok(Self {
             global,
             deprecated: parse_or_inherit(&[basic.deprecated.as_deref()], &default.deprecated)?,
-            accent: parse_or_inherit(&[basic.accent.as_deref()], &default.accent)?,
-            border: parse_or_inherit(&[basic.border.as_deref()], &default.border)?,
-            cursor: UiCursor {
+            accent: UiAccent {
                 normal: parse_or_inherit(
-                    &[basic.cursor_normal.as_deref()],
-                    &default.cursor.normal,
+                    &[basic.accent_normal.as_deref()],
+                    &default.accent.normal,
                 )?,
-                muted: parse_or_inherit(&[basic.cursor_muted.as_deref()], &default.cursor.muted)?,
+            },
+            border: UiBorder {
+                normal: parse_or_inherit(
+                    &[basic.border_normal.as_deref()],
+                    &default.border.normal,
+                )?,
+            },
+            cursor: UiCursor {
+                normal: UiBgFg {
+                    background: parse_or_inherit(
+                        &[basic.cursor_normal_background.as_deref()],
+                        &default.cursor.normal.background,
+                    )?,
+                    foreground: parse_or_inherit(
+                        &[basic.cursor_normal_foreground.as_deref()],
+                        &default.cursor.normal.foreground,
+                    )?,
+                },
+                muted: UiBgFg {
+                    background: parse_or_inherit(
+                        &[basic.cursor_muted_background.as_deref()],
+                        &default.cursor.muted.background,
+                    )?,
+                    foreground: parse_or_inherit(
+                        &[basic.cursor_muted_foreground.as_deref()],
+                        &default.cursor.muted.foreground,
+                    )?,
+                },
             },
             gutter,
             highlight,
             indent_guide,
-            link: parse_or_inherit(&[basic.link.as_deref()], &default.link)?,
+            link: UiLink {
+                normal: UiBgFg {
+                    background: parse_or_inherit(
+                        &[basic.link_normal_background.as_deref()],
+                        &default.link.normal.background,
+                    )?,
+                    foreground: parse_or_inherit(
+                        &[basic.link_normal_foreground.as_deref()],
+                        &default.link.normal.foreground,
+                    )?,
+                },
+            },
             selection,
             status: UiStatus {
                 error: parse_or_inherit(&[basic.status_error.as_deref()], &default.status.error)?,
@@ -432,10 +492,12 @@ impl Ui {
             UiKey::GlobalBackgroundDark => &self.global.background.dark,
             UiKey::GlobalBackgroundLight => &self.global.background.light,
             UiKey::Deprecated => &self.deprecated,
-            UiKey::Accent => &self.accent,
-            UiKey::Border => &self.border,
-            UiKey::CursorNormal => &self.cursor.normal,
-            UiKey::CursorMuted => &self.cursor.muted,
+            UiKey::AccentNormal => &self.accent.normal,
+            UiKey::BorderNormal => &self.border.normal,
+            UiKey::CursorNormalBackground => &self.cursor.normal.background,
+            UiKey::CursorNormalForeground => &self.cursor.normal.foreground,
+            UiKey::CursorMutedBackground => &self.cursor.muted.background,
+            UiKey::CursorMutedForeground => &self.cursor.muted.foreground,
             UiKey::GlobalForegroundNormal => &self.global.foreground.normal,
             UiKey::GlobalForegroundDark => &self.global.foreground.dark,
             UiKey::GlobalForegroundLight => &self.global.foreground.light,
@@ -453,7 +515,8 @@ impl Ui {
             UiKey::HighlightButtonForeground => &self.highlight.button.foreground,
             UiKey::IndentGuideBackground => &self.indent_guide.background,
             UiKey::IndentGuideActiveBackground => &self.indent_guide.active_background,
-            UiKey::Link => &self.link,
+            UiKey::LinkNormalBackground => &self.link.normal.background,
+            UiKey::LinkNormalForeground => &self.link.normal.foreground,
             UiKey::SelectionForeground => &self.selection.foreground,
             UiKey::SelectionBackground => &self.selection.background,
             UiKey::SelectionInactiveBackground => &self.selection.inactive_background,
@@ -512,6 +575,18 @@ pub struct UiHighlightText {
     pub active_foreground: Color,
 }
 #[derive(Debug, Clone, Serialize)]
+pub struct UiAccent {
+    pub normal: Color,
+}
+#[derive(Debug, Clone, Serialize)]
+pub struct UiBorder {
+    pub normal: Color,
+}
+#[derive(Debug, Clone, Serialize)]
+pub struct UiLink {
+    pub normal: UiBgFg,
+}
+#[derive(Debug, Clone, Serialize)]
 pub struct UiIndentGuide {
     pub background: Color,
     #[serde(rename = "active-background")]
@@ -531,8 +606,8 @@ pub struct UiSelection {
 }
 #[derive(Debug, Clone, Serialize)]
 pub struct UiCursor {
-    pub normal: Color,
-    pub muted: Color,
+    pub normal: UiBgFg,
+    pub muted: UiBgFg,
 }
 #[derive(Debug, Clone, Serialize)]
 pub struct UiStatus {

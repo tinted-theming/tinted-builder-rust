@@ -125,14 +125,18 @@ pub struct BasicUi {
     #[serde(rename = "global.background.light")]
     pub global_background_light: Option<String>,
     pub deprecated: Option<String>,
-    #[serde(rename = "accent")]
-    pub accent: Option<String>,
-    #[serde(rename = "border")]
-    pub border: Option<String>,
-    #[serde(rename = "cursor.normal")]
-    pub cursor_normal: Option<String>,
-    #[serde(rename = "cursor.muted")]
-    pub cursor_muted: Option<String>,
+    #[serde(rename = "accent.normal")]
+    pub accent_normal: Option<String>,
+    #[serde(rename = "border.normal")]
+    pub border_normal: Option<String>,
+    #[serde(rename = "cursor.normal.background")]
+    pub cursor_normal_background: Option<String>,
+    #[serde(rename = "cursor.normal.foreground")]
+    pub cursor_normal_foreground: Option<String>,
+    #[serde(rename = "cursor.muted.background")]
+    pub cursor_muted_background: Option<String>,
+    #[serde(rename = "cursor.muted.foreground")]
+    pub cursor_muted_foreground: Option<String>,
     #[serde(rename = "global.foreground.normal")]
     pub global_foreground_normal: Option<String>,
     #[serde(rename = "global.foreground.dark")]
@@ -167,8 +171,10 @@ pub struct BasicUi {
     pub indent_guide_background: Option<String>,
     #[serde(rename = "indent-guide.active-background")]
     pub indent_guide_active_background: Option<String>,
-    #[serde(rename = "link")]
-    pub link: Option<String>,
+    #[serde(rename = "link.normal.background")]
+    pub link_normal_background: Option<String>,
+    #[serde(rename = "link.normal.foreground")]
+    pub link_normal_foreground: Option<String>,
     #[serde(rename = "selection.background")]
     pub selection_background: Option<String>,
     #[serde(rename = "selection.foreground")]
