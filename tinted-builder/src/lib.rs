@@ -34,6 +34,7 @@ pub mod tinted8 {
     /// - `SUPPORTED_STYLING_SPEC_VERSION` / `SUPPORTED_BUILDER_SPEC_VERSION`: version strings the
     ///   library targets; useful for compatibility checks.
     pub use crate::scheme::tinted8::{
-        Palette, Scheme, SyntaxKey, SUPPORTED_BUILDER_SPEC_VERSION, SUPPORTED_STYLING_SPEC_VERSION,
+        Palette, Scheme, SyntaxKey, UiKey, SUPPORTED_BUILDER_SPEC_VERSION,
+        SUPPORTED_STYLING_SPEC_VERSION,
     };
 }

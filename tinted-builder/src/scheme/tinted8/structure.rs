@@ -6,7 +6,7 @@ pub mod ui;
 pub use crate::scheme::tinted8::structure::meta::SchemeMeta;
 pub use crate::scheme::tinted8::structure::palette::Palette;
 pub use crate::scheme::tinted8::structure::syntax::{Syntax, SyntaxKey};
-pub use crate::scheme::tinted8::structure::ui::Ui;
+pub use crate::scheme::tinted8::structure::ui::{Ui, UiKey};
 use crate::scheme::tinted8::yaml::Tinted8Scheme as YamlTinted8Scheme;
 use crate::tinted8::SUPPORTED_STYLING_SPEC_VERSION;
 use crate::utils::slugify;
