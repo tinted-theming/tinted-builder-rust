@@ -352,6 +352,55 @@ fn syntax_all_keys_accessible() -> Result<(), TintedBuilderError> {
 }
 
 #[test]
+fn ui_all_keys_accessible() -> Result<(), TintedBuilderError> {
+    use tinted_builder::tinted8::UiKey;
+
+    let scheme: Tinted8Scheme = serde_yaml::from_str(SCHEME_MINIMAL)?;
+
+    for key in UiKey::variants() {
+        let color = scheme.ui.get_color(key);
+        assert!(!color.to_hex().is_empty(), "Key {key} should have a color");
+    }
+
+    Ok(())
+}
+
+#[test]
+fn ui_key_display_uses_dotted_paths() {
+    use tinted_builder::tinted8::UiKey;
+
+    let rendered: Vec<String> = UiKey::variants().iter().map(ToString::to_string).collect();
+
+    assert!(rendered.contains(&"global.background.normal".to_string()));
+    assert!(rendered.contains(&"global.foreground.normal".to_string()));
+    assert!(rendered.contains(&"selection.background".to_string()));
+    assert!(rendered.contains(&"highlight.text.active-foreground".to_string()));
+    assert!(rendered.contains(&"indent-guide.active-background".to_string()));
+}
+
+#[test]
+fn ui_key_overrides_resolve_via_get_color() -> Result<(), TintedBuilderError> {
+    use tinted_builder::tinted8::UiKey;
+
+    let scheme: Tinted8Scheme = serde_yaml::from_str(SCHEME_WITH_UI)?;
+
+    assert_eq!(
+        scheme.ui.get_color(&UiKey::GlobalBackgroundNormal).to_hex(),
+        "111111"
+    );
+    assert_eq!(
+        scheme.ui.get_color(&UiKey::GlobalForegroundNormal).to_hex(),
+        "eeeeee"
+    );
+    assert_eq!(
+        scheme.ui.get_color(&UiKey::GlobalBackgroundDark).to_hex(),
+        "000000"
+    );
+
+    Ok(())
+}
+
+#[test]
 fn syntax_new_scopes_parse_correctly() -> Result<(), TintedBuilderError> {
     let scheme: Tinted8Scheme = serde_yaml::from_str(SCHEME_WITH_NEW_SCOPES)?;
 
