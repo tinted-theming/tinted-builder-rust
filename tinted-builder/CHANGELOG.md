@@ -1,11 +1,11 @@
 # Changelog
 
-## Unreleased
+## [0.15.0] - 2026-04-30
 
 ### Added
 
-- Re-export `tinted8::UiKey` so downstream crates can iterate UI keys the
-  same way they already do with `tinted8::SyntaxKey`.
+- Re-export `tinted8::UiKey` so downstream crates can iterate UI keys the same
+  way they already do with `tinted8::SyntaxKey`.
 
 ## [0.14.0] - 21-04-2026
 

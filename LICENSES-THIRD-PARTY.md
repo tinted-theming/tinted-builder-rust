@@ -1826,8 +1826,8 @@ limitations under the License.
 
 #### Used by
 
-- [tinted-builder 0.14.0](https://github.com/tinted-theming/tinted-builder-rust)
-- [tinted-builder-rust 0.18.0](https://github.com/tinted-theming/tinted-builder-rust)
+- [tinted-builder 0.15.0](https://github.com/tinted-theming/tinted-builder-rust)
+- [tinted-builder-rust 0.19.0](https://github.com/tinted-theming/tinted-builder-rust)
 
 ```
 GNU GENERAL PUBLIC LICENSE
