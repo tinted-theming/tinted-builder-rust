@@ -34,6 +34,12 @@ define_ui_keys! {
     GlobalBackgroundNormal => "global.background.normal",
     GlobalBackgroundDark => "global.background.dark",
     GlobalBackgroundLight => "global.background.light",
+    ChromeBackgroundNormal => "chrome.background.normal",
+    ChromeBackgroundDark => "chrome.background.dark",
+    ChromeBackgroundLight => "chrome.background.light",
+    ChromeForegroundNormal => "chrome.foreground.normal",
+    ChromeForegroundDark => "chrome.foreground.dark",
+    ChromeForegroundLight => "chrome.foreground.light",
     Deprecated => "deprecated",
     AccentNormal => "accent.normal",
     BorderNormal => "border.normal",
@@ -85,6 +91,7 @@ pub struct Ui {
     pub deprecated: Color,
     pub accent: UiAccent,
     pub border: UiBorder,
+    pub chrome: UiChrome,
     pub cursor: UiCursor,
     pub global: UiGlobal,
     pub gutter: UiBgFg,
@@ -121,8 +128,8 @@ impl Ui {
             },
             SchemeVariant::Light => UiGlobalForeground {
                 normal: palette.black_normal.clone(),
-                dark: palette.black_dim.clone(),
-                light: palette.black_bright.clone(),
+                dark: palette.black_bright.clone(),
+                light: palette.black_dim.clone(),
             },
         };
         let global = UiGlobal {
@@ -160,11 +167,11 @@ impl Ui {
                     foreground: palette.black_normal.clone(),
                 },
                 line: UiBgFg {
-                    background: palette.gray_bright.clone(),
+                    background: palette.white_dim.clone(),
                     foreground: palette.black_bright.clone(),
                 },
                 text: UiHighlightText {
-                    background: palette.gray_dim.clone(),
+                    background: palette.white_dim.clone(),
                     foreground: palette.black_normal.clone(),
                     active_background: palette.gray_normal.clone(),
                     active_foreground: palette.black_normal.clone(),
@@ -181,7 +188,7 @@ impl Ui {
                 active_background: palette.gray_dim.clone(),
             },
             SchemeVariant::Light => UiIndentGuide {
-                background: background.light,
+                background: background.dark,
                 active_background: palette.gray_bright.clone(),
             },
         };
@@ -202,6 +209,32 @@ impl Ui {
         };
         let border = UiBorder {
             normal: palette.gray_dim.clone(),
+        };
+        let chrome = match variant {
+            SchemeVariant::Dark => UiChrome {
+                background: UiChromeBackground {
+                    normal: palette.black_bright.clone(),
+                    dark: palette.black_dim.clone(),
+                    light: palette.gray_dim.clone(),
+                },
+                foreground: UiChromeForeground {
+                    normal: palette.white_normal.clone(),
+                    dark: palette.white_dim.clone(),
+                    light: palette.white_bright.clone(),
+                },
+            },
+            SchemeVariant::Light => UiChrome {
+                background: UiChromeBackground {
+                    normal: palette.white_dim.clone(),
+                    dark: palette.gray_bright.clone(),
+                    light: palette.white_normal.clone(),
+                },
+                foreground: UiChromeForeground {
+                    normal: palette.black_normal.clone(),
+                    dark: palette.black_dim.clone(),
+                    light: palette.black_bright.clone(),
+                },
+            },
         };
         let cursor = match variant {
             SchemeVariant::Dark => UiCursor {
@@ -256,6 +289,7 @@ impl Ui {
             deprecated: palette.brown_normal.clone(),
             accent,
             border,
+            chrome,
             cursor,
             gutter,
             highlight,
@@ -402,6 +436,37 @@ impl Ui {
             )?,
         };
 
+        let chrome = UiChrome {
+            background: UiChromeBackground {
+                normal: parse_or_inherit(
+                    &[basic.chrome_background_normal.as_deref()],
+                    &default.chrome.background.normal,
+                )?,
+                dark: parse_or_inherit(
+                    &[basic.chrome_background_dark.as_deref()],
+                    &default.chrome.background.dark,
+                )?,
+                light: parse_or_inherit(
+                    &[basic.chrome_background_light.as_deref()],
+                    &default.chrome.background.light,
+                )?,
+            },
+            foreground: UiChromeForeground {
+                normal: parse_or_inherit(
+                    &[basic.chrome_foreground_normal.as_deref()],
+                    &default.chrome.foreground.normal,
+                )?,
+                dark: parse_or_inherit(
+                    &[basic.chrome_foreground_dark.as_deref()],
+                    &default.chrome.foreground.dark,
+                )?,
+                light: parse_or_inherit(
+                    &[basic.chrome_foreground_light.as_deref()],
+                    &default.chrome.foreground.light,
+                )?,
+            },
+        };
+
         Ok(Self {
             global,
             deprecated: parse_or_inherit(&[basic.deprecated.as_deref()], &default.deprecated)?,
@@ -417,6 +482,7 @@ impl Ui {
                     &default.border.normal,
                 )?,
             },
+            chrome,
             cursor: UiCursor {
                 normal: UiBgFg {
                     background: parse_or_inherit(
@@ -491,6 +557,12 @@ impl Ui {
             UiKey::GlobalBackgroundNormal => &self.global.background.normal,
             UiKey::GlobalBackgroundDark => &self.global.background.dark,
             UiKey::GlobalBackgroundLight => &self.global.background.light,
+            UiKey::ChromeBackgroundNormal => &self.chrome.background.normal,
+            UiKey::ChromeBackgroundDark => &self.chrome.background.dark,
+            UiKey::ChromeBackgroundLight => &self.chrome.background.light,
+            UiKey::ChromeForegroundNormal => &self.chrome.foreground.normal,
+            UiKey::ChromeForegroundDark => &self.chrome.foreground.dark,
+            UiKey::ChromeForegroundLight => &self.chrome.foreground.light,
             UiKey::Deprecated => &self.deprecated,
             UiKey::AccentNormal => &self.accent.normal,
             UiKey::BorderNormal => &self.border.normal,
@@ -573,6 +645,23 @@ pub struct UiHighlightText {
     pub active_background: Color,
     #[serde(rename = "active-foreground")]
     pub active_foreground: Color,
+}
+#[derive(Debug, Clone, Serialize)]
+pub struct UiChrome {
+    pub background: UiChromeBackground,
+    pub foreground: UiChromeForeground,
+}
+#[derive(Debug, Clone, Serialize)]
+pub struct UiChromeBackground {
+    pub normal: Color,
+    pub dark: Color,
+    pub light: Color,
+}
+#[derive(Debug, Clone, Serialize)]
+pub struct UiChromeForeground {
+    pub normal: Color,
+    pub dark: Color,
+    pub light: Color,
 }
 #[derive(Debug, Clone, Serialize)]
 pub struct UiAccent {
