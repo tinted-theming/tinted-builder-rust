@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Added
+
+- Updated to Tinted8 `0.2.0-beta8` builder spec. Add `ui.chrome.*` properties
+
 ## [0.15.0] - 2026-04-30
 
 ### Added

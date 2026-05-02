@@ -129,6 +129,18 @@ pub struct BasicUi {
     pub accent_normal: Option<String>,
     #[serde(rename = "border.normal")]
     pub border_normal: Option<String>,
+    #[serde(rename = "chrome.background.normal")]
+    pub chrome_background_normal: Option<String>,
+    #[serde(rename = "chrome.background.dark")]
+    pub chrome_background_dark: Option<String>,
+    #[serde(rename = "chrome.background.light")]
+    pub chrome_background_light: Option<String>,
+    #[serde(rename = "chrome.foreground.normal")]
+    pub chrome_foreground_normal: Option<String>,
+    #[serde(rename = "chrome.foreground.dark")]
+    pub chrome_foreground_dark: Option<String>,
+    #[serde(rename = "chrome.foreground.light")]
+    pub chrome_foreground_light: Option<String>,
     #[serde(rename = "cursor.normal.background")]
     pub cursor_normal_background: Option<String>,
     #[serde(rename = "cursor.normal.foreground")]
