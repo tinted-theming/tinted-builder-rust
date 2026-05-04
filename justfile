@@ -19,3 +19,6 @@ lint:
 
 clean:
     rm -rf target/
+
+generate-licenses:
+    cargo about generate about.hbs -o LICENSES-THIRD-PARTY.md
