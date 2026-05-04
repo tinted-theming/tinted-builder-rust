@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Fixed
+
+- Fix bug where empty-dir error output is not behind a silence flag
+
 ## [0.20.0] - 2026-05-03
 
 ### Changed
