@@ -360,7 +360,9 @@ fn generate_themes_for_config(
     is_quiet: bool,
 ) -> Result<()> {
     if scheme_files.is_empty() {
-        eprintln!("W001: No schemes found for a template config entry \"{config_name}\"");
+        if !is_quiet {
+            eprintln!("W001: No schemes found for a template config entry \"{config_name}\"");
+        }
 
         return Ok(());
     }
