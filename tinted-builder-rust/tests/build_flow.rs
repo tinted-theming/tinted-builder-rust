@@ -493,7 +493,10 @@ fn get_scheme_files_skips_non_scheme_and_hidden_files() -> Result<()> {
     write_to_file(schemes.join("README.md"), "x")?;
     write_to_file(schemes.join(".yamllint.yml"), "x")?;
     create_dir_all(schemes.join(".github").join("workflows"))?;
-    write_to_file(schemes.join(".github").join("workflows").join("ci.yml"), "x")?;
+    write_to_file(
+        schemes.join(".github").join("workflows").join("ci.yml"),
+        "x",
+    )?;
 
     let files = get_scheme_files(&schemes, &[], true)?;
     let mut names: Vec<String> = files
@@ -575,7 +578,10 @@ fn build_renders_system_dir_scheme_despite_root_junk() -> Result<()> {
     write_to_file(schemes.join("base16").join("silk-light.yaml"), &scheme)?;
     write_to_file(schemes.join("LICENSE"), "license text")?;
     create_dir_all(schemes.join(".github").join("workflows"))?;
-    write_to_file(schemes.join(".github").join("workflows").join("ci.yml"), "on: push")?;
+    write_to_file(
+        schemes.join(".github").join("workflows").join("ci.yml"),
+        "on: push",
+    )?;
 
     create_dir_all(&templates_dir)?;
     write_to_file(templates_dir.join("config.yaml"), &config)?;
