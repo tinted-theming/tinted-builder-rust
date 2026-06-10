@@ -292,8 +292,10 @@ default:
 }
 
 #[test]
-fn e111_invalid_extension_in_schemes() -> Result<()> {
-    let tmp_dir = unique_tmp_dir("e111")?;
+fn non_scheme_files_at_root_are_ignored() -> Result<()> {
+    // The schemes-dir root may contain non-scheme files (e.g. `LICENSE`, `README.md`).
+    // These must be skipped during discovery rather than surfacing an E111 error.
+    let tmp_dir = unique_tmp_dir("non_scheme_root")?;
     let schemes = tmp_dir.join("schemes");
     let template = tmp_dir.join("template");
     let templates_dir = template.join("templates");
@@ -308,14 +310,15 @@ default:
 
     create_dir_all(&schemes)?;
     write_to_file(schemes.join("bad.txt"), "not a scheme")?;
+    write_to_file(schemes.join("LICENSE"), "license text")?;
+    write_to_file(schemes.join("README.md"), "# readme")?;
     create_dir_all(&templates_dir)?;
     write_to_file(templates_dir.join("config.yaml"), config)?;
     write_to_file(templates_dir.join("default.mustache"), "Hello\n")?;
 
-    #[allow(clippy::unwrap_used)]
-    let err = tinted_builder_rust::build(&template, &schemes, &[], true).unwrap_err();
+    // No schemes are present, but discovery must not fail on the non-scheme files.
+    tinted_builder_rust::build(&template, &schemes, &[], true)?;
 
-    assert!(err.to_string().contains("E111"));
     Ok(())
 }
 
@@ -471,5 +474,118 @@ default:
     let out = fs::read_to_string(&out_path)?;
 
     assert!(out.contains("Hello Test\nBlue is #0000ff"));
+    Ok(())
+}
+
+#[test]
+fn get_scheme_files_skips_non_scheme_and_hidden_files() -> Result<()> {
+    use tinted_builder_rust::operation_build::utils::get_scheme_files;
+
+    let tmp_dir = unique_tmp_dir("walker_lenient")?;
+    let schemes = tmp_dir.join("schemes");
+    create_dir_all(&schemes)?;
+
+    // Scheme files at the root are discovered...
+    write_to_file(schemes.join("good.yaml"), "x")?;
+    write_to_file(schemes.join("note.yml"), "x")?;
+    // ...while non-scheme files and hidden entries are skipped.
+    write_to_file(schemes.join("LICENSE"), "x")?;
+    write_to_file(schemes.join("README.md"), "x")?;
+    write_to_file(schemes.join(".yamllint.yml"), "x")?;
+    create_dir_all(schemes.join(".github").join("workflows"))?;
+    write_to_file(schemes.join(".github").join("workflows").join("ci.yml"), "x")?;
+
+    let files = get_scheme_files(&schemes, &[], true)?;
+    let mut names: Vec<String> = files
+        .iter()
+        .filter_map(|f| f.get_path().file_name()?.to_str().map(String::from))
+        .collect();
+    names.sort();
+
+    assert_eq!(names, vec!["good.yaml".to_string(), "note.yml".to_string()]);
+    Ok(())
+}
+
+#[test]
+fn get_scheme_files_is_strict_within_scheme_system_dir() -> Result<()> {
+    use tinted_builder_rust::operation_build::utils::get_scheme_files;
+
+    let tmp_dir = unique_tmp_dir("walker_strict")?;
+    let schemes = tmp_dir.join("schemes");
+    let base16 = schemes.join("base16");
+    create_dir_all(&base16)?;
+
+    // An unrecognized file directly inside a scheme-system directory must surface an error...
+    write_to_file(base16.join("not-a-scheme.txt"), "x")?;
+    #[allow(clippy::unwrap_used)]
+    let err = get_scheme_files(&schemes, &[], true).unwrap_err();
+    assert!(err.to_string().contains("E111"), "got: {err}");
+
+    // ...whereas the same file at the lenient root is simply skipped.
+    let tmp_dir = unique_tmp_dir("walker_strict_root")?;
+    let schemes = tmp_dir.join("schemes");
+    create_dir_all(&schemes)?;
+    write_to_file(schemes.join("not-a-scheme.txt"), "x")?;
+    assert!(get_scheme_files(&schemes, &[], true)?.is_empty());
+
+    Ok(())
+}
+
+#[test]
+fn get_scheme_files_by_name_keys_and_filters_by_system() -> Result<()> {
+    use tinted_builder::SchemeSystem;
+    use tinted_builder_rust::operation_build::utils::get_scheme_files_by_name;
+
+    let tmp_dir = unique_tmp_dir("walker_by_name")?;
+    let schemes = tmp_dir.join("schemes");
+    create_dir_all(schemes.join("base16"))?;
+    create_dir_all(schemes.join("base24"))?;
+    write_to_file(schemes.join("base16").join("github.yaml"), "x")?;
+    write_to_file(schemes.join("base24").join("dracula.yaml"), "x")?;
+    // Root-level files are not part of the `<system>/`-keyed map.
+    write_to_file(schemes.join("LICENSE"), "x")?;
+    write_to_file(schemes.join("boo-base16.yaml"), "x")?;
+
+    let all = get_scheme_files_by_name(&schemes, None)?;
+    assert_eq!(all.len(), 2);
+    assert!(all.contains_key("base16-github"));
+    assert!(all.contains_key("base24-dracula"));
+
+    let only_base16 = get_scheme_files_by_name(&schemes, Some(SchemeSystem::Base16))?;
+    assert_eq!(only_base16.len(), 1);
+    assert!(only_base16.contains_key("base16-github"));
+
+    Ok(())
+}
+
+#[test]
+fn build_renders_system_dir_scheme_despite_root_junk() -> Result<()> {
+    // A full build against a `<system>/`-organized schemes dir succeeds even when the root
+    // carries non-scheme files and hidden non-scheme YAML.
+    let config = fs::read_to_string("./tests/fixtures/templates/base16-config.yaml")?;
+    let mustache = fs::read_to_string("./tests/fixtures/templates/base16-template.mustache")?;
+    let scheme = fs::read_to_string("./tests/fixtures/schemes/base16/silk-light.yaml")?;
+
+    let tmp_dir = unique_tmp_dir("build_with_junk")?;
+    let schemes = tmp_dir.join("schemes");
+    let template = tmp_dir.join("template");
+    let templates_dir = template.join("templates");
+
+    create_dir_all(schemes.join("base16"))?;
+    write_to_file(schemes.join("base16").join("silk-light.yaml"), &scheme)?;
+    write_to_file(schemes.join("LICENSE"), "license text")?;
+    create_dir_all(schemes.join(".github").join("workflows"))?;
+    write_to_file(schemes.join(".github").join("workflows").join("ci.yml"), "on: push")?;
+
+    create_dir_all(&templates_dir)?;
+    write_to_file(templates_dir.join("config.yaml"), &config)?;
+    write_to_file(templates_dir.join("base16-template.mustache"), &mustache)?;
+
+    tinted_builder_rust::build(&template, &schemes, &[], true)?;
+
+    let output_dir = template.join("output-themes");
+    let rendered_count = fs::read_dir(&output_dir)?.count();
+    assert_eq!(rendered_count, 1, "expected the base16 scheme to render");
+
     Ok(())
 }
