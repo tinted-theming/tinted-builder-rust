@@ -20,7 +20,7 @@ jobs:
         run: |
           crate_name="tinted-builder"
           version="$(cargo read-manifest --manifest-path ./tinted-builder/Cargo.toml | jq -r ".version")"
-          response=$(curl -s "https://crates.io/api/v1/crates/$crate_name")
+          response=$(curl -s -H "User-Agent: tinted-theming-ci (https://github.com/tinted-theming)" "https://crates.io/api/v1/crates/$crate_name")
           if ! echo "$response" | grep -q "\"num\":\"$version\""; then
             cargo publish -p tinted-builder --locked
           fi
