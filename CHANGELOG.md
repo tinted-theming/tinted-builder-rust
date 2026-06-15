@@ -1,5 +1,20 @@
 # Changelog
 
+## Unreleased
+
+### Fixed
+
+- `build` no longer fails with `E111` on non-scheme files in the schemes
+  directory (e.g. `LICENSE`, `README.md`) or on hidden entries such as
+  `.yamllint.yml` / `.github/**`; these are skipped during discovery. Files
+  with an unrecognized extension *inside* a `base16`/`base24`/`tinted8`
+  directory still surface an error.
+
+### Added
+
+- Expose `get_scheme_files_by_name()` for `<system>/`-subdir keyed scheme
+  discovery, so downstreams can share one walker implementation.
+
 ## [0.20.1] - 2026-05-04
 
 ### Fixed

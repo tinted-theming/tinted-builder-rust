@@ -7,7 +7,7 @@ pub mod operations {
 mod helpers;
 
 pub mod utils {
-    pub use crate::operations::build::utils::get_scheme_files;
+    pub use crate::operations::build::utils::{get_scheme_files, get_scheme_files_by_name};
 }
 
 pub use crate::operations::build as operation_build;
