@@ -11,9 +11,10 @@ homepage = "https://github.com/tinted-theming/tinted-builder-rust"
 repository = "https://github.com/tinted-theming/tinted-builder-rust"
 documentation = "https://github.com/tinted-theming/tinted-builder-rust"
 readme = "README.md"
+rust-version.workspace = true
 
 [dependencies]
-anyhow = "1.0.100"
+anyhow = "1.0.101"
 clap = "4.5.51"
 dirs = "6.0.0"
 regex = "1.12.2"

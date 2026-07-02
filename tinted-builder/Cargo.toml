@@ -10,12 +10,12 @@ homepage = "https://github.com/tinted-theming/tinted-builder-rust"
 repository = "https://github.com/tinted-theming/tinted-builder-rust"
 keywords = ["cli", "base16", "base24", "tinted-theming"]
 categories = ["command-line-utilities", "template-engine"]
-rust-version = "1.74.0"
+rust-version.workspace = true
 
 [dependencies]
 dirs = "6.0.0"
 palette = "0.7.6"
-quick-xml = { version = "0.38.3", features = ["serialize"] }
+quick-xml = { version = "0.41.0", features = ["serialize"] }
 regex = "1.12.2"
 ribboncurls = "0.5.0"
 semver = "1.0.27"
@@ -29,7 +29,7 @@ serde = { version = "1.0.228", features = ["derive"] }
 serde_yaml = "0.9.34"
 
 [dev-dependencies]
-anyhow = "1.0.100"
+anyhow = "1.0.101"
 strip-ansi-escapes = "0.2.1"
 
 [lints.clippy]

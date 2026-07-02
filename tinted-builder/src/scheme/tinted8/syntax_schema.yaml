@@ -104,7 +104,7 @@ syntax:
                 non_standard: true
           - key: namespace
             scope: entity.name.namespace
-            default: yellow_dim
+            default: yellow_normal
           - key: section
             scope: entity.name.section
             default: cyan_normal
@@ -185,11 +185,13 @@ syntax:
           - key: constant
             scope: variable.other.constant
             non_standard: true
-          - key: property
-            scope: variable.other.property
           - key: object
             scope: variable.other.object
             non_standard: true
+            children:
+              - key: property
+                scope: variable.other.object.property
+                non_standard: true
 
   - key: punctuation
     scope: punctuation
@@ -208,12 +210,8 @@ syntax:
           - key: comment
             scope: punctuation.definition.comment
             default: gray_dim
-      - key: section
-        scope: punctuation.section
-        default: orange_normal
       - key: brackets
         scope: punctuation.brackets
-        default: orange_normal
         children:
           - key: angle
             scope: punctuation.brackets.angle
@@ -223,6 +221,9 @@ syntax:
             scope: punctuation.brackets.round
           - key: square
             scope: punctuation.brackets.square
+      - key: section
+        scope: punctuation.section
+        default: orange_normal
 
   - key: markup
     scope: markup

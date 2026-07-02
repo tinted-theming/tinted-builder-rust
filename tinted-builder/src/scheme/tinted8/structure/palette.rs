@@ -331,16 +331,12 @@ impl Palette {
                 )
                 .map_err(|err| PaletteError::UnableToCreateColor(err.to_string()))?,
             orange_dim: basic_palette
-                .orange_bright
+                .orange_dim
                 .as_ref()
                 .map_or_else(
-                    || orange_normal.try_to_variant(&ColorVariant::Bright),
+                    || orange_normal.try_to_variant(&ColorVariant::Dim),
                     |orange_hex| {
-                        Color::new(
-                            orange_hex,
-                            Some(ColorName::Orange),
-                            Some(ColorVariant::Bright),
-                        )
+                        Color::new(orange_hex, Some(ColorName::Orange), Some(ColorVariant::Dim))
                     },
                 )
                 .map_err(|err| PaletteError::UnableToCreateColor(err.to_string()))?,
@@ -351,28 +347,53 @@ impl Palette {
                 Some(ColorVariant::Normal),
             )
             .map_err(|err| PaletteError::UnableToConvertFrom(err.to_string()))?,
-            gray_bright: Color::new(
-                basic_palette.gray.as_ref().unwrap_or(&generated_gray_hex),
-                Some(ColorName::Gray),
-                Some(ColorVariant::Bright),
-            )
-            .and_then(|c| c.try_to_variant(variant_bright))
-            .map_err(|err| PaletteError::UnableToConvertFrom(err.to_string()))?,
-            gray_dim: Color::new(
-                basic_palette.gray.as_ref().unwrap_or(&generated_gray_hex),
-                Some(ColorName::Gray),
-                Some(ColorVariant::Dim),
-            )
-            .and_then(|c| c.try_to_variant(variant_dim))
-            .map_err(|err| PaletteError::UnableToConvertFrom(err.to_string()))?,
+            gray_bright: basic_palette
+                .gray_bright
+                .as_ref()
+                .map_or_else(
+                    || {
+                        Color::new(
+                            basic_palette.gray.as_ref().unwrap_or(&generated_gray_hex),
+                            Some(ColorName::Gray),
+                            Some(ColorVariant::Normal),
+                        )
+                        .and_then(|c| c.try_to_variant(variant_bright))
+                    },
+                    |hex| Color::new(hex, Some(ColorName::Gray), Some(ColorVariant::Bright)),
+                )
+                .map_err(|err| PaletteError::UnableToConvertFrom(err.to_string()))?,
+            gray_dim: basic_palette
+                .gray_dim
+                .as_ref()
+                .map_or_else(
+                    || {
+                        Color::new(
+                            basic_palette.gray.as_ref().unwrap_or(&generated_gray_hex),
+                            Some(ColorName::Gray),
+                            Some(ColorVariant::Normal),
+                        )
+                        .and_then(|c| c.try_to_variant(variant_dim))
+                    },
+                    |hex| Color::new(hex, Some(ColorName::Gray), Some(ColorVariant::Dim)),
+                )
+                .map_err(|err| PaletteError::UnableToConvertFrom(err.to_string()))?,
 
             brown_normal: brown_normal.clone(),
-            brown_bright: brown_normal
-                .clone()
-                .try_to_variant(&ColorVariant::Bright)
+            brown_bright: basic_palette
+                .brown_bright
+                .as_ref()
+                .map_or_else(
+                    || brown_normal.clone().try_to_variant(&ColorVariant::Bright),
+                    |hex| Color::new(hex, Some(ColorName::Brown), Some(ColorVariant::Bright)),
+                )
                 .map_err(|err| PaletteError::UnableToConvertFrom(err.to_string()))?,
-            brown_dim: brown_normal
-                .try_to_variant(&ColorVariant::Dim)
+            brown_dim: basic_palette
+                .brown_dim
+                .as_ref()
+                .map_or_else(
+                    || brown_normal.try_to_variant(&ColorVariant::Dim),
+                    |hex| Color::new(hex, Some(ColorName::Brown), Some(ColorVariant::Dim)),
+                )
                 .map_err(|err| PaletteError::UnableToConvertFrom(err.to_string()))?,
         };
 
@@ -649,9 +670,9 @@ fn color_black_and_white_to_gray(
     let h2 = black_hsl.get_hue().into_degrees();
     let d = ((h2 - h1 + 540.0) % 360.0) - 180.0;
     let gray_hsl_h = (0.5_f32.mul_add(d, h1) + 360.0) % 360.0;
-    // For a neutral gray, force saturation to 0 and average the lightness.
-    let gray_hsl_s = 0.0;
-    let gray_hsl_l = 0.5 * (white_hsl.lightness + black_hsl.lightness);
+    // Saturation midpoint of black and white per spec.
+    let gray_hsl_s = f32::midpoint(white_hsl.saturation, black_hsl.saturation);
+    let gray_hsl_l = f32::midpoint(white_hsl.lightness, black_hsl.lightness);
 
     let gray_hsl = Hsl::new(RgbHue::from_degrees(gray_hsl_h), gray_hsl_s, gray_hsl_l);
     let gray_rgb: Rgb = gray_hsl.into_color();

@@ -67,7 +67,7 @@ impl Color {
     #[must_use]
     /// Returns the 6-digit hex string (lowercase) without the leading `#`.
     pub fn to_hex(&self) -> String {
-        format!("{}{}{}", &self.hex.0, &self.hex.1, &self.hex.2)
+        format!("{}{}{}", self.hex.0, self.hex.1, self.hex.2)
     }
 
     #[allow(
@@ -170,7 +170,7 @@ impl Color {
 
 impl fmt::Display for Color {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "#{}", &self.to_hex())
+        write!(f, "#{}", self.to_hex())
     }
 }
 
@@ -353,7 +353,7 @@ fn process_hex_input(input: &str) -> Option<String> {
                 Some(
                     hex_str
                         .chars()
-                        .flat_map(|c| std::iter::repeat(c).take(2))
+                        .flat_map(|c| std::iter::repeat_n(c, 2))
                         .collect(),
                 )
             } else {

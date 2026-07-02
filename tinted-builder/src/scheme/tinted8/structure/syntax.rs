@@ -87,19 +87,19 @@ impl Syntax {
             SyntaxKey::VariableLanguage => &self.variable.language,
             SyntaxKey::VariableOther => &self.variable.other.default,
             SyntaxKey::VariableOtherConstant => &self.variable.other.constant,
-            SyntaxKey::VariableOtherObject => &self.variable.other.object,
-            SyntaxKey::VariableOtherProperty => &self.variable.other.property,
+            SyntaxKey::VariableOtherObject => &self.variable.other.object.default,
+            SyntaxKey::VariableOtherObjectProperty => &self.variable.other.object.property,
             SyntaxKey::Punctuation => &self.punctuation.default,
             SyntaxKey::PunctuationSeparator => &self.punctuation.separator,
             SyntaxKey::PunctuationDefinition => &self.punctuation.definition.default,
             SyntaxKey::PunctuationDefinitionString => &self.punctuation.definition.string,
             SyntaxKey::PunctuationDefinitionComment => &self.punctuation.definition.comment,
-            SyntaxKey::PunctuationSection => &self.punctuation.section,
             SyntaxKey::PunctuationBrackets => &self.punctuation.brackets.default,
             SyntaxKey::PunctuationBracketsAngle => &self.punctuation.brackets.angle,
             SyntaxKey::PunctuationBracketsCurly => &self.punctuation.brackets.curly,
             SyntaxKey::PunctuationBracketsRound => &self.punctuation.brackets.round,
             SyntaxKey::PunctuationBracketsSquare => &self.punctuation.brackets.square,
+            SyntaxKey::PunctuationSection => &self.punctuation.section,
             SyntaxKey::Markup => &self.markup.default,
             SyntaxKey::MarkupBold => &self.markup.bold,
             SyntaxKey::MarkupItalic => &self.markup.italic,
@@ -134,7 +134,7 @@ impl Syntax {
 impl fmt::Display for Syntax {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         for key in SyntaxKey::variants() {
-            writeln!(f, "  {key}: #{}", &self.get_color(key).to_hex())?;
+            writeln!(f, "  {key}: #{}", self.get_color(key).to_hex())?;
         }
 
         Ok(())
@@ -228,7 +228,12 @@ pub struct SyntaxVariable {
 pub struct SyntaxVariableOther {
     pub default: Color,
     pub constant: Color,
-    pub object: Color,
+    pub object: SyntaxVariableOtherObject,
+}
+
+#[derive(Debug, Clone, Serialize)]
+pub struct SyntaxVariableOtherObject {
+    pub default: Color,
     pub property: Color,
 }
 
@@ -313,9 +318,9 @@ pub struct SyntaxSupportFunction {
 #[derive(Debug, Clone, Serialize)]
 pub struct SyntaxPunctuation {
     pub default: Color,
-    pub brackets: SyntaxPunctuationBrackets,
     pub separator: Color,
     pub definition: SyntaxPunctuationDefinition,
+    pub brackets: SyntaxPunctuationBrackets,
     pub section: Color,
 }
 

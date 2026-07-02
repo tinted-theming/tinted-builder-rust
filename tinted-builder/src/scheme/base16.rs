@@ -151,7 +151,7 @@ impl<'a> Serialize for SortedPalette<'a> {
     {
         let mut map = serializer.serialize_map(Some(self.0.len()))?;
         for (key, value) in &self.0 {
-            map.serialize_entry(key, format!("#{}", &value.to_hex()).as_str())?;
+            map.serialize_entry(key, format!("#{}", value.to_hex()).as_str())?;
         }
         map.end()
     }

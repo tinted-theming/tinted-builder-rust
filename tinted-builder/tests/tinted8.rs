@@ -29,9 +29,9 @@ fn deserialize_family_style_derives_name() -> Result<(), TintedBuilderError> {
 fn deserialize_ui_overrides() -> Result<(), TintedBuilderError> {
     let scheme: Tinted8Scheme = serde_yaml::from_str(SCHEME_WITH_UI)?;
 
-    assert_eq!(scheme.ui.global.background.normal.to_hex(), "111111");
-    assert_eq!(scheme.ui.global.foreground.normal.to_hex(), "eeeeee");
-    assert_eq!(scheme.ui.global.background.dark.to_hex(), "000000");
+    assert_eq!(scheme.ui.global.normal.background.to_hex(), "111111");
+    assert_eq!(scheme.ui.global.normal.foreground.to_hex(), "eeeeee");
+    assert_eq!(scheme.ui.global.dark.background.to_hex(), "000000");
 
     Ok(())
 }
@@ -59,11 +59,11 @@ palette:
   white:   "#ffffff"
 ui:
   global:
-    background:
-      normal: "#111111"
-      dark:   "#000000"
-    foreground:
-      normal: "#eeeeee"
+    normal:
+      background: "#111111"
+      foreground: "#eeeeee"
+    dark:
+      background: "#000000"
   cursor.normal.background: "#333333"
   cursor.normal.foreground: "#f1f1f1"
   cursor.muted.background: "#666666"
@@ -74,9 +74,9 @@ ui:
 "##,
     )?;
 
-    assert_eq!(scheme.ui.global.background.normal.to_hex(), "111111");
-    assert_eq!(scheme.ui.global.foreground.normal.to_hex(), "eeeeee");
-    assert_eq!(scheme.ui.global.background.dark.to_hex(), "000000");
+    assert_eq!(scheme.ui.global.normal.background.to_hex(), "111111");
+    assert_eq!(scheme.ui.global.normal.foreground.to_hex(), "eeeeee");
+    assert_eq!(scheme.ui.global.dark.background.to_hex(), "000000");
     assert_eq!(scheme.ui.cursor.normal.background.to_hex(), "333333");
     assert_eq!(scheme.ui.cursor.normal.foreground.to_hex(), "f1f1f1");
     assert_eq!(scheme.ui.cursor.muted.background.to_hex(), "666666");
@@ -93,11 +93,11 @@ fn deserialize_ui_normals_from_palette() -> Result<(), TintedBuilderError> {
     let scheme: Tinted8Scheme = serde_yaml::from_str(SCHEME_MINIMAL)?;
 
     assert_eq!(
-        scheme.ui.global.background.normal.to_hex(),
+        scheme.ui.global.normal.background.to_hex(),
         scheme.palette.black_normal.to_hex()
     );
     assert_eq!(
-        scheme.ui.global.foreground.normal.to_hex(),
+        scheme.ui.global.normal.foreground.to_hex(),
         scheme.palette.white_normal.to_hex()
     );
     assert_eq!(
@@ -177,7 +177,7 @@ fn deserialize_full_scheme() -> Result<(), TintedBuilderError> {
     assert_eq!(ts.syntax.comment.default.to_hex(), "565f89");
     assert_eq!(ts.syntax.entity.name.default.to_hex(), "7aa2f7");
     assert_eq!(ts.syntax.entity.other.attribute_name.to_hex(), "e0af68");
-    assert_eq!(ts.ui.global.background.normal.to_hex(), "ff0000");
+    assert_eq!(ts.ui.global.normal.background.to_hex(), "ff0000");
     assert_eq!(ts.ui.selection.background.to_hex(), "33467c");
 
     Ok(())
@@ -269,9 +269,9 @@ palette:
   cyan:    "#00ffff"
   white:   "#ffffff"
 ui:
-  global.background.normal: "#111111"
-  global.foreground.normal: "#eeeeee"
-  global.background.dark: "#000000"
+  global.normal.background: "#111111"
+  global.normal.foreground: "#eeeeee"
+  global.dark.background: "#000000"
 "##;
 
 const SCHEME_WITH_SYNTAX: &str = r##"
@@ -331,9 +331,9 @@ syntax:
   markup.deleted: "#f7768e"
 ui:
   global:
-    background:
-      normal: "#ff0000"
-    foreground.normal: "#c0caf5"
+    normal:
+      background: "#ff0000"
+      foreground: "#c0caf5"
   selection.background: "#33467c"
 "##;
 
@@ -371,11 +371,11 @@ fn ui_key_display_uses_dotted_paths() {
 
     let rendered: Vec<String> = UiKey::variants().iter().map(ToString::to_string).collect();
 
-    assert!(rendered.contains(&"global.background.normal".to_string()));
-    assert!(rendered.contains(&"global.foreground.normal".to_string()));
+    assert!(rendered.contains(&"global.normal.background".to_string()));
+    assert!(rendered.contains(&"global.normal.foreground".to_string()));
     assert!(rendered.contains(&"selection.background".to_string()));
-    assert!(rendered.contains(&"highlight.text.active-foreground".to_string()));
-    assert!(rendered.contains(&"indent-guide.active-background".to_string()));
+    assert!(rendered.contains(&"highlight.text.active.foreground".to_string()));
+    assert!(rendered.contains(&"indent-guide.active.background".to_string()));
 }
 
 #[test]
@@ -385,15 +385,15 @@ fn ui_key_overrides_resolve_via_get_color() -> Result<(), TintedBuilderError> {
     let scheme: Tinted8Scheme = serde_yaml::from_str(SCHEME_WITH_UI)?;
 
     assert_eq!(
-        scheme.ui.get_color(&UiKey::GlobalBackgroundNormal).to_hex(),
+        scheme.ui.get_color(&UiKey::GlobalNormalBackground).to_hex(),
         "111111"
     );
     assert_eq!(
-        scheme.ui.get_color(&UiKey::GlobalForegroundNormal).to_hex(),
+        scheme.ui.get_color(&UiKey::GlobalNormalForeground).to_hex(),
         "eeeeee"
     );
     assert_eq!(
-        scheme.ui.get_color(&UiKey::GlobalBackgroundDark).to_hex(),
+        scheme.ui.get_color(&UiKey::GlobalDarkBackground).to_hex(),
         "000000"
     );
 

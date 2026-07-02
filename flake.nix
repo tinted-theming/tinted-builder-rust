@@ -30,6 +30,8 @@
             rustToolchain
             pkgs.alejandra
             pkgs.cargo-about
+            pkgs.cargo-audit
+            pkgs.cargo-chef
             pkgs.cargo-deny
             pkgs.just
           ];
