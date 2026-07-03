@@ -1,3 +1,5 @@
+#![allow(clippy::expect_used, clippy::panic, clippy::indexing_slicing)]
+
 use core::iter::Iterator;
 use serde::Deserialize;
 use std::env;

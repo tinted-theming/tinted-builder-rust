@@ -32,7 +32,5 @@ serde_yaml.workspace = true
 anyhow = "1.0.103"
 strip-ansi-escapes.workspace = true
 
-[lints.clippy]
-pedantic      = { level = "deny", priority = -1 }
-nursery       = { level = "deny", priority = -1 }
-unwrap_used   = "deny"
+[lints]
+workspace = true

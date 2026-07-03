@@ -676,9 +676,13 @@ fn color_black_and_white_to_gray(
 
     let gray_hsl = Hsl::new(RgbHue::from_degrees(gray_hsl_h), gray_hsl_s, gray_hsl_l);
     let gray_rgb: Rgb = gray_hsl.into_color();
-    let gray_rgb_r: u8 = (gray_rgb.red.clamp(0.0, 1.0) * 255.0).round() as u8;
-    let gray_rgb_g: u8 = (gray_rgb.green.clamp(0.0, 1.0) * 255.0).round() as u8;
-    let gray_rgb_b: u8 = (gray_rgb.blue.clamp(0.0, 1.0) * 255.0).round() as u8;
+    #[allow(
+        clippy::cast_possible_truncation,
+        clippy::cast_sign_loss,
+        clippy::as_conversions
+    )]
+    let [gray_rgb_r, gray_rgb_g, gray_rgb_b] = [gray_rgb.red, gray_rgb.green, gray_rgb.blue]
+        .map(|c| (c.clamp(0.0, 1.0) * 255.0).round() as u8);
     let gray_hex = format!("{gray_rgb_r:02X}{gray_rgb_g:02X}{gray_rgb_b:02X}");
 
     Color::new(&gray_hex, Some(ColorName::Gray), Some(ColorVariant::Normal))

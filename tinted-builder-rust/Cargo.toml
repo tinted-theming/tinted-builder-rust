@@ -33,7 +33,5 @@ strip-ansi-escapes.workspace = true
 name = "tinted-builder-rust"
 path = "src/main.rs"
 
-[lints.clippy]
-pedantic    = { level = "deny", priority = -1 }
-nursery     = { level = "deny", priority = -1 }
-unwrap_used = "deny"
+[lints]
+workspace = true

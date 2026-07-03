@@ -41,11 +41,11 @@ impl Color {
         variant: Option<ColorVariant>,
     ) -> Result<Self, TintedBuilderError> {
         let hex_full = process_hex_input(hex_color).ok_or(TintedBuilderError::HexInputFormat)?;
-        let hex: (String, String, String) = (
-            hex_full[0..2].to_lowercase(),
-            hex_full[2..4].to_lowercase(),
-            hex_full[4..6].to_lowercase(),
-        );
+        let mut chars = hex_full.chars();
+        let r: String = chars.by_ref().take(2).collect();
+        let g: String = chars.by_ref().take(2).collect();
+        let b: String = chars.take(2).collect();
+        let hex: (String, String, String) = (r.to_lowercase(), g.to_lowercase(), b.to_lowercase());
         let rgb = hex_to_rgb(&hex)?;
         // Store normalized decimal channels in [0.0, 1.0]
         let inv_255: f32 = 1.0 / 255.0;
@@ -70,11 +70,7 @@ impl Color {
         format!("{}{}{}", self.hex.0, self.hex.1, self.hex.2)
     }
 
-    #[allow(
-        clippy::cast_possible_truncation,
-        clippy::cast_sign_loss,
-        clippy::missing_errors_doc
-    )]
+    #[allow(clippy::missing_errors_doc)]
     /// Derives a `dim` or `bright` variant from a `normal` color according to the Tinted8 rules.
     ///
     /// # Errors
@@ -85,9 +81,9 @@ impl Color {
         let hsl: Hsl = Hsl::from_color(rgb.into_format::<f32>());
         let updated_hsl = adjust_normal_hsl_for_variant(hsl, color_variant);
         let updated_rgb: Rgb = updated_hsl.into_color();
-        let updated_rgb_r: u8 = (updated_rgb.red.clamp(0.0, 1.0) * 255.0).round() as u8;
-        let updated_rgb_g: u8 = (updated_rgb.green.clamp(0.0, 1.0) * 255.0).round() as u8;
-        let updated_rgb_b: u8 = (updated_rgb.blue.clamp(0.0, 1.0) * 255.0).round() as u8;
+        let updated_rgb_r = float_to_u8(updated_rgb.red);
+        let updated_rgb_g = float_to_u8(updated_rgb.green);
+        let updated_rgb_b = float_to_u8(updated_rgb.blue);
         let updated_hex = format!("{updated_rgb_r:02X}{updated_rgb_g:02X}{updated_rgb_b:02X}");
 
         Self::new(
@@ -97,11 +93,7 @@ impl Color {
         )
     }
 
-    #[allow(
-        clippy::missing_errors_doc,
-        clippy::cast_possible_truncation,
-        clippy::cast_sign_loss
-    )]
+    #[allow(clippy::missing_errors_doc)]
     /// Derives supplemental colors (e.g., `orange` or `brown`) from a base color as specified.
     ///
     /// # Errors
@@ -123,9 +115,8 @@ impl Color {
                 let h_prime = (from_hsl_h - 10.0 + 360.0) % 360.0;
                 let to_hsl: Hsl = Hsl::new(h_prime, from_hsl_s, from_hsl_l);
                 let to_rgb: Rgb = to_hsl.into_color();
-                let [to_rgb_r, to_rgb_g, to_rgb_b]: [u8; 3] =
-                    [to_rgb.red, to_rgb.green, to_rgb.blue]
-                        .map(|c| (c.clamp(0.0, 1.0) * 255.0).round() as u8);
+                let [to_rgb_r, to_rgb_g, to_rgb_b] =
+                    [to_rgb.red, to_rgb.green, to_rgb.blue].map(float_to_u8);
                 let to_hex = format!("{to_rgb_r:02X}{to_rgb_g:02X}{to_rgb_b:02X}");
 
                 Self::new(
@@ -148,9 +139,8 @@ impl Color {
                 let l_prime = (from_hsl_l - l_difference).clamp(0.0, 1.0);
                 let to_hsl: Hsl = Hsl::new(from_hsl_h - h_difference, s_prime, l_prime);
                 let to_rgb: Rgb = to_hsl.into_color();
-                let [to_rgb_r, to_rgb_g, to_rgb_b]: [u8; 3] =
-                    [to_rgb.red, to_rgb.green, to_rgb.blue]
-                        .map(|c| (c.clamp(0.0, 1.0) * 255.0).round() as u8);
+                let [to_rgb_r, to_rgb_g, to_rgb_b] =
+                    [to_rgb.red, to_rgb.green, to_rgb.blue].map(float_to_u8);
                 let to_hex = format!("{to_rgb_r:02X}{to_rgb_g:02X}{to_rgb_b:02X}");
 
                 Self::new(
@@ -330,6 +320,16 @@ impl FromStr for ColorType {
             ColorVariant::from_str(variant)?,
         ))
     }
+}
+
+/// Safely converts a clamped `[0.0, 1.0]` float to a `u8` in `[0, 255]`.
+#[allow(
+    clippy::cast_possible_truncation,
+    clippy::cast_sign_loss,
+    clippy::as_conversions
+)]
+pub fn float_to_u8(value: f32) -> u8 {
+    (value.clamp(0.0, 1.0) * 255.0).round() as u8
 }
 
 /// Converts a `(rr, gg, bb)` hex tuple to `rgb` bytes.

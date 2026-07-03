@@ -161,7 +161,7 @@ fn git_diff(target_dir: impl AsRef<Path>) -> Result<bool> {
                 target_dir.as_ref().display()
             )
         })?;
-    let stdout = str::from_utf8(&output.stdout).expect("Not valid UTF-8");
+    let stdout = str::from_utf8(&output.stdout).context("Git status output is not valid UTF-8")?;
 
     if stdout.is_empty() {
         Ok(false)
