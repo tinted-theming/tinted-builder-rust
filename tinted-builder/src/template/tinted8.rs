@@ -1,5 +1,7 @@
 use crate::{
-    error::TintedBuilderError, tinted8::Scheme as Tinted8Scheme, SchemeSupports, SchemeVariant,
+    error::TintedBuilderError,
+    tinted8::{Scheme as Tinted8Scheme, SUPPORTED_BUILDER_SPEC_VERSION},
+    SchemeSupports, SchemeVariant,
 };
 use serde::Serialize;
 
@@ -22,12 +24,18 @@ pub fn render<T: serde::Serialize>(content: &str, ctx: &T) -> Result<String, Tin
 struct SchemeMetaCtx {
     name: String,
     author: String,
+    #[serde(rename = "theme-author")]
+    theme_author: String,
     description: String,
     slug: String,
     #[serde(rename = "slug-underscored")]
     slug_underscored: String,
     system: String,
     supports: SchemeSupports,
+    #[serde(rename = "supported-styling-version")]
+    supported_styling_version: String,
+    #[serde(rename = "supported-builder-version")]
+    supported_builder_version: String,
     family: String,
     style: String,
 }
@@ -60,6 +68,7 @@ pub fn to_template_context(
     let scheme_ctx = SchemeMetaCtx {
         name: meta.name.clone(),
         author: meta.author.clone(),
+        theme_author: meta.theme_author.clone(),
         description: meta.description.clone().unwrap_or_default(),
         slug: meta.slug.clone(),
         slug_underscored: meta.slug.replace('-', "_"),
@@ -67,6 +76,8 @@ pub fn to_template_context(
         supports: SchemeSupports {
             styling_spec: meta.supports.styling_spec.clone(),
         },
+        supported_styling_version: meta.supports.styling_spec.clone(),
+        supported_builder_version: SUPPORTED_BUILDER_SPEC_VERSION.to_string(),
         family: meta.family.clone().unwrap_or_default(),
         style: meta.style.clone().unwrap_or_default(),
     };

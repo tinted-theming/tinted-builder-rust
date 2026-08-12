@@ -184,7 +184,6 @@ fn generate_syntax_key_enum(code: &mut String, nodes: &[FlattenedNode]) {
     }
     code.push_str("        }\n");
     code.push_str("    }\n\n");
-
     code.push_str("    #[must_use]\n");
     code.push_str("    #[allow(clippy::too_many_lines)]\n");
     code.push_str("    pub const fn variants() -> &'static [Self] {\n");
@@ -194,7 +193,7 @@ fn generate_syntax_key_enum(code: &mut String, nodes: &[FlattenedNode]) {
     }
     code.push_str("        ]\n");
     code.push_str("    }\n\n");
-
+    code.push('\n');
     code.push_str("    #[must_use]\n");
     code.push_str("    #[allow(clippy::too_many_lines)]\n");
     code.push_str("    pub const fn default_color(&self) -> &str {\n");
@@ -208,7 +207,7 @@ fn generate_syntax_key_enum(code: &mut String, nodes: &[FlattenedNode]) {
     }
     code.push_str("        }\n");
     code.push_str("    }\n\n");
-
+    code.push('\n');
     code.push_str("    #[must_use]\n");
     code.push_str("    #[allow(clippy::too_many_lines)]\n");
     code.push_str("    pub const fn parent_scopes(&self) -> &[&str] {\n");
@@ -319,24 +318,35 @@ fn generate_valid_syntax_keys(code: &mut String, nodes: &[FlattenedNode]) {
 /// # Returns
 /// - `()` after appending to `code`.
 fn generate_get_palette_color(code: &mut String) {
-    code.push_str("fn get_palette_color(palette: &Palette, color_type: &ColorType, variant: &SchemeVariant) -> Result<Color, TintedBuilderError> {\n");
-    code.push_str(
-        "    // For light variant, swap white↔black to handle foreground/background inversion\n",
-    );
-    code.push_str("    let color_type = match variant {\n");
-    code.push_str("        SchemeVariant::Light => match &color_type.0 {\n");
-    code.push_str(
-        "            ColorName::White => ColorType(ColorName::Black, color_type.1.clone()),\n",
-    );
-    code.push_str(
-        "            ColorName::Black => ColorType(ColorName::White, color_type.1.clone()),\n",
-    );
-    code.push_str("            _ => ColorType(color_type.0.clone(), color_type.1.clone()),\n");
-    code.push_str("        },\n");
-    code.push_str("        _ => ColorType(color_type.0.clone(), color_type.1.clone()),\n");
-    code.push_str("    };\n");
-    code.push_str("    #[allow(clippy::match_same_arms)]\n");
-    code.push_str("    match &color_type {\n");
+    write!(
+        code,
+        r"
+    fn get_palette_color(palette: &Palette, color_type: &ColorType, variant:
+&SchemeVariant) -> Result<Color, TintedBuilderError> {{
+        // For light variant, mirror the luminance scale: light_index = 8 - dark_index
+        // black-dim(0)↔white-bright(8), black-normal(1)↔white-normal(7), black-bright(2)↔white-dim(6)
+        // gray-dim(3)↔gray-bright(5), gray-normal(4) stays
+        fn mirror_variant(v: &ColorVariant) -> ColorVariant {{
+            match v {{
+                ColorVariant::Dim => ColorVariant::Bright,
+                ColorVariant::Bright => ColorVariant::Dim,
+                other => other.clone(),
+            }}
+        }}
+        let color_type = match variant {{
+            SchemeVariant::Light => match &color_type.0 {{
+                ColorName::White => ColorType(ColorName::Black, mirror_variant(&color_type.1)),
+                ColorName::Black => ColorType(ColorName::White, mirror_variant(&color_type.1)),
+                ColorName::Gray => ColorType(ColorName::Gray, mirror_variant(&color_type.1)),
+                _ => ColorType(color_type.0.clone(), color_type.1.clone()),
+            }},
+            _ => ColorType(color_type.0.clone(), color_type.1.clone()),
+        }};
+        #[allow(clippy::match_same_arms)]
+        match &color_type {{
+        "
+    )
+    .expect("heh");
 
     let colors = [
         "black", "red", "green", "yellow", "blue", "magenta", "cyan", "white", "orange", "gray",

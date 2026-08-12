@@ -5,3 +5,6 @@ members = [
 ]
 default-members = ["tinted-builder-rust"]
 resolver = "2"
+
+[workspace.package]
+rust-version = "1.88.0"

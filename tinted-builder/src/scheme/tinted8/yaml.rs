@@ -118,29 +118,35 @@ fn flatten_mapping(prefix: Option<&str>, map: &Mapping) -> Mapping {
 #[derive(Deserialize, Serialize, Default)]
 #[serde(deny_unknown_fields, rename_all = "kebab-case")]
 pub struct BasicUi {
-    #[serde(rename = "global.background.normal")]
-    pub global_background_normal: Option<String>,
-    #[serde(rename = "global.background.dark")]
-    pub global_background_dark: Option<String>,
-    #[serde(rename = "global.background.light")]
-    pub global_background_light: Option<String>,
+    #[serde(rename = "global.normal.background")]
+    pub global_normal_background: Option<String>,
+    #[serde(rename = "global.normal.foreground")]
+    pub global_normal_foreground: Option<String>,
+    #[serde(rename = "global.dark.background")]
+    pub global_dark_background: Option<String>,
+    #[serde(rename = "global.dark.foreground")]
+    pub global_dark_foreground: Option<String>,
+    #[serde(rename = "global.light.background")]
+    pub global_light_background: Option<String>,
+    #[serde(rename = "global.light.foreground")]
+    pub global_light_foreground: Option<String>,
     pub deprecated: Option<String>,
     #[serde(rename = "accent.normal")]
     pub accent_normal: Option<String>,
     #[serde(rename = "border.normal")]
     pub border_normal: Option<String>,
-    #[serde(rename = "chrome.background.normal")]
-    pub chrome_background_normal: Option<String>,
-    #[serde(rename = "chrome.background.dark")]
-    pub chrome_background_dark: Option<String>,
-    #[serde(rename = "chrome.background.light")]
-    pub chrome_background_light: Option<String>,
-    #[serde(rename = "chrome.foreground.normal")]
-    pub chrome_foreground_normal: Option<String>,
-    #[serde(rename = "chrome.foreground.dark")]
-    pub chrome_foreground_dark: Option<String>,
-    #[serde(rename = "chrome.foreground.light")]
-    pub chrome_foreground_light: Option<String>,
+    #[serde(rename = "chrome.normal.background")]
+    pub chrome_normal_background: Option<String>,
+    #[serde(rename = "chrome.normal.foreground")]
+    pub chrome_normal_foreground: Option<String>,
+    #[serde(rename = "chrome.dark.background")]
+    pub chrome_dark_background: Option<String>,
+    #[serde(rename = "chrome.dark.foreground")]
+    pub chrome_dark_foreground: Option<String>,
+    #[serde(rename = "chrome.light.background")]
+    pub chrome_light_background: Option<String>,
+    #[serde(rename = "chrome.light.foreground")]
+    pub chrome_light_foreground: Option<String>,
     #[serde(rename = "cursor.normal.background")]
     pub cursor_normal_background: Option<String>,
     #[serde(rename = "cursor.normal.foreground")]
@@ -149,12 +155,6 @@ pub struct BasicUi {
     pub cursor_muted_background: Option<String>,
     #[serde(rename = "cursor.muted.foreground")]
     pub cursor_muted_foreground: Option<String>,
-    #[serde(rename = "global.foreground.normal")]
-    pub global_foreground_normal: Option<String>,
-    #[serde(rename = "global.foreground.dark")]
-    pub global_foreground_dark: Option<String>,
-    #[serde(rename = "global.foreground.light")]
-    pub global_foreground_light: Option<String>,
     #[serde(rename = "gutter.background")]
     pub gutter_background: Option<String>,
     #[serde(rename = "gutter.foreground")]
@@ -171,9 +171,9 @@ pub struct BasicUi {
     pub highlight_text_background: Option<String>,
     #[serde(rename = "highlight.text.foreground")]
     pub highlight_text_foreground: Option<String>,
-    #[serde(rename = "highlight.text.active-background")]
+    #[serde(rename = "highlight.text.active.background")]
     pub highlight_text_active_background: Option<String>,
-    #[serde(rename = "highlight.text.active-foreground")]
+    #[serde(rename = "highlight.text.active.foreground")]
     pub highlight_text_active_foreground: Option<String>,
     #[serde(rename = "highlight.button.background")]
     pub highlight_button_background: Option<String>,
@@ -181,7 +181,7 @@ pub struct BasicUi {
     pub highlight_button_foreground: Option<String>,
     #[serde(rename = "indent-guide.background")]
     pub indent_guide_background: Option<String>,
-    #[serde(rename = "indent-guide.active-background")]
+    #[serde(rename = "indent-guide.active.background")]
     pub indent_guide_active_background: Option<String>,
     #[serde(rename = "link.normal.background")]
     pub link_normal_background: Option<String>,
@@ -191,7 +191,7 @@ pub struct BasicUi {
     pub selection_background: Option<String>,
     #[serde(rename = "selection.foreground")]
     pub selection_foreground: Option<String>,
-    #[serde(rename = "selection.inactive-background")]
+    #[serde(rename = "selection.inactive.background")]
     pub selection_inactive_background: Option<String>,
     #[serde(rename = "status.error")]
     pub status_error: Option<String>,
