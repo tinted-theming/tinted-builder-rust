@@ -71,6 +71,7 @@ pub fn slugify(input: &str) -> String {
         }
     }
 
+    #[allow(clippy::expect_used)]
     let re = Regex::new(r"-+").expect("Unable to unwrap regex");
     let cleaned_slug = re.replace_all(&slug, "-").to_string();
 
@@ -83,6 +84,7 @@ pub fn slugify(input: &str) -> String {
 /// - "catppuccin-mocha" -> "Catppuccin Mocha"
 /// - "`rose_pine`" -> "Rose Pine"
 pub fn titlecasify(input: &str) -> String {
+    #[allow(clippy::expect_used)]
     let sep = Regex::new(r"[-_]+").expect("Unable to unwrap regex");
     let replaced = sep.replace_all(input.trim(), " ");
 
