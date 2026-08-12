@@ -33,6 +33,7 @@
             pkgs.cargo-audit
             pkgs.cargo-chef
             pkgs.cargo-deny
+            pkgs.cargo-msrv
             pkgs.just
           ];
         };
