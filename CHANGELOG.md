@@ -4,12 +4,7 @@
 
 ### Added
 
-- Expose a `slug-underscored` variable on each scheme item in list templates
-  (`options.list`), containing the scheme slug with hyphens replaced by
-  underscores. This matches the `scheme-slug-underscored` (base16/base24) and
-  `scheme.slug-underscored` (tinted8) variables already available to
-  per-scheme templates. For `tinted8` lists it is exposed as
-  `scheme.slug-underscored`.
+- Expose a `slug-underscored` variable, matching `scheme-slug-underscored`
 
 ## [0.21.0] - 2026-06-15
 
