@@ -101,6 +101,14 @@ With an example template being `templates/some-base16-list.mustache`:
 {{/schemes}}
 ```
 
+In addition to the serialized scheme properties, each list item exposes a
+`slug-underscored` variable containing the scheme slug with hyphens (`-`)
+replaced by underscores (`_`). This is useful for generating identifiers in
+languages where hyphens are invalid, e.g. `{{ slug-underscored }}` renders
+`gruvbox_dark_hard` for the `gruvbox-dark-hard` scheme. For `tinted8` lists it
+is available as `{{ scheme.slug-underscored }}`, alongside the other
+`scheme.*` properties.
+
 Note: These are unofficial scheme-systems, meaning it's not
 part of the Tinted Theming scheme specification.
 

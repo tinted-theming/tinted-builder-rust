@@ -6,9 +6,7 @@ use semver::{Version, VersionReq};
 use std::collections::HashMap;
 use std::fs::{self, create_dir_all, read_to_string};
 use std::path::{Path, PathBuf};
-use tinted_builder::tinted8::{
-    Scheme as Tinted8Scheme, SUPPORTED_BUILDER_SPEC_VERSION, SUPPORTED_STYLING_SPEC_VERSION,
-};
+use tinted_builder::tinted8::{SUPPORTED_BUILDER_SPEC_VERSION, SUPPORTED_STYLING_SPEC_VERSION};
 use tinted_builder::{Scheme, SchemeSystem, Template};
 use utils::{get_scheme_files, parse_filename, ParsedFilename, TemplateConfig};
 
@@ -246,8 +244,14 @@ fn render_list(
                 let schemes: Vec<serde_yaml::Value> = all_scheme_files
                     .iter()
                     .filter_map(|(_, scheme)| match scheme {
-                        Scheme::Base16(s) => serde_yaml::to_value(s).ok(),
-                        Scheme::Base24(s) => serde_yaml::to_value(s).ok(),
+                        Scheme::Base16(s) => serde_yaml::to_value(s).ok().map(|mut value| {
+                            insert_slug_underscored(&mut value, &s.slug);
+                            value
+                        }),
+                        Scheme::Base24(s) => serde_yaml::to_value(s).ok().map(|mut value| {
+                            insert_slug_underscored(&mut value, &s.slug);
+                            value
+                        }),
                         _ => None,
                     })
                     .collect();
@@ -258,19 +262,21 @@ fn render_list(
                 *data_yaml = serde_yaml::to_string(&data).unwrap_or_default();
             }
             SchemeSystem::Tinted8 => {
-                let mut data: HashMap<&str, Vec<Box<Tinted8Scheme>>> = HashMap::new();
+                let schemes: Vec<serde_yaml::Value> = all_scheme_files
+                    .iter()
+                    .filter_map(|(_, scheme)| match scheme {
+                        Scheme::Tinted8(s) => serde_yaml::to_value(s).ok().map(|mut value| {
+                            if let Some(meta) = value.get_mut("scheme") {
+                                insert_slug_underscored(meta, &s.scheme.slug);
+                            }
+                            value
+                        }),
+                        _ => None,
+                    })
+                    .collect();
 
-                data.insert(
-                    "schemes",
-                    all_scheme_files
-                        .iter()
-                        .cloned()
-                        .filter_map(|(_, scheme)| match scheme {
-                            Scheme::Tinted8(scheme) => Some(scheme),
-                            _ => None,
-                        })
-                        .collect::<Vec<Box<Tinted8Scheme>>>(),
-                );
+                let mut data: HashMap<&str, Vec<serde_yaml::Value>> = HashMap::new();
+                data.insert("schemes", schemes);
 
                 *data_yaml = serde_yaml::to_string(&data).unwrap_or_default();
             }
@@ -307,6 +313,18 @@ fn render_list(
     }
 
     Ok(())
+}
+
+/// Adds a `slug-underscored` property to a serialized scheme mapping so list templates can build
+/// identifiers from scheme slugs, mirroring the `slug-underscored` variable available to
+/// per-scheme templates.
+fn insert_slug_underscored(value: &mut serde_yaml::Value, slug: &str) {
+    if let serde_yaml::Value::Mapping(map) = value {
+        map.insert(
+            serde_yaml::Value::String("slug-underscored".to_string()),
+            serde_yaml::Value::String(slug.replace('-', "_")),
+        );
+    }
 }
 
 fn get_filename(config_value: &TemplateConfig, is_quiet: bool) -> Result<String> {
