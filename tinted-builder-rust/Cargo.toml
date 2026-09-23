@@ -7,10 +7,8 @@ license = "GPL-3.0-only"
 description = "Simple Base16, Base24 and Tinted8 compliant rendering of mustache templates"
 keywords = ["base16", "tinted8", "mustache", "template"]
 categories = ["template-engine"]
-homepage = "https://github.com/tinted-theming/tinted-builder-rust"
 repository = "https://github.com/tinted-theming/tinted-builder-rust"
 documentation = "https://github.com/tinted-theming/tinted-builder-rust"
-readme = "README.md"
 rust-version.workspace = true
 
 [dependencies]
