@@ -1,5 +1,11 @@
 # Changelog
 
+## [Unreleased]
+
+### Added
+
+- Expose a `slug-underscored` variable, matching `scheme-slug-underscored`
+
 ## [0.21.0] - 2026-06-15
 
 ### Fixed

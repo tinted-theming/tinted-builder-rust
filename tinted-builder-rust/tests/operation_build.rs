@@ -451,7 +451,7 @@ fn test_operation_build_listbase16() -> Result<()> {
     let template_theme_path = tmp_dir.join("template");
     let template_templates_path = template_theme_path.join("templates");
     let schemes_path = tmp_dir.join("schemes");
-    let rendered_list_theme_path = PathBuf::from("./tests/fixtures/rendered/list.md");
+    let rendered_list_theme_path = template_theme_path.join("base16, base24-list.md");
     let rendered_listbase16_theme_path = PathBuf::from("./tests/fixtures/rendered/listbase16.md");
     let rendered_listbase24_theme_path = PathBuf::from("./tests/fixtures/rendered/listbase24.md");
 
