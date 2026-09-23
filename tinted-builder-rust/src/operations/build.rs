@@ -3,7 +3,7 @@ pub mod utils;
 use crate::helpers::write_to_file;
 use anyhow::{anyhow, Result};
 use semver::{Version, VersionReq};
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 use std::fs::{self, create_dir_all, read_to_string};
 use std::path::{Path, PathBuf};
 use tinted_builder::tinted8::{SUPPORTED_BUILDER_SPEC_VERSION, SUPPORTED_STYLING_SPEC_VERSION};
@@ -28,6 +28,9 @@ const REPO_NAME: &str = env!("CARGO_PKG_NAME");
 ///   directory or file.
 /// * `user_schemes_path` - A `impl AsRef<Path>` representing the directory where user schemes are
 ///   stored.
+/// * `prune_stale` - A boolean flag that, when set to `true`, deletes previously generated themes
+///   whose scheme no longer exists. Only files matching a template config entry's own `filename`
+///   pattern are considered, and only once every entry has been generated successfully.
 /// * `is_quiet` - A boolean flag that, when set to `true`, suppresses most of the output,
 ///   making the build process quieter.
 ///
@@ -60,6 +63,7 @@ pub fn build(
     theme_template_path: impl AsRef<Path>,
     user_schemes_path: impl AsRef<Path>,
     ignores: &[String],
+    prune_stale: bool,
     is_quiet: bool,
 ) -> Result<()> {
     if !user_schemes_path.as_ref().exists() {
@@ -118,6 +122,12 @@ pub fn build(
             )),
         })
         .collect::<Result<Vec<(PathBuf, Scheme)>>>()?;
+
+    // Every path written by this build, and the set of directory/filename patterns those paths
+    // could have landed in. Pruning compares the two once every config entry has been generated,
+    // since sibling entries routinely share an output directory.
+    let mut generated_paths: HashSet<PathBuf> = HashSet::new();
+    let mut prune_scopes: HashSet<PruneScope> = HashSet::new();
 
     // For each template definition in the templates/config.yaml file
     for (template_item_config_name, template_item_config_value) in &template_config {
@@ -204,8 +214,154 @@ pub fn build(
             template_item_config_value,
             &theme_template_path,
             &template_item_scheme_files,
+            &mut generated_paths,
             is_quiet,
         )?;
+
+        if prune_stale {
+            let filename = get_filename(template_item_config_value, true)?;
+
+            for system in &supported_systems {
+                // A system that produced nothing this run must not be pruned, otherwise a
+                // partially synced or heavily ignored schemes directory silently deletes every
+                // theme previously generated for it.
+                if !template_item_scheme_files
+                    .iter()
+                    .any(|(_, scheme)| scheme.get_scheme_system() == *system)
+                {
+                    continue;
+                }
+
+                match prune_scope(&theme_template_path, &filename, system) {
+                    Some(scope) => {
+                        prune_scopes.insert(scope);
+                    }
+                    None if !is_quiet => eprintln!(
+                        "W002: Unable to prune stale themes for \"{template_item_config_name}\": \"{filename}\" has no scheme slug to match on"
+                    ),
+                    None => {}
+                }
+            }
+        }
+    }
+
+    if prune_stale {
+        prune_stale_themes(&prune_scopes, &generated_paths, is_quiet)?;
+    }
+
+    Ok(())
+}
+
+/// A bounded region of the output tree that pruning is allowed to delete from: files directly
+/// inside `directory` whose name is `{prefix}{slug}{suffix}`.
+///
+/// Anchoring on both sides is what keeps pruning safe. A pattern such as
+/// `themes/ghostty/{{ scheme-system }}-{{ scheme-slug }}` produces no file extension at all, so
+/// matching on the directory alone would sweep up a `README.md` sitting beside the themes.
+#[derive(Debug, PartialEq, Eq, Hash)]
+struct PruneScope {
+    directory: PathBuf,
+    prefix: String,
+    suffix: String,
+}
+
+/// A byte that cannot appear in a path, used to locate the scheme slug within a filename pattern.
+const SLUG_PLACEHOLDER: &str = "\u{0}";
+
+/// Derives the prune scope for one template config entry and scheme system.
+///
+/// Returns `None` when the pattern cannot be bounded safely: no slug in the final path component
+/// (list templates), a slug in the directory portion, more than one slug, or a slug with nothing
+/// around it to anchor against.
+fn prune_scope(
+    theme_template_path: impl AsRef<Path>,
+    filename: &str,
+    system: &SchemeSystem,
+) -> Option<PruneScope> {
+    let system = system.to_string();
+    let filepath = filename
+        .replace("{{ scheme-slug }}", SLUG_PLACEHOLDER)
+        .replace("{{scheme-slug}}", SLUG_PLACEHOLDER)
+        .replace("{{ scheme.slug }}", SLUG_PLACEHOLDER)
+        .replace("{{scheme.slug}}", SLUG_PLACEHOLDER)
+        .replace("{{ scheme-system }}", &system)
+        .replace("{{scheme-system}}", &system)
+        .replace("{{ scheme.system }}", &system)
+        .replace("{{scheme.system}}", &system);
+
+    let path = Path::new(&filepath);
+    let (prefix, suffix) = path.file_name()?.to_str()?.split_once(SLUG_PLACEHOLDER)?;
+
+    // A second slug would leave the middle unbounded, and a slug with no prefix or suffix would
+    // match every file in the directory.
+    if suffix.contains(SLUG_PLACEHOLDER) || (prefix.is_empty() && suffix.is_empty()) {
+        return None;
+    }
+
+    let directory = path.parent().map_or_else(
+        || theme_template_path.as_ref().to_path_buf(),
+        |dir| theme_template_path.as_ref().join(dir),
+    );
+    if directory.to_str()?.contains(SLUG_PLACEHOLDER) {
+        return None;
+    }
+
+    Some(PruneScope {
+        directory,
+        prefix: prefix.to_string(),
+        suffix: suffix.to_string(),
+    })
+}
+
+/// Deletes files inside each scope that the current build did not generate.
+fn prune_stale_themes(
+    scopes: &HashSet<PruneScope>,
+    generated_paths: &HashSet<PathBuf>,
+    is_quiet: bool,
+) -> Result<()> {
+    for scope in scopes {
+        if !scope.directory.is_dir() {
+            continue;
+        }
+
+        let min_length = scope
+            .prefix
+            .len()
+            .checked_add(scope.suffix.len())
+            .ok_or_else(|| {
+                anyhow!(
+                    "E306: Filename pattern too long to prune: {}",
+                    scope.directory.display()
+                )
+            })?;
+
+        for item in scope.directory.read_dir()? {
+            let file_path = item?.path();
+
+            if file_path.is_dir() || generated_paths.contains(&file_path) {
+                continue;
+            }
+
+            let Some(file_name) = file_path.file_name().and_then(|name| name.to_str()) else {
+                continue;
+            };
+
+            // `>` rather than `>=` so the slug itself is non-empty, and hidden files are never
+            // considered generated output.
+            if file_name.starts_with('.')
+                || file_name.len() <= min_length
+                || !file_name.starts_with(&scope.prefix)
+                || !file_name.ends_with(&scope.suffix)
+            {
+                continue;
+            }
+
+            fs::remove_file(&file_path)?;
+
+            if !is_quiet {
+                println!("✔ Removed stale theme \"{}\"", file_path.display());
+            }
+        }
     }
 
     Ok(())
@@ -375,6 +531,7 @@ fn generate_themes_for_config(
     config_value: &TemplateConfig,
     theme_template_path: impl AsRef<Path>,
     scheme_files: &Vec<(PathBuf, Scheme)>,
+    generated_paths: &mut HashSet<PathBuf>,
     is_quiet: bool,
 ) -> Result<()> {
     if scheme_files.is_empty() {
@@ -458,12 +615,14 @@ fn generate_themes_for_config(
             create_dir_all(&parsed_filename.directory)?;
         }
 
-        generate_theme(
+        if let Some(output_path) = generate_theme(
             &template_content,
             parsed_filename,
             scheme_path,
             &scheme_system.clone(),
-        )?;
+        )? {
+            generated_paths.insert(output_path);
+        }
     }
 
     if !is_quiet {
@@ -501,7 +660,8 @@ fn generate_themes_for_config(
 ///
 /// # Returns
 ///
-/// Returns `Result<()>` indicating success (`Ok(())`) or an error (`Err`) if any of the following conditions are met:
+/// Returns the path that was written, or `Ok(None)` for a skipped hidden file. Returns an error
+/// (`Err`) if any of the following conditions are met:
 ///
 /// * The scheme file cannot be read or parsed.
 /// * The output directory cannot be created.
@@ -525,7 +685,7 @@ fn generate_theme(
     parsed_filename: ParsedFilename,
     scheme_path: impl AsRef<Path>,
     system: &SchemeSystem,
-) -> Result<()> {
+) -> Result<Option<PathBuf>> {
     let scheme_file_type = SchemeFile::new(scheme_path)?;
     let scheme_path = scheme_file_type.get_path();
     let scheme_file_stem = scheme_path
@@ -536,61 +696,146 @@ fn generate_theme(
 
     // Ignore hidden files
     if scheme_file_stem.starts_with('.') {
-        return Ok(());
+        return Ok(None);
     }
 
     let scheme = scheme_file_type.get_scheme()?;
 
-    match &scheme {
-        Scheme::Base16(scheme_inner) => {
-            if scheme_inner.system != *system {
-                return Err(anyhow!("E001: Invalid system"));
-            }
+    let scheme_system = match &scheme {
+        Scheme::Base16(scheme_inner) => &scheme_inner.system,
+        Scheme::Base24(scheme_inner) => &scheme_inner.system,
+        Scheme::Tinted8(scheme_inner) => &scheme_inner.scheme.system,
+        _ => return Err(anyhow!("Unknown Scheme enum variant")),
+    };
 
-            let template = Template::new(template_content.to_string(), scheme.clone());
-            let output = template.render()?;
-            let output_path = parsed_filename.get_path();
-
-            if !parsed_filename.directory.exists() {
-                fs::create_dir_all(parsed_filename.directory)?;
-            }
-
-            write_to_file(&output_path, &output)?;
-        }
-        Scheme::Base24(scheme_inner) => {
-            if scheme_inner.system != *system {
-                return Err(anyhow!("E001: Invalid system"));
-            }
-
-            let template = Template::new(template_content.to_string(), scheme.clone());
-            let output = template.render()?;
-            let output_path = parsed_filename.get_path();
-
-            if !parsed_filename.directory.exists() {
-                fs::create_dir_all(parsed_filename.directory)?;
-            }
-
-            write_to_file(&output_path, &output)?;
-        }
-        Scheme::Tinted8(scheme_inner) => {
-            if scheme_inner.scheme.system != *system {
-                return Err(anyhow!("E001: Invalid system"));
-            }
-
-            let template = Template::new(template_content.to_string(), scheme.clone());
-            let output = template.render()?;
-            let output_path = parsed_filename.get_path();
-
-            if !parsed_filename.directory.exists() {
-                fs::create_dir_all(parsed_filename.directory)?;
-            }
-
-            write_to_file(&output_path, &output)?;
-        }
-        _ => {
-            return Err(anyhow!("Unknown Scheme enum variant"));
-        }
+    if scheme_system != system {
+        return Err(anyhow!("E001: Invalid system"));
     }
 
-    Ok(())
+    let template = Template::new(template_content.to_string(), scheme.clone());
+    let output = template.render()?;
+    let output_path = parsed_filename.get_path();
+
+    if !parsed_filename.directory.exists() {
+        fs::create_dir_all(parsed_filename.directory)?;
+    }
+
+    write_to_file(&output_path, &output)?;
+
+    Ok(Some(output_path))
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn scope(filename: &str, system: &SchemeSystem) -> Option<PruneScope> {
+        prune_scope(Path::new("/template"), filename, system)
+    }
+
+    #[test]
+    fn test_prune_scope_anchors_on_prefix_and_suffix() {
+        assert_eq!(
+            scope(
+                "colors/{{ scheme-system }}-{{ scheme-slug }}.conf",
+                &SchemeSystem::Base16
+            ),
+            Some(PruneScope {
+                directory: PathBuf::from("/template/colors"),
+                prefix: "base16-".to_string(),
+                suffix: ".conf".to_string(),
+            })
+        );
+    }
+
+    #[test]
+    fn test_prune_scope_with_dot_notation_variables() {
+        assert_eq!(
+            scope(
+                "scripts/{{scheme.system}}-{{scheme.slug}}.sh",
+                &SchemeSystem::Tinted8
+            ),
+            Some(PruneScope {
+                directory: PathBuf::from("/template/scripts"),
+                prefix: "tinted8-".to_string(),
+                suffix: ".sh".to_string(),
+            })
+        );
+    }
+
+    /// tinted-terminal's ghostty themes have no file extension, so the prefix is the only anchor.
+    #[test]
+    fn test_prune_scope_without_file_extension() {
+        assert_eq!(
+            scope(
+                "themes/ghostty/{{ scheme-system }}-{{ scheme-slug }}",
+                &SchemeSystem::Base24
+            ),
+            Some(PruneScope {
+                directory: PathBuf::from("/template/themes/ghostty"),
+                prefix: "base24-".to_string(),
+                suffix: String::new(),
+            })
+        );
+    }
+
+    /// tinted-terminal's st themes wrap the slug in both a prefix and a version suffix.
+    #[test]
+    fn test_prune_scope_with_text_on_both_sides_of_the_slug() {
+        assert_eq!(
+            scope(
+                "themes/st/st-{{ scheme-system }}-{{ scheme-slug }}-0.9.3.diff",
+                &SchemeSystem::Base16
+            ),
+            Some(PruneScope {
+                directory: PathBuf::from("/template/themes/st"),
+                prefix: "st-base16-".to_string(),
+                suffix: "-0.9.3.diff".to_string(),
+            })
+        );
+    }
+
+    #[test]
+    fn test_prune_scope_at_template_root() {
+        assert_eq!(
+            scope(
+                "{{ scheme-system }}-{{ scheme-slug }}.md",
+                &SchemeSystem::Base16
+            ),
+            Some(PruneScope {
+                directory: PathBuf::from("/template"),
+                prefix: "base16-".to_string(),
+                suffix: ".md".to_string(),
+            })
+        );
+    }
+
+    /// A list template renders a single file, so there is no slug to match stale siblings against.
+    #[test]
+    fn test_prune_scope_none_without_a_slug() {
+        assert_eq!(
+            scope("{{ scheme-system }}-list.md", &SchemeSystem::Base16),
+            None
+        );
+    }
+
+    /// Nothing anchors the match, so every file in the directory would qualify.
+    #[test]
+    fn test_prune_scope_none_when_slug_is_the_whole_filename() {
+        assert_eq!(
+            scope("themes/{{ scheme-slug }}", &SchemeSystem::Base16),
+            None
+        );
+    }
+
+    #[test]
+    fn test_prune_scope_none_when_slug_is_in_the_directory() {
+        assert_eq!(
+            scope(
+                "themes/{{ scheme-slug }}/{{ scheme-system }}-{{ scheme-slug }}.conf",
+                &SchemeSystem::Base16
+            ),
+            None
+        );
+    }
 }

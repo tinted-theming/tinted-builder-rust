@@ -17,6 +17,7 @@ build templates within your own Rust application.
 - [Basic usage](#basic-usage)
 - [Commands](#commands)
 - [Flags](#flags)
+- [Pruning stale themes](#pruning-stale-themes)
 - [Builder specification](#builder-specification)
 - [Contributing](#contributing)
 - [License](#license)
@@ -54,7 +55,7 @@ The following is a table of the available subcommands for the CLI tool (tinted-b
 | Subcommand | Description | Arguments | Example Usage | Flags |
 |------------|-------------|-----------|---------------|-------|
 | `sync`  | Installs and or updates latest schemes. | - | `tinted-builder-rust sync` | `--quiet` (silence stderr and stdout) |
-| `build` | Builds the themes of a template. | `template_path`: Path to template directory. | `tinted-builder-rust build ./path/to/base16-template` | `--quiet` (silence stderr and stdout), `--sync` (equivalent of running `tinted-builder-rust sync` before `tinted-builder-rust build`) |
+| `build` | Builds the themes of a template. | `template_path`: Path to template directory. | `tinted-builder-rust build ./path/to/base16-template` | `--quiet` (silence stderr and stdout), `--sync` (equivalent of running `tinted-builder-rust sync` before `tinted-builder-rust build`), `--prune-stale` (remove themes whose scheme no longer exists) |
 
 ## Flags
 
@@ -62,9 +63,39 @@ The following is a table of the available subcommands for the CLI tool (tinted-b
 |-------------|-------------|------------------------|---------------|---------------|
 | `--schemes-dir` `-s` | Path to local schemes directories.  Used by `build` to find schemes and by `sync` to clone/pull into those paths. | `build`, `sync` | Defaults to `<data-dir>/schemes` | `tinted-builder-rust build . -s /path/one -s /path/two` |
 | `--ignore` `-i`   | One or more glob patterns to skip when scanning schemes. Repeat this flag to add multiple ignores. | `build` | - | `tinted-builder-rust build . --ignore "**/LICENSE"` |
+| `--prune-stale` | Delete previously generated themes whose scheme no longer exists, such as the files left behind when a scheme is renamed. See [Pruning stale themes](#pruning-stale-themes). | `build` | Disabled | `tinted-builder-rust build . --prune-stale` |
 | `--data-dir` `-d` | Specifies a custom path for the data directory. | All | Linux: `$XDG_DATA_HOME/tinted-theming/tinted-builder-rust`. macOS: `~/Library/Application\ Support/tinted-theming/tinted-builder-rust` | `tinted-builder-rust sync --data-dir /path/to/custom/data-dir` |
 | `--help` `-h` | Displays help information for the subcommand. | All | - | `tinted-builder-rust --help`, `tinted-builder-rust build --help`, etc |
 | `--version` `-V` | Shows the version of tinted-builder-rust. | All | - | `tinted-builder-rust --version` |
+
+## Pruning stale themes
+
+A build only ever writes files, so a theme generated for a scheme that has
+since been renamed or deleted stays in the template repository forever.
+Passing `--prune-stale` removes those leftovers once the build has finished:
+
+```sh
+tinted-builder-rust build . --prune-stale
+```
+
+Pruning is deliberately conservative. A file is only removed when all of the
+following hold:
+
+- It sits directly in the output directory of a `templates/config.yaml` entry,
+  and its name matches that entry's `filename` pattern with the scheme slug
+  substituted. For `colors/{{ scheme-system }}-{{ scheme-slug }}.conf`, that
+  means only `colors/base16-*.conf` is ever considered.
+- It was not written by the current build.
+- Its scheme system produced at least one theme in the current build, so a
+  partially synced or heavily ignored schemes directory cannot wipe out an
+  entire system's themes.
+- It is not a dotfile and not a directory.
+
+Entries whose `filename` has no scheme slug in its last path component, such
+as `list` templates, are skipped and reported as `W002`.
+
+Note that schemes excluded with `--ignore` count as non-existent, so their
+previously generated themes are pruned too.
 
 ## List usage
 

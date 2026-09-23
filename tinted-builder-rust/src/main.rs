@@ -65,6 +65,9 @@ fn main() -> Result<()> {
             let is_quiet = sub_matches
                 .get_one::<bool>("quiet")
                 .is_some_and(ToOwned::to_owned);
+            let prune_stale = sub_matches
+                .get_one::<bool>("prune-stale")
+                .is_some_and(ToOwned::to_owned);
             let template_dir = sub_matches
                 .get_one::<String>("template-dir")
                 .cloned()
@@ -76,7 +79,13 @@ fn main() -> Result<()> {
                 operations::sync::sync(&data_schemes_path, is_quiet)?;
             }
 
-            operations::build::build(&template_path, &schemes_path, &ignores, is_quiet)?;
+            operations::build::build(
+                &template_path,
+                &schemes_path,
+                &ignores,
+                prune_stale,
+                is_quiet,
+            )?;
         }
         Some(("sync", sub_matches)) => {
             let is_quiet: bool = sub_matches

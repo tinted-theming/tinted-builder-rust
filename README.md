@@ -68,7 +68,7 @@ The following is a table of the available subcommands for the CLI tool (tinted-b
 | Subcommand | Description                          | Arguments            | Example Usage                              | Flags |
 |------------|--------------------------------------|----------------------|--------------------------------------------|-------|
 | `sync`  | Installs and or updates latest schemes. | - | `tinted-builder-rust sync` | `--quiet` (silence stderr and stdout) |
-| `build` | Builds the themes of a template. | `template_path`: Path to template directory. | `tinted-builder-rust build ./path/to/base16-template` | `--quiet` (silence stderr and stdout), `--sync` (equivalent of running `tinted-builder-rust sync` before `tinted-builder-rust build`) |
+| `build` | Builds the themes of a template. | `template_path`: Path to template directory. | `tinted-builder-rust build ./path/to/base16-template` | `--quiet` (silence stderr and stdout), `--sync` (equivalent of running `tinted-builder-rust sync` before `tinted-builder-rust build`), `--prune-stale` (remove themes whose scheme no longer exists) |
 
 ## Flags
 
@@ -76,6 +76,7 @@ The following is a table of the available subcommands for the CLI tool (tinted-b
 |-------------------|-----------------------------------------|------------------------|---------------|-------------------------------------------|
 | `--schemes-dir` `-s`   | Path to local schemes directories. Used by `build` to find schemes and by `sync` to clone/pull into those paths. | `build`, `sync` | Defaults to `<data-dir>/schemes` | `tinted-builder-rust build . -s /path/one -s /path/two` |
 | `--ignore` `-i`   | One or more glob patterns to skip when scanning schemes. Repeat this flag to add multiple ignores. | `build` | - | `tinted-builder-rust build . --ignore "**/LICENSE"` |
+| `--prune-stale`   | Delete previously generated themes whose scheme no longer exists, such as the files left behind when a scheme is renamed. Only files matching a template config entry's own `filename` pattern are removed, and only for scheme systems that produced at least one theme in the same run. | `build` | Disabled | `tinted-builder-rust build . --prune-stale` |
 | `--data-dir` `-d`   | Specifies a custom path for the data directory. | All | Linux: `$XDG_DATA_HOME/tinted-theming/tinted-builder-rust` or `~/.local/share`. MacOS: `~/Library/Application\ Support/tinted-theming/tinted-builder-rust` | `tinted-builder-rust sync --data-dir /path/to/custom/data-dir` |
 | `--help` `-h`     | Displays help information for the subcommand. | All | - | `tinted-builder-rust --help`, `tinted-builder-rust build --help`, etc |
 | `--version` `-V`  | Shows the version of tinted-builder-rust. | All | - | `tinted-builder-rust --version` |

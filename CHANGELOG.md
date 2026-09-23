@@ -5,6 +5,17 @@
 ### Added
 
 - Expose a `slug-underscored` variable, matching `scheme-slug-underscored`
+- Add `build --prune-stale` flag which deletes previously generated themes, or
+  unknown files in out directory, of files that aren't recognised. Renaming a
+  scheme previously left the old theme behind in every template repository
+  indefinitely. Pruning is limited to files matching a template config entry's
+  own `filename` pattern, skips scheme systems that generated nothing in the same
+  run, and only runs once every config entry has been generated successfully.
+
+### Changed
+
+- **Breaking (library):** `operation_build::build()` takes a new `prune_stale`
+  argument before `is_quiet`.
 
 ## [0.21.0] - 2026-06-15
 

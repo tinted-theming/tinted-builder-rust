@@ -52,6 +52,12 @@ fn build_cli() -> Command {
                         .long("sync")
                         .help("Sync with latest schemes before build")
                         .action(ArgAction::SetTrue),
+                )
+                .arg(
+                    Arg::new("prune-stale")
+                        .long("prune-stale")
+                        .help("Delete previously generated themes whose scheme no longer exists")
+                        .action(ArgAction::SetTrue),
                 ),
         )
         .subcommand(
