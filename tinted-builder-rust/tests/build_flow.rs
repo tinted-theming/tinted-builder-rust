@@ -15,7 +15,7 @@ fn e305_missing_template_config() -> Result<()> {
     create_dir_all(&template)?;
 
     #[allow(clippy::unwrap_used)]
-    let err = tinted_builder_rust::build(&template, &schemes, &[], true).unwrap_err();
+    let err = tinted_builder_rust::build(&template, &schemes, &[], false, true).unwrap_err();
     let msg = err.to_string();
 
     assert!(msg.contains("E305"), "expected E305, got: {msg}");
@@ -59,7 +59,7 @@ default:
     write_to_file(templates_dir.join("default.mustache"), "{{scheme.name}}\n")?;
 
     #[allow(clippy::unwrap_used)]
-    let err = tinted_builder_rust::build(&template, &schemes, &[], true).unwrap_err();
+    let err = tinted_builder_rust::build(&template, &schemes, &[], false, true).unwrap_err();
     let msg = err.to_string();
 
     assert!(msg.contains("E300"), "expected E300, got: {msg}");
@@ -105,7 +105,7 @@ default:
     write_to_file(templates_dir.join("config.yaml"), config)?;
 
     #[allow(clippy::unwrap_used)]
-    let err = tinted_builder_rust::build(&template, &schemes, &[], true).unwrap_err();
+    let err = tinted_builder_rust::build(&template, &schemes, &[], false, true).unwrap_err();
     let msg = err.to_string();
 
     assert!(msg.contains("E303"), "expected E303, got: {msg}");
@@ -151,7 +151,7 @@ default:
     write_to_file(templates_dir.join("default.mustache"), "Hello\n")?;
 
     #[allow(clippy::unwrap_used)]
-    let err = tinted_builder_rust::build(&template, &schemes, &[], true).unwrap_err();
+    let err = tinted_builder_rust::build(&template, &schemes, &[], false, true).unwrap_err();
 
     assert!(err.to_string().contains("E002"));
     Ok(())
@@ -196,7 +196,7 @@ default:
     write_to_file(templates_dir.join("default.mustache"), "Hello\n")?;
 
     #[allow(clippy::unwrap_used)]
-    let err = tinted_builder_rust::build(&template, &schemes, &[], true).unwrap_err();
+    let err = tinted_builder_rust::build(&template, &schemes, &[], false, true).unwrap_err();
 
     assert!(err.to_string().contains("E003"));
     Ok(())
@@ -240,7 +240,7 @@ default:
     write_to_file(templates_dir.join("default.mustache"), "Hello\n")?;
 
     #[allow(clippy::unwrap_used)]
-    let err = tinted_builder_rust::build(&template, &schemes, &[], true).unwrap_err();
+    let err = tinted_builder_rust::build(&template, &schemes, &[], false, true).unwrap_err();
 
     assert!(err.to_string().contains("E301"));
     Ok(())
@@ -285,7 +285,7 @@ default:
     write_to_file(templates_dir.join("default.mustache"), "Hello\n")?;
 
     #[allow(clippy::unwrap_used)]
-    let err = tinted_builder_rust::build(&template, &schemes, &[], true).unwrap_err();
+    let err = tinted_builder_rust::build(&template, &schemes, &[], false, true).unwrap_err();
 
     assert!(err.to_string().contains("E302"));
     Ok(())
@@ -317,7 +317,7 @@ default:
     write_to_file(templates_dir.join("default.mustache"), "Hello\n")?;
 
     // No schemes are present, but discovery must not fail on the non-scheme files.
-    tinted_builder_rust::build(&template, &schemes, &[], true)?;
+    tinted_builder_rust::build(&template, &schemes, &[], false, true)?;
 
     Ok(())
 }
@@ -362,7 +362,7 @@ default:
     write_to_file(templates_dir.join("default.mustache"), "Hello\n")?;
 
     #[allow(clippy::unwrap_used)]
-    let err = tinted_builder_rust::build(&template, &schemes, &[], true).unwrap_err();
+    let err = tinted_builder_rust::build(&template, &schemes, &[], false, true).unwrap_err();
 
     assert!(err.to_string().contains("E110"));
     Ok(())
@@ -469,7 +469,7 @@ default:
         "Hello {{scheme.name}}\nBlue is #{{palette.blue.normal.hex}}",
     )?;
 
-    tinted_builder_rust::build(&template, &schemes, &[], true)?;
+    tinted_builder_rust::build(&template, &schemes, &[], false, true)?;
     let out_path = template.join("out/tinted8-test.txt");
     let out = fs::read_to_string(&out_path)?;
 
@@ -587,7 +587,7 @@ fn build_renders_system_dir_scheme_despite_root_junk() -> Result<()> {
     write_to_file(templates_dir.join("config.yaml"), &config)?;
     write_to_file(templates_dir.join("base16-template.mustache"), &mustache)?;
 
-    tinted_builder_rust::build(&template, &schemes, &[], true)?;
+    tinted_builder_rust::build(&template, &schemes, &[], false, true)?;
 
     let output_dir = template.join("output-themes");
     let rendered_count = fs::read_dir(&output_dir)?.count();
