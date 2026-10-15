@@ -12,6 +12,11 @@ no-default-features = false
 [output]
 feature-depth = 1
 
+[advisories]
+ignore = [
+    { id = "RUSTSEC-2024-0449", reason = "unsafe-libyaml is pulled in by serde_yaml, which ribboncurls also depends on" },
+]
+
 [licenses]
 confidence-threshold = 0.93
 allow = [
