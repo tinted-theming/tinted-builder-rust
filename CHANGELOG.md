@@ -11,6 +11,9 @@
   indefinitely. Pruning is limited to files matching a template config entry's
   own `filename` pattern, skips scheme systems that generated nothing in the same
   run, and only runs once every config entry has been generated successfully.
+  Patterns with nothing in front of the scheme slug, such as
+  `{{ scheme-slug }}.md`, are never pruned, so files like `README.md` are left
+  alone.
 
 ### Changed
 
